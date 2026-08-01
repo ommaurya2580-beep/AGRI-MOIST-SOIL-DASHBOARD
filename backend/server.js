@@ -49,7 +49,8 @@ app.get('/api/state', async (req, res) => {
     
     if (latestSensorData) {
       const timeDiff = Date.now() - new Date(latestSensorData.timestamp).getTime();
-      if (timeDiff < 30000) {
+      // Changed to 6000 (6 seconds) for almost instant offline detection with a 1s network buffer
+      if (timeDiff < 6000) {
         isOnline = true;
         currentMoisture = latestSensorData.moistureLevel;
       }
