@@ -3,7 +3,7 @@ import { Leaf, Droplet, Activity, ToggleLeft } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import './index.css';
 
-const API_URL = 'http://18.215.153.77/api';
+const API_URL = '/api';
 
 const gaugeData = [
   { name: 'Dry', value: 33.33, color: '#d97743' },
