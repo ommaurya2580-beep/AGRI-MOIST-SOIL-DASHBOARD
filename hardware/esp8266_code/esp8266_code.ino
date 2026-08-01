@@ -78,7 +78,7 @@ void loop() {
         Serial.println(payload);
         
         // 4. Parse the Response to get Pump Status
-        StaticJsonDocument<200> doc;
+        JsonDocument doc;
         DeserializationError error = deserializeJson(doc, payload);
         
         if (!error) {
