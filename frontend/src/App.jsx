@@ -19,6 +19,7 @@ function App() {
   const [moisture, setMoisture] = useState(0);
   const [trendData, setTrendData] = useState([]);
   const [pumpStatus, setPumpStatus] = useState(false);
+  const [isOnline, setIsOnline] = useState(false);
 
   // Fetch initial state and trend
   useEffect(() => {
@@ -38,6 +39,7 @@ function App() {
         setPumpStatus(stateData.state.pumpIsOn);
       }
       setMoisture(stateData.currentMoisture || 0);
+      setIsOnline(stateData.isOnline !== undefined ? stateData.isOnline : false);
 
       const trendRes = await fetch(`${API_URL}/trend`);
       const trendJson = await trendRes.json();
@@ -192,9 +194,11 @@ function App() {
                   <span>Wet</span>
                 </div>
                 
-                <div className="moisture-value">{moisture}%</div>
-                <div className="moisture-status">
-                  {moisture < 40 ? 'DRY' : moisture > 60 ? 'WET' : 'OPTIMAL'}
+                <div className="moisture-value" style={{ color: isOnline ? '#333' : '#999' }}>
+                  {isOnline ? `${moisture}%` : 'OFFLINE'}
+                </div>
+                <div className="moisture-status" style={{ color: isOnline ? 'var(--green-dark)' : '#999' }}>
+                  {isOnline ? (moisture < 40 ? 'DRY' : moisture > 60 ? 'WET' : 'OPTIMAL') : 'SENSOR DISCONNECTED'}
                 </div>
                 
                 <div className="gauge-footer">

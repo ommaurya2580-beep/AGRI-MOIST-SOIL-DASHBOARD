@@ -43,9 +43,22 @@ app.get('/api/state', async (req, res) => {
     const state = await DeviceState.findOne({ fieldId: 'Field 1' });
     const latestSensorData = await SensorData.findOne({ fieldId: 'Field 1' }).sort({ timestamp: -1 });
     
+    // Check if offline (no data in last 30 seconds)
+    let isOnline = false;
+    let currentMoisture = 0;
+    
+    if (latestSensorData) {
+      const timeDiff = Date.now() - new Date(latestSensorData.timestamp).getTime();
+      if (timeDiff < 30000) {
+        isOnline = true;
+        currentMoisture = latestSensorData.moistureLevel;
+      }
+    }
+    
     res.json({
       state,
-      currentMoisture: latestSensorData ? latestSensorData.moistureLevel : 0
+      currentMoisture,
+      isOnline
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
