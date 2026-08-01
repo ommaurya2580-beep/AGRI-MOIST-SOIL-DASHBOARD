@@ -4,8 +4,8 @@
 #include <ArduinoJson.h>
 
 // --- Wi-Fi Credentials ---
-const char* ssid = "YOUR_WIFI_SSID";
-const char* password = "YOUR_WIFI_PASSWORD";
+const char* ssid = "OPPO";
+const char* password = "00000000";
 
 // --- API Endpoint (Your EC2 Server IP) ---
 const char* serverName = "http://18.215.153.77/api/sensor";
