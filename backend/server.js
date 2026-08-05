@@ -5,6 +5,13 @@ const cors = require('cors');
 
 const SensorData = require('./models/SensorData');
 const DeviceState = require('./models/DeviceState');
+const AnalysisRecord = require('./models/AnalysisRecord');
+const multer = require('multer');
+const axios = require('axios');
+const FormData = require('form-data');
+
+// Multer setup for memory storage
+const upload = multer({ storage: multer.memoryStorage() });
 
 const app = express();
 app.use(cors());
@@ -129,6 +136,76 @@ app.post('/api/sensor', async (req, res) => {
     res.json({ pumpIsOn: state.pumpIsOn });
   } catch (error) {
     res.status(500).json({ error: error.message });
+  }
+});
+
+// --- API Endpoints for ML Crop Analysis ---
+
+app.post('/api/analysis/disease', upload.single('image'), async (req, res) => {
+  try {
+    const { crop, plantPart, userId, farmId } = req.body;
+    
+    if (!req.file) {
+      return res.status(400).json({ error: 'Image file is required' });
+    }
+    
+    // Prepare form data for FastAPI
+    const formData = new FormData();
+    formData.append('image', req.file.buffer, {
+      filename: req.file.originalname,
+      contentType: req.file.mimetype,
+    });
+    formData.append('crop', crop || 'wheat');
+    formData.append('plantPart', plantPart || 'leaf');
+    
+    // Call Python ML Service
+    const mlResponse = await axios.post('http://127.0.0.1:8000/api/v1/disease/predict', formData, {
+      headers: {
+        ...formData.getHeaders()
+      }
+    });
+    
+    const rawData = mlResponse.data;
+    
+    // Map AI service response to frontend expected format
+    const isUncertain = rawData.disease === 'Unknown' || rawData.confidence < 50;
+    
+    const mlData = {
+      crop: crop || 'wheat',
+      plantPart: plantPart || 'leaf',
+      modelVersion: 'v1.0',
+      status: isUncertain ? 'uncertain' : 'success',
+      predictions: [
+        { label: rawData.disease, confidence: rawData.confidence }
+      ]
+    };
+    
+    // Save to database
+    const analysisId = 'ANA-' + Date.now();
+    const record = new AnalysisRecord({
+      analysisId,
+      userId: userId || 'anonymous',
+      farmId: farmId || 'farm-01',
+      cropType: mlData.crop,
+      plantPart: mlData.plantPart,
+      modelVersion: mlData.modelVersion,
+      topPrediction: mlData.predictions[0].label,
+      topConfidence: mlData.predictions[0].confidence,
+      predictions: mlData.predictions,
+      analysisStatus: mlData.status
+    });
+    
+    await record.save();
+    
+    res.json({
+      success: true,
+      analysisId,
+      ...mlData
+    });
+    
+  } catch (error) {
+    console.error("Error in /api/analysis/disease:", error.message);
+    res.status(500).json({ error: 'Failed to process analysis' });
   }
 });
 

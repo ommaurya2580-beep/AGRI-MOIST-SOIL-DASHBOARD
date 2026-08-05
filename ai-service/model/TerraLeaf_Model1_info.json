@@ -1,0 +1,23 @@
+{
+    "model_name": "TerraLeaf Model 1",
+    "architecture": "EfficientNet-B0",
+    "dataset_images": 999,
+    "classes": [
+        "BrownRust",
+        "Healthy",
+        "Mildew",
+        "Septoria",
+        "YellowRust"
+    ],
+    "train_images": 697,
+    "validation_images": 148,
+    "test_images": 154,
+    "best_validation_accuracy": 0.72297,
+    "final_test_accuracy": 0.7532,
+    "macro_f1": 0.7027,
+    "weighted_f1": 0.7517,
+    "image_size": [
+        224,
+        224
+    ]
+}
