@@ -151,7 +151,7 @@ app.post('/api/analysis/disease', upload.single('image'), async (req, res) => {
     
     // Prepare form data for FastAPI
     const formData = new FormData();
-    formData.append('image', req.file.buffer, {
+    formData.append('file', req.file.buffer, {
       filename: req.file.originalname,
       contentType: req.file.mimetype,
     });
