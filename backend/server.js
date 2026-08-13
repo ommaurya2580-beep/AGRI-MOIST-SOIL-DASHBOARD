@@ -158,8 +158,8 @@ app.post('/api/analysis/disease', upload.single('image'), async (req, res) => {
     formData.append('crop', crop || 'wheat');
     formData.append('plantPart', plantPart || 'leaf');
     
-    // Call Python ML Service
-    const mlResponse = await axios.post('http://127.0.0.1:8000/api/v1/disease/predict', formData, {
+    // Call Python ML Service on AWS EC2
+    const mlResponse = await axios.post('http://100.54.13.254:8000/api/v1/disease/predict', formData, {
       headers: {
         ...formData.getHeaders()
       }
