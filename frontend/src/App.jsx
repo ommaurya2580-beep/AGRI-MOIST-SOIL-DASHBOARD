@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Leaf, Droplet, Activity, Settings, Cpu, Map, Power, RefreshCw, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import CropAnalysis from './components/CropAnalysis';
+import TerraLeafPro from './components/TerraLeafPro';
 import './index.css';
 
 const API_URL = '/api';
@@ -369,6 +370,7 @@ function App() {
           <div className={`nav-item ${activeTab === 'fields' ? 'active' : ''}`} onClick={() => setActiveTab('fields')}>Fields</div>
           <div className={`nav-item ${activeTab === 'sensors' ? 'active' : ''}`} onClick={() => setActiveTab('sensors')}>Sensors</div>
           <div className={`nav-item ${activeTab === 'analysis' ? 'active' : ''}`} onClick={() => setActiveTab('analysis')}>Crop Analysis</div>
+          <div className={`nav-item ${activeTab === 'pro' ? 'active' : ''}`} onClick={() => setActiveTab('pro')}>TerraLeaf Pro</div>
           <div className={`nav-item ${activeTab === 'settings' ? 'active' : ''}`} onClick={() => setActiveTab('settings')}>Settings</div>
         </div>
 
@@ -386,6 +388,7 @@ function App() {
               {activeTab === 'fields' && 'Field Management'}
               {activeTab === 'sensors' && 'Hardware Sensors'}
               {activeTab === 'analysis' && 'Crop Disease Analysis'}
+              {activeTab === 'pro' && 'TerraLeaf Pro - Advanced AI Diagnostics'}
               {activeTab === 'settings' && 'Settings'}
             </h1>
             <p className="page-subtitle">Monitor and control your smart agriculture system</p>
@@ -402,6 +405,7 @@ function App() {
         {activeTab === 'fields' && renderFields()}
         {activeTab === 'sensors' && renderSensors()}
         {activeTab === 'analysis' && <CropAnalysis />}
+        {activeTab === 'pro' && <TerraLeafPro />}
         {activeTab === 'settings' && renderSettings()}
         
       </main>

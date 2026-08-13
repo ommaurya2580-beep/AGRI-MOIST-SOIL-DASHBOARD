@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    {
+      "source": "/api/v1/disease/predict",
+      "destination": "http://3.235.152.171/api/v1/disease/predict"
+    }
+  ]
+}
