@@ -2,11 +2,11 @@
   "rewrites": [
     {
       "source": "/api/v1/disease/predict",
-      "destination": "http://3.88.159.225/api/v1/disease/predict"
+      "destination": "http://3.235.152.171/api/v1/disease/predict"
     },
     {
       "source": "/api/pest/predict",
-      "destination": "http://3.88.159.225/api/pest/predict"
+      "destination": "http://3.235.152.171/api/pest/predict"
     }
   ]
 }

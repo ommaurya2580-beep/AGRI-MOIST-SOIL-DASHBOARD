@@ -7,11 +7,11 @@ export default defineConfig({
   server: {
     proxy: {
       '/api/v1/disease/predict': {
-        target: 'http://3.88.159.225',
+        target: 'http://3.235.152.171',
         changeOrigin: true
       },
       '/api/pest/predict': {
-        target: 'http://3.88.159.225',
+        target: 'http://3.235.152.171',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api\/pest\/predict/, '/api/pest/predict')
       }
