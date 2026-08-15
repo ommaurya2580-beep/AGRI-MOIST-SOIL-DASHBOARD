@@ -209,6 +209,34 @@ app.post('/api/analysis/disease', upload.single('image'), async (req, res) => {
   }
 });
 
+// Pest Detection endpoint forwarding to new EC2 instance
+app.post('/api/analysis/pest', upload.single('image'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: 'Image file is required' });
+    }
+    
+    const formData = new FormData();
+    formData.append('file', req.file.buffer, {
+      filename: req.file.originalname,
+      contentType: req.file.mimetype,
+    });
+    
+    // Using the new AWS EC2 Public IP provided
+    const mlResponse = await axios.post('http://3.88.159.225:8000/predict', formData, {
+      headers: {
+        ...formData.getHeaders()
+      }
+    });
+    
+    res.json(mlResponse.data);
+    
+  } catch (error) {
+    console.error("Error in /api/analysis/pest:", error.message);
+    res.status(500).json({ error: 'Failed to process pest analysis' });
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
