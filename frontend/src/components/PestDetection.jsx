@@ -3,7 +3,7 @@ import { Upload, AlertTriangle, Bug, AlertCircle } from 'lucide-react';
 
 const API_URL = '/api';
 
-const CONFIDENCE_THRESHOLD = 0.25;
+const CONFIDENCE_THRESHOLD = 0.15;
 
 const CLASS_NAMES = {
   0: "English Grain Aphid",

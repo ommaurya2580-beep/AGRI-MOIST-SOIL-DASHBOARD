@@ -23,7 +23,7 @@ CLASS_NAMES = {
     8: "cerodonta_denticornis",
 }
 
-def get_predictions(img, conf_threshold=0.25):
+def get_predictions(img, conf_threshold=0.15):
     if model is None:
         return []
         

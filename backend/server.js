@@ -18,8 +18,7 @@ app.use(cors());
 app.use(express.json());
 
 const path = require('path');
-// Serve the frontend build folder as static files
-app.use(express.static(path.join(__dirname, 'public')));
+
 
 const PORT = process.env.PORT || 5000;
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/iot_dashboard';
@@ -159,7 +158,7 @@ app.post('/api/analysis/disease', upload.single('image'), async (req, res) => {
     formData.append('plantPart', plantPart || 'leaf');
     
     // Call Python ML Service on AWS EC2
-    const mlResponse = await axios.post('http://100.54.13.254:8000/api/v1/disease/predict', formData, {
+    const mlResponse = await axios.post('http://127.0.0.1:8001/api/v1/disease/predict', formData, {
       headers: {
         ...formData.getHeaders()
       }
