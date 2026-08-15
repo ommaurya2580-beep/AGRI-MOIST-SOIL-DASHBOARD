@@ -31,7 +31,7 @@ export default function CropAnalysis() {
     setResult(null);
     
     const formData = new FormData();
-    formData.append('image', file);
+    formData.append('file', file);
     formData.append('crop', 'wheat');
     formData.append('plantPart', 'leaf');
 
@@ -142,7 +142,7 @@ export default function CropAnalysis() {
             disabled={!file || loading}
             onClick={handleAnalyze}
           >
-            {loading ? 'Analyzing...' : 'Analyze Image'}
+            {loading ? 'Analyzing (v2)...' : 'Analyze Image (v2)'}
           </button>
           
           {error && <div style={{ marginTop: '1rem', color: 'var(--danger)', fontSize: '0.9rem' }}>{error}</div>}
