@@ -46,10 +46,10 @@ export default function PestDetection() {
     setResult(null);
     
     const formData = new FormData();
-    formData.append('image', file);
+    formData.append('file', file);
 
     try {
-      const response = await fetch(`${API_URL}/analysis/pest`, {
+      const response = await fetch(`/api/pest/predict`, {
         method: 'POST',
         body: formData,
       });
