@@ -49,10 +49,17 @@ export default function PestDetection() {
     formData.append('file', file);
 
     try {
+      // Create an AbortController to timeout the request after 15 seconds
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000);
+
       const response = await fetch(`/api/pest/predict`, {
         method: 'POST',
         body: formData,
+        signal: controller.signal
       });
+
+      clearTimeout(timeoutId);
 
       if (!response.ok) {
         throw new Error('Failed to analyze image');

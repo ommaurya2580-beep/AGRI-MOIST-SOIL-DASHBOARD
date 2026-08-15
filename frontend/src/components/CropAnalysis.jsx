@@ -36,11 +36,18 @@ export default function CropAnalysis() {
     formData.append('plantPart', 'leaf');
 
     try {
+      // Create an AbortController to timeout the request after 15 seconds
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000);
+
       // Use the Vercel rewritten endpoint that points directly to EC2
       const response = await fetch('/api/v1/disease/predict', {
         method: 'POST',
         body: formData,
+        signal: controller.signal
       });
+
+      clearTimeout(timeoutId);
 
       if (!response.ok) {
         throw new Error('Failed to analyze image');
