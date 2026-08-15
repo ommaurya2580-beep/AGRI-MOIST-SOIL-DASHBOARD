@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { Upload, AlertTriangle, CheckCircle, Leaf } from 'lucide-react';
+import PestDetection from './PestDetection';
 
 const API_URL = '/api';
 
 export default function CropAnalysis() {
+  const [activeModel, setActiveModel] = useState('model1');
   const [file, setFile] = useState(null);
   const [preview, setPreview] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -54,8 +56,27 @@ export default function CropAnalysis() {
   };
 
   return (
-    <div className="card" style={{ maxWidth: '800px', margin: '0 auto', padding: '2rem' }}>
-      <div className="card-header" style={{ marginBottom: '1.5rem', borderBottom: '1px solid var(--border-light)', paddingBottom: '1rem' }}>
+    <div>
+      <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem', justifyContent: 'center' }}>
+        <button 
+          onClick={() => setActiveModel('model1')} 
+          className={`motor-btn ${activeModel === 'model1' ? 'on' : 'off'}`} 
+          style={{ padding: '0.5rem 1.5rem', borderRadius: '20px', minWidth: '220px' }}
+        >
+          Model-1: Crop Disease
+        </button>
+        <button 
+          onClick={() => setActiveModel('model2')} 
+          className={`motor-btn ${activeModel === 'model2' ? 'on' : 'off'}`} 
+          style={{ padding: '0.5rem 1.5rem', borderRadius: '20px', minWidth: '220px' }}
+        >
+          Model-2: Wheat Pest (YOLO11s)
+        </button>
+      </div>
+
+      {activeModel === 'model1' ? (
+        <div className="card" style={{ maxWidth: '800px', margin: '0 auto', padding: '2rem' }}>
+          <div className="card-header" style={{ marginBottom: '1.5rem', borderBottom: '1px solid var(--border-light)', paddingBottom: '1rem' }}>
         <div className="card-icon"><Leaf size={24} /></div>
         <h2 style={{ margin: 0, fontSize: '1.25rem' }}>Visual Disease Analysis (Model-1)</h2>
       </div>
@@ -185,6 +206,10 @@ export default function CropAnalysis() {
           )}
         </div>
       </div>
+      </div>
+      ) : (
+        <PestDetection />
+      )}
     </div>
   );
 }

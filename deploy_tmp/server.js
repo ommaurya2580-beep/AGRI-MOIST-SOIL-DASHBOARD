@@ -2,6 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
+const path = require('path');
 
 const SensorData = require('./models/SensorData');
 const DeviceState = require('./models/DeviceState');
@@ -222,8 +223,8 @@ app.post('/api/analysis/pest', upload.single('image'), async (req, res) => {
       contentType: req.file.mimetype,
     });
     
-    // Using localhost since the Docker container is running on the same EC2 instance
-    const mlResponse = await axios.post('http://127.0.0.1:8000/predict', formData, {
+    // Using the new AWS EC2 Public IP provided
+    const mlResponse = await axios.post('http://3.88.159.225:8000/predict', formData, {
       headers: {
         ...formData.getHeaders()
       }
@@ -239,7 +240,7 @@ app.post('/api/analysis/pest', upload.single('image'), async (req, res) => {
 
 // Serve static frontend files
 app.use(express.static(path.join(__dirname, '../frontend/dist')));
-app.use((req, res) => {
+app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, '../frontend/dist/index.html'));
 });
 

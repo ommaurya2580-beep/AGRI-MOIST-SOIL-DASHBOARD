@@ -371,8 +371,6 @@ function App() {
           <div className={`nav-item ${activeTab === 'fields' ? 'active' : ''}`} onClick={() => setActiveTab('fields')}>Fields</div>
           <div className={`nav-item ${activeTab === 'sensors' ? 'active' : ''}`} onClick={() => setActiveTab('sensors')}>Sensors</div>
           <div className={`nav-item ${activeTab === 'analysis' ? 'active' : ''}`} onClick={() => setActiveTab('analysis')}>Crop Analysis</div>
-          <div className={`nav-item ${activeTab === 'pest' ? 'active' : ''}`} onClick={() => setActiveTab('pest')}>Pest Detection</div>
-          <div className={`nav-item ${activeTab === 'pro' ? 'active' : ''}`} onClick={() => setActiveTab('pro')}>TerraLeaf Pro</div>
           <div className={`nav-item ${activeTab === 'settings' ? 'active' : ''}`} onClick={() => setActiveTab('settings')}>Settings</div>
         </div>
 
