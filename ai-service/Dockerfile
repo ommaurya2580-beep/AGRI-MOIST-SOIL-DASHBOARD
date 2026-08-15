@@ -11,6 +11,9 @@ COPY app/ ./app/
 COPY model/ ./model/
 COPY .env.example .env
 
+# Unzip the model package
+RUN python -c "import zipfile, os; zipfile.ZipFile('model/TerraLeaf_Model1_FINAL_PACKAGE.zip', 'r').extractall('model/')"
+
 # Expose port
 EXPOSE 8000
 
