@@ -36,7 +36,8 @@ export default function CropAnalysis() {
     formData.append('plantPart', 'leaf');
 
     try {
-      const response = await fetch(`${API_URL}/analysis/disease`, {
+      // Use the Vercel rewritten endpoint that points directly to EC2
+      const response = await fetch('/api/v1/disease/predict', {
         method: 'POST',
         body: formData,
       });
@@ -45,8 +46,16 @@ export default function CropAnalysis() {
         throw new Error('Failed to analyze image');
       }
 
-      const data = await response.json();
-      setResult(data);
+      const rawData = await response.json();
+      
+      // Map the new Model-2 Python API response format to Model-1 UI format
+      const mappedData = {
+        status: rawData.confidence < 50 ? 'uncertain' : 'success',
+        predictions: [
+          { label: rawData.prediction, confidence: rawData.confidence }
+        ]
+      };
+      setResult(mappedData);
     } catch (err) {
       console.error(err);
       setError('An error occurred during analysis. Make sure the ML service is running.');
