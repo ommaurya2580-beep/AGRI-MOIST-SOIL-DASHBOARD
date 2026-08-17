@@ -14,9 +14,9 @@ export default defineConfig({
       },
       // Local dev proxy for Model 2 (Pest)
       '/api/pest/predict': {
-        target: 'http://3.227.14.235',
+        target: 'http://3.88.159.225',
         changeOrigin: true,
-        secure: false,
+        rewrite: (path) => path.replace(/^\/api\/pest\/predict/, '/api/pest/predict')
       }
     }
   },

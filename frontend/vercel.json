@@ -6,7 +6,7 @@
     },
     {
       "source": "/api/pest/predict",
-      "destination": "http://3.227.14.235/api/pest/predict"
+      "destination": "http://3.88.159.225/api/pest/predict"
     }
   ]
 }
