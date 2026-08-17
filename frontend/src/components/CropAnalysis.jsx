@@ -50,7 +50,12 @@ export default function CropAnalysis() {
       clearTimeout(timeoutId);
 
       if (!response.ok) {
-        throw new Error('Failed to analyze image');
+        let errMsg = `Failed to analyze image (Status: ${response.status})`;
+        try {
+          const errData = await response.json();
+          if (errData && errData.detail) errMsg += ` - ${JSON.stringify(errData.detail)}`;
+        } catch (e) {}
+        throw new Error(errMsg);
       }
 
       const rawData = await response.json();
@@ -65,7 +70,7 @@ export default function CropAnalysis() {
       setResult(mappedData);
     } catch (err) {
       console.error(err);
-      setError('An error occurred during analysis. Make sure the ML service is running.');
+      setError(`Error: ${err.message}`);
     } finally {
       setLoading(false);
     }
