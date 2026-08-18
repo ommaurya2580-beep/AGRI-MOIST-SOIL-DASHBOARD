@@ -7,6 +7,10 @@
     {
       "source": "/api/pest/predict",
       "destination": "http://100.63.212.231/api/pest/predict"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
     }
   ]
 }
