@@ -33,13 +33,15 @@ const WIZARD_STEPS = [
     subtitle: 'What fertilizer did you use recently?',
     bgImage: 'https://images.unsplash.com/photo-1625246333195-78d9c38ad449?auto=format&fit=crop&q=80&w=1200',
     icon: Leaf,
-    type: 'visual-select',
+    type: 'visual-select-with-other',
     options: [
-      { id: 'urea', label: 'Urea (Nitrogen)', emoji: '⚪' },
-      { id: 'dap', label: 'DAP (Phosphorus)', emoji: '🟤' },
-      { id: 'npk', label: 'NPK Mix', emoji: '🔴' },
-      { id: 'organic', label: 'Organic Manure', emoji: '💩' },
-      { id: 'none', label: 'None', emoji: '❌' },
+      { id: 'urea', label: 'Nitrogen (Urea)', image: 'https://images.unsplash.com/photo-1473655584826-613d052d9a6c?w=150&h=150&fit=crop' },
+      { id: 'dap', label: 'Phosphorus (DAP/SSP)', image: 'https://images.unsplash.com/photo-1601004890684-d8cbf643f5f2?w=150&h=150&fit=crop' },
+      { id: 'potassium', label: 'Potassium (MOP/Potash)', image: 'https://images.unsplash.com/photo-1610664917637-2ee0fbb72bd5?w=150&h=150&fit=crop' },
+      { id: 'zinc', label: 'Zinc Sulphate', image: 'https://images.unsplash.com/photo-1587843180490-50212db1704e?w=150&h=150&fit=crop' },
+      { id: 'sulphur', label: 'Sulphur', image: 'https://images.unsplash.com/photo-1616035987010-096d2c49c71a?w=150&h=150&fit=crop' },
+      { id: 'organic', label: 'Organic (FYM/Compost)', image: 'https://images.unsplash.com/photo-1590682680695-43b964a3ae17?w=150&h=150&fit=crop' },
+      { id: 'other', label: 'Other (Type Name)', emoji: '✏️' },
     ]
   },
   {
@@ -114,6 +116,18 @@ export default function CropHistoryWizard() {
     }
   };
 
+  const isStepValid = () => {
+    const sel = selections[step.id];
+    if (!sel) return false;
+    if (step.type === 'visual-select-with-other') {
+       if (!sel.selectedOption) return false;
+       if (sel.selectedOption === 'other' && !sel.otherName) return false;
+       if (!sel.approxDate) return false;
+       return true;
+    }
+    return true;
+  };
+
   return (
     <div className="relative w-full h-[calc(100vh-80px)] overflow-hidden bg-slate-900 rounded-3xl shadow-2xl flex flex-col">
       
@@ -155,25 +169,72 @@ export default function CropHistoryWizard() {
         {/* Input Controls */}
         <div className="w-full max-w-lg">
           
-          {step.type === 'visual-select' && (
-            <div className="grid grid-cols-2 gap-4">
-              {step.options.map(opt => {
-                const isSelected = selections[step.id] === opt.id;
-                return (
-                  <div 
-                    key={opt.id}
-                    onClick={() => handleSelect(opt.id)}
-                    className={`cursor-pointer backdrop-blur-md p-6 rounded-2xl border-2 transition-all transform active:scale-95 flex flex-col items-center justify-center gap-3 ${
-                      isSelected 
-                        ? 'bg-emerald-500/40 border-emerald-400 shadow-[0_0_20px_rgba(52,211,153,0.3)]' 
-                        : 'bg-slate-900/40 border-white/10 hover:bg-slate-800/60 hover:border-white/30'
-                    }`}
-                  >
-                    <span className="text-4xl">{opt.emoji}</span>
-                    <span className="font-semibold text-white tracking-wide">{opt.label}</span>
+          {(step.type === 'visual-select' || step.type === 'visual-select-with-other') && (
+            <div className="space-y-6">
+              <div className="grid grid-cols-2 gap-4">
+                {step.options.map(opt => {
+                  const isSelected = selections[step.id]?.selectedOption === opt.id || selections[step.id] === opt.id;
+                  
+                  return (
+                    <div 
+                      key={opt.id}
+                      onClick={() => {
+                        if (step.type === 'visual-select-with-other') {
+                          setSelections({ ...selections, [step.id]: { ...selections[step.id], selectedOption: opt.id } });
+                        } else {
+                          handleSelect(opt.id);
+                        }
+                      }}
+                      className={`cursor-pointer backdrop-blur-md p-4 rounded-2xl border-2 transition-all transform active:scale-95 flex flex-col items-center justify-center gap-3 ${
+                        isSelected 
+                          ? 'bg-emerald-500/40 border-emerald-400 shadow-[0_0_20px_rgba(52,211,153,0.3)]' 
+                          : 'bg-slate-900/40 border-white/10 hover:bg-slate-800/60 hover:border-white/30'
+                      }`}
+                    >
+                      {opt.image ? (
+                        <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-white/20 shadow-lg">
+                           <img src={opt.image} className="w-full h-full object-cover" alt={opt.label} />
+                        </div>
+                      ) : (
+                        <span className="text-4xl">{opt.emoji}</span>
+                      )}
+                      <span className="font-semibold text-white tracking-wide text-sm">{opt.label}</span>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Show Extra Fields if type is visual-select-with-other */}
+              {step.type === 'visual-select-with-other' && selections[step.id]?.selectedOption && (
+                <div className="bg-slate-900/60 backdrop-blur-md p-5 rounded-2xl border border-white/10 space-y-4 animate-in slide-in-from-bottom-4">
+                  
+                  {selections[step.id]?.selectedOption === 'other' && (
+                    <div>
+                      <p className="text-sm text-slate-300 font-semibold mb-2 text-left">Type Fertilizer Name:</p>
+                      <input 
+                        type="text" 
+                        placeholder="e.g. Calcium Nitrate"
+                        className="w-full bg-slate-800/50 border border-white/20 rounded-xl p-3 text-white outline-none focus:border-emerald-400"
+                        value={selections[step.id]?.otherName || ''}
+                        onChange={(e) => setSelections({ ...selections, [step.id]: { ...selections[step.id], otherName: e.target.value } })}
+                      />
+                    </div>
+                  )}
+
+                  <div>
+                    <p className="text-sm text-slate-300 font-semibold mb-2 text-left flex items-center gap-2">
+                      <CalIcon size={16} className="text-emerald-400" /> Approx Date Applied:
+                    </p>
+                    <input 
+                      type="date" 
+                      className="w-full bg-slate-800/50 border border-white/20 rounded-xl p-3 text-white outline-none focus:border-emerald-400 [&::-webkit-calendar-picker-indicator]:filter-[invert(1)]"
+                      value={selections[step.id]?.approxDate || ''}
+                      onChange={(e) => setSelections({ ...selections, [step.id]: { ...selections[step.id], approxDate: e.target.value } })}
+                    />
                   </div>
-                );
-              })}
+
+                </div>
+              )}
             </div>
           )}
 
@@ -227,11 +288,11 @@ export default function CropHistoryWizard() {
         <button 
           onClick={handleNext}
           className={`flex items-center gap-2 px-8 py-4 rounded-full font-bold transition-all shadow-lg text-lg ${
-            selections[step.id] 
+            isStepValid() 
               ? 'bg-emerald-500 hover:bg-emerald-400 text-white shadow-emerald-500/40 translate-y-0' 
               : 'bg-white/10 text-white/50 cursor-not-allowed'
           }`}
-          disabled={!selections[step.id]}
+          disabled={!isStepValid()}
         >
           {isLastStep ? 'Save Farm Profile' : 'Continue'} 
           {isLastStep ? <CheckCircle2 size={20} /> : <ChevronRight size={20} />}
