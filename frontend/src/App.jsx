@@ -6,6 +6,8 @@ import Dashboard from './pages/Dashboard';
 import Weather from './pages/Weather';
 import Monitoring from './pages/Monitoring';
 import CropHistoryWizard from './pages/CropHistoryWizard';
+import Sensors from './pages/Sensors';
+import ESP32Connect from './pages/ESP32Connect';
 
 // Legacy components mapped to new routes for now
 import PestDetection from './components/PestDetection';
@@ -22,9 +24,13 @@ function App() {
         {/* Main Application Layout */}
         <Route element={<DashboardLayout />}>
           <Route path="dashboard" element={<Dashboard />} />
-          <Route path="fields" element={<div className="p-4">Fields (Under Construction)</div>} />
+          <Route path="fields" element={<div className="p-4">Field Map (Under Construction)</div>} />
+          <Route path="irrigation" element={<div className="p-4">Irrigation (Under Construction)</div>} />
+          <Route path="fertilizer-guide" element={<div className="p-4">Fertilizer Guide (Under Construction)</div>} />
           <Route path="monitoring" element={<Monitoring />} />
-          <Route path="sensors" element={<div className="p-4">Sensors Data (Under Construction)</div>} />
+          <Route path="sensors" element={<Sensors />} />
+          <Route path="esp32-connect" element={<ESP32Connect />} />
+          <Route path="soil-npk" element={<div className="p-4">Soil & NPK (Under Construction)</div>} />
           <Route path="weather" element={<Weather />} />
           <Route path="reports" element={<CropHistoryWizard />} />
           <Route path="alerts" element={<div className="p-4">Alerts & Notifications (Under Construction)</div>} />

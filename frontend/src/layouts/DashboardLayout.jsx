@@ -16,14 +16,16 @@ import {
 } from 'lucide-react';
 
 const navItems = [
-  { path: '/dashboard', label: 'Overview', icon: Home },
-  { path: '/fields', label: 'Fields', icon: Map },
-  { path: '/monitoring', label: 'Monitoring', icon: Activity },
-  { path: '/sensors', label: 'Sensors Data', icon: Cpu },
-  { path: '/weather', label: 'Weather Forecast', icon: CloudRain },
-  { path: '/reports', label: 'Reports & History', icon: FileText },
-  { path: '/alerts', label: 'Alerts & Notifications', icon: Bell },
-  { path: '/recommendations', label: 'Recommendations', icon: Lightbulb },
+  { path: '/dashboard', label: 'Dashboard', icon: Home },
+  { path: '/sensors', label: 'Sensors', icon: Cpu },
+  { path: '/soil-npk', label: 'Soil & NPK', icon: Activity },
+  { path: '/fields', label: 'Field Map', icon: Map },
+  { path: '/irrigation', label: 'Irrigation', icon: CloudRain }, // Using CloudRain or similar for now
+  { path: '/fertilizer-guide', label: 'Fertilizer Guide', icon: Lightbulb },
+  { path: '/weather', label: 'Weather', icon: CloudRain },
+  { path: '/reports', label: 'Reports', icon: FileText },
+  { path: '/alerts', label: 'Alerts', icon: Bell },
+  { path: '/esp32-connect', label: 'ESP32 Connect', icon: Cpu },
   { path: '/settings', label: 'Settings', icon: Settings },
 ];
 
