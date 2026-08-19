@@ -35,9 +35,9 @@ export default function DashboardLayout() {
   return (
     <div className="flex h-screen bg-slate-50 overflow-hidden">
       {/* Sidebar */}
-      <aside className="w-64 bg-[#064e3b] text-white flex flex-col justify-between shrink-0">
-        <div>
-          <div className="p-6 flex items-center gap-3">
+      <aside className="w-64 bg-[#064e3b] text-white flex flex-col justify-between shrink-0 h-screen">
+        <div className="flex flex-col overflow-hidden h-full">
+          <div className="p-6 flex items-center gap-3 shrink-0">
             <LeafLogo />
             <div>
               <h1 className="font-bold text-xl tracking-tight">AgriPulse</h1>
@@ -45,7 +45,7 @@ export default function DashboardLayout() {
             </div>
           </div>
 
-          <nav className="mt-4 px-3 flex flex-col gap-1">
+          <nav className="mt-2 px-3 flex flex-col gap-1 overflow-y-auto scrollbar-none pb-4">
             {navItems.map((item) => {
               const isActive = location.pathname.startsWith(item.path);
               return (
@@ -91,7 +91,7 @@ export default function DashboardLayout() {
           </nav>
         </div>
 
-        <div className="p-4">
+        <div className="p-4 shrink-0 border-t border-[#065f46]">
           <div className="bg-[#065f46] p-4 rounded-xl relative overflow-hidden">
             <div className="absolute top-0 right-0 p-2 opacity-20">
               <Bot size={40} />
