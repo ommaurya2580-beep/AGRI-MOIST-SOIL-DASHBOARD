@@ -143,7 +143,8 @@ export default function CropHistoryWizard() {
       </div>
 
       {/* Main Content Area */}
-      <div className="relative z-10 flex-1 flex flex-col items-center justify-center p-6 text-white text-center">
+      <div className="relative z-10 flex-1 w-full overflow-y-auto scrollbar-none">
+        <div className="flex flex-col items-center justify-center min-h-full p-6 text-white text-center py-12">
         <div className="w-16 h-16 bg-emerald-500/20 backdrop-blur-md rounded-full flex items-center justify-center mb-6 border border-emerald-400/30">
           <step.icon size={32} className="text-emerald-300" />
         </div>
@@ -209,6 +210,7 @@ export default function CropHistoryWizard() {
           )}
 
         </div>
+      </div>
       </div>
 
       {/* Bottom Navigation */}
