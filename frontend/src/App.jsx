@@ -2,9 +2,8 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import DashboardLayout from './layouts/DashboardLayout';
 
-// Pages
-// import Login from './pages/Login'; // To be implemented
-// import Dashboard from './pages/Dashboard';
+import Dashboard from './pages/Dashboard';
+import Weather from './pages/Weather';
 import Monitoring from './pages/Monitoring';
 
 // Legacy components mapped to new routes for now
@@ -21,11 +20,11 @@ function App() {
         
         {/* Main Application Layout */}
         <Route element={<DashboardLayout />}>
-          <Route path="dashboard" element={<div className="p-4">Dashboard (Under Construction)</div>} />
+          <Route path="dashboard" element={<Dashboard />} />
           <Route path="fields" element={<div className="p-4">Fields (Under Construction)</div>} />
           <Route path="monitoring" element={<Monitoring />} />
           <Route path="sensors" element={<div className="p-4">Sensors Data (Under Construction)</div>} />
-          <Route path="weather" element={<div className="p-4">Weather Forecast (Under Construction)</div>} />
+          <Route path="weather" element={<Weather />} />
           <Route path="reports" element={<div className="p-4">Reports & History (Under Construction)</div>} />
           <Route path="alerts" element={<div className="p-4">Alerts & Notifications (Under Construction)</div>} />
           <Route path="recommendations" element={<div className="p-4">Recommendations (Under Construction)</div>} />
