@@ -12,7 +12,8 @@ import {
   Clock, 
   Settings,
   Search,
-  Bot
+  Bot,
+  Globe
 } from 'lucide-react';
 import AgriPulseBot from '../components/AgriPulseBot';
 
@@ -33,6 +34,19 @@ const navItems = [
 export default function DashboardLayout() {
   const location = useLocation();
   const [isBotOpen, setIsBotOpen] = useState(false);
+  const [isHindi, setIsHindi] = useState(false);
+
+  const toggleLanguage = () => {
+    const select = document.querySelector('.goog-te-combo');
+    if (select) {
+      select.value = isHindi ? 'en' : 'hi';
+      select.dispatchEvent(new Event('change'));
+      setIsHindi(!isHindi);
+    } else {
+      // Fallback if google translate script hasn't loaded yet
+      setTimeout(() => toggleLanguage(), 500);
+    }
+  };
 
   return (
     <div className="flex h-screen bg-slate-50 overflow-hidden">
@@ -147,6 +161,17 @@ export default function DashboardLayout() {
             </div>
             
             <div className="flex items-center gap-4 text-slate-500">
+              
+              {/* Custom Language Toggle */}
+              <button 
+                onClick={toggleLanguage}
+                className="flex items-center gap-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 px-3 py-1.5 rounded-full transition-colors mr-2 border border-emerald-200 shadow-sm"
+                title="Switch Language"
+              >
+                <Globe size={16} />
+                <span className="text-sm font-bold tracking-wide">{isHindi ? 'हिन्दी' : 'ENG'}</span>
+              </button>
+
               <button className="relative hover:text-slate-700 transition-colors">
                 <Bell size={20} />
                 <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-[10px] font-bold flex items-center justify-center rounded-full border-2 border-white">
