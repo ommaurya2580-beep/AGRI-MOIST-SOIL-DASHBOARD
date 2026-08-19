@@ -35,13 +35,13 @@ const WIZARD_STEPS = [
     icon: Leaf,
     type: 'visual-select-with-other',
     options: [
-      { id: 'urea', label: 'Nitrogen (Urea)', image: 'https://images.unsplash.com/photo-1473655584826-613d052d9a6c?w=150&h=150&fit=crop' },
-      { id: 'dap', label: 'Phosphorus (DAP/SSP)', image: 'https://images.unsplash.com/photo-1601004890684-d8cbf643f5f2?w=150&h=150&fit=crop' },
-      { id: 'potassium', label: 'Potassium (MOP/Potash)', image: 'https://images.unsplash.com/photo-1610664917637-2ee0fbb72bd5?w=150&h=150&fit=crop' },
-      { id: 'zinc', label: 'Zinc Sulphate', image: 'https://images.unsplash.com/photo-1587843180490-50212db1704e?w=150&h=150&fit=crop' },
-      { id: 'sulphur', label: 'Sulphur', image: 'https://images.unsplash.com/photo-1616035987010-096d2c49c71a?w=150&h=150&fit=crop' },
-      { id: 'organic', label: 'Organic (FYM/Compost)', image: 'https://images.unsplash.com/photo-1590682680695-43b964a3ae17?w=150&h=150&fit=crop' },
-      { id: 'other', label: 'Other (Type Name)', emoji: '✏️' },
+      { id: 'urea', label: 'Nitrogen (Urea)', image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/Urea.JPG/320px-Urea.JPG' },
+      { id: 'dap', label: 'Phosphorus (DAP/SSP)', image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/ad/Diammonium_phosphate.JPG/320px-Diammonium_phosphate.JPG' },
+      { id: 'potassium', label: 'Potassium (MOP)', image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/30/Sylvite.jpg/320px-Sylvite.jpg' },
+      { id: 'zinc', label: 'Zinc Sulphate', image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/13/Zinc_sulfate.JPG/320px-Zinc_sulfate.JPG' },
+      { id: 'sulphur', label: 'Sulphur', image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/44/Sulfur-sample.jpg/320px-Sulfur-sample.jpg' },
+      { id: 'organic', label: 'Organic (FYM)', image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/64/Manure.jpg/320px-Manure.jpg' },
+      { id: 'other', label: 'Other', emoji: '✏️' },
     ]
   },
   {
@@ -167,11 +167,12 @@ export default function CropHistoryWizard() {
         <p className="text-lg md:text-xl text-slate-200 mb-10 max-w-md drop-shadow-md">{step.subtitle}</p>
 
         {/* Input Controls */}
-        <div className="w-full max-w-lg">
+        <div className={`w-full transition-all duration-300 ${step.type === 'visual-select-with-other' && selections[step.id]?.selectedOption ? 'max-w-4xl' : 'max-w-xl'}`}>
           
           {(step.type === 'visual-select' || step.type === 'visual-select-with-other') && (
-            <div className="space-y-6">
-              <div className="grid grid-cols-2 gap-4">
+            <div className={`flex flex-col ${step.type === 'visual-select-with-other' && selections[step.id]?.selectedOption ? 'lg:flex-row' : ''} gap-6 items-start justify-center`}>
+              
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4 w-full flex-1">
                 {step.options.map(opt => {
                   const isSelected = selections[step.id]?.selectedOption === opt.id || selections[step.id] === opt.id;
                   
@@ -198,7 +199,7 @@ export default function CropHistoryWizard() {
                       ) : (
                         <span className="text-4xl">{opt.emoji}</span>
                       )}
-                      <span className="font-semibold text-white tracking-wide text-sm">{opt.label}</span>
+                      <span className="font-semibold text-white tracking-wide text-sm text-center">{opt.label}</span>
                     </div>
                   );
                 })}
@@ -206,7 +207,7 @@ export default function CropHistoryWizard() {
 
               {/* Show Extra Fields if type is visual-select-with-other */}
               {step.type === 'visual-select-with-other' && selections[step.id]?.selectedOption && (
-                <div className="bg-slate-900/60 backdrop-blur-md p-5 rounded-2xl border border-white/10 space-y-4 animate-in slide-in-from-bottom-4">
+                <div className="bg-slate-900/60 backdrop-blur-md p-6 rounded-2xl border border-white/10 space-y-5 animate-in slide-in-from-right-4 w-full lg:w-80 shrink-0 shadow-2xl">
                   
                   {selections[step.id]?.selectedOption === 'other' && (
                     <div>
@@ -214,7 +215,7 @@ export default function CropHistoryWizard() {
                       <input 
                         type="text" 
                         placeholder="e.g. Calcium Nitrate"
-                        className="w-full bg-slate-800/50 border border-white/20 rounded-xl p-3 text-white outline-none focus:border-emerald-400"
+                        className="w-full bg-slate-800/50 border border-white/20 rounded-xl p-3 text-white outline-none focus:border-emerald-400 transition-colors"
                         value={selections[step.id]?.otherName || ''}
                         onChange={(e) => setSelections({ ...selections, [step.id]: { ...selections[step.id], otherName: e.target.value } })}
                       />
@@ -227,7 +228,7 @@ export default function CropHistoryWizard() {
                     </p>
                     <input 
                       type="date" 
-                      className="w-full bg-slate-800/50 border border-white/20 rounded-xl p-3 text-white outline-none focus:border-emerald-400 [&::-webkit-calendar-picker-indicator]:filter-[invert(1)]"
+                      className="w-full bg-slate-800/50 border border-white/20 rounded-xl p-3 text-white outline-none focus:border-emerald-400 transition-colors [&::-webkit-calendar-picker-indicator]:filter-[invert(1)]"
                       value={selections[step.id]?.approxDate || ''}
                       onChange={(e) => setSelections({ ...selections, [step.id]: { ...selections[step.id], approxDate: e.target.value } })}
                     />
