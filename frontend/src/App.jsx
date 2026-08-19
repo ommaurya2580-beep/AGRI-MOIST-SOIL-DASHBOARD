@@ -23,11 +23,10 @@ function App() {
         <Route element={<DashboardLayout />}>
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="fields" element={<div className="p-4">Fields (Under Construction)</div>} />
-          <Route path="crop-history" element={<CropHistoryWizard />} />
           <Route path="monitoring" element={<Monitoring />} />
           <Route path="sensors" element={<div className="p-4">Sensors Data (Under Construction)</div>} />
           <Route path="weather" element={<Weather />} />
-          <Route path="reports" element={<div className="p-4">Reports & History (Under Construction)</div>} />
+          <Route path="reports" element={<CropHistoryWizard />} />
           <Route path="alerts" element={<div className="p-4">Alerts & Notifications (Under Construction)</div>} />
           <Route path="recommendations" element={<div className="p-4">Recommendations (Under Construction)</div>} />
           <Route path="settings" element={<div className="p-4">Settings (Under Construction)</div>} />
