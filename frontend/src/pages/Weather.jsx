@@ -3,7 +3,7 @@ import {
   CloudRain, Wind, Droplets, Sun, Sunrise, Sunset, 
   ThermometerSun, Eye, AlertTriangle, RefreshCw,
   Navigation, Map as MapIcon, Info, CloudLightning,
-  Cloud, CloudFog, ThermometerSnowflake, Activity, Leaf
+  Cloud, CloudFog, ThermometerSnowflake, Activity, Leaf, Calendar
 } from 'lucide-react';
 import { 
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, 
