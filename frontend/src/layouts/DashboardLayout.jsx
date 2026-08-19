@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Outlet, NavLink, useLocation } from 'react-router-dom';
 import { 
   Home, 
@@ -14,6 +14,7 @@ import {
   Search,
   Bot
 } from 'lucide-react';
+import AgriPulseBot from '../components/AgriPulseBot';
 
 const navItems = [
   { path: '/dashboard', label: 'Dashboard', icon: Home },
@@ -31,6 +32,7 @@ const navItems = [
 
 export default function DashboardLayout() {
   const location = useLocation();
+  const [isBotOpen, setIsBotOpen] = useState(false);
 
   return (
     <div className="flex h-screen bg-slate-50 overflow-hidden">
@@ -103,25 +105,28 @@ export default function DashboardLayout() {
             <p className="text-xs text-emerald-100 mb-3 relative z-10">
               Ask anything about your crops, pests, or weather...
             </p>
-            <button className="w-full bg-emerald-500 hover:bg-emerald-400 text-white text-xs font-medium py-2 rounded-lg transition-colors relative z-10">
+            <button 
+              onClick={() => setIsBotOpen(true)}
+              className="w-full bg-emerald-500 hover:bg-emerald-400 text-white text-xs font-medium py-2 rounded-lg transition-colors relative z-10 shadow-sm"
+            >
               Ask AgriPulse
             </button>
           </div>
           
           <div className="mt-4 flex items-center gap-3 px-2">
-            <div className="w-10 h-10 rounded-full bg-emerald-600 flex items-center justify-center font-bold border-2 border-[#064e3b]">
+            <div className="w-10 h-10 rounded-full bg-emerald-600 flex items-center justify-center font-bold border-2 border-[#064e3b] shrink-0">
               JD
             </div>
-            <div>
-              <p className="text-sm font-medium">John Doe</p>
-              <p className="text-xs text-emerald-300">Premium User</p>
+            <div className="overflow-hidden">
+              <p className="text-sm font-medium truncate">John Doe</p>
+              <p className="text-xs text-emerald-300 truncate">Premium User</p>
             </div>
           </div>
         </div>
       </aside>
 
       {/* Main Content Area */}
-      <main className="flex-1 flex flex-col overflow-hidden">
+      <main className="flex-1 flex flex-col overflow-hidden relative">
         {/* Top Header */}
         <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-8 shrink-0">
           <div>
@@ -156,8 +161,11 @@ export default function DashboardLayout() {
         </header>
 
         {/* Scrollable Page Content */}
-        <div className="flex-1 overflow-y-auto p-8">
+        <div className="flex-1 overflow-y-auto p-8 bg-slate-50 relative">
           <Outlet />
+          
+          {/* AI Assistant Overlay */}
+          <AgriPulseBot isOpen={isBotOpen} onClose={() => setIsBotOpen(false)} />
         </div>
       </main>
     </div>
