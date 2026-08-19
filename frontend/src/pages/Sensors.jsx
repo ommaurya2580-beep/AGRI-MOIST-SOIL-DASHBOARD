@@ -1,24 +1,103 @@
-import React, { useState } from 'react';
-import { Droplet, Thermometer, FlaskConical, Clock, Activity, Wifi, Link, CheckCircle, ExternalLink, Leaf, AlertCircle } from 'lucide-react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
+import React, { useState, useEffect } from 'react';
+import { Droplet, Thermometer, FlaskConical, Clock, Activity, Wifi, Link, CheckCircle, ExternalLink, Leaf, AlertCircle, Power } from 'lucide-react';
+import { LineChart, Line, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 
-const mockData = [
-  { time: '12:00 PM', moisture: 75, temp: 42, ph: 24 },
-  { time: '2:00 PM', moisture: 78, temp: 44, ph: 23 },
-  { time: '4:00 PM', moisture: 82, temp: 40, ph: 28 },
-  { time: '6:00 PM', moisture: 80, temp: 45, ph: 27 },
-  { time: '8:00 PM', moisture: 77, temp: 48, ph: 26 },
-  { time: '10:00 PM', moisture: 76, temp: 50, ph: 28 },
-  { time: '12:00 AM', moisture: 85, temp: 52, ph: 31 },
-  { time: '2:00 AM', moisture: 80, temp: 48, ph: 29 },
-  { time: '4:00 AM', moisture: 77, temp: 45, ph: 27 },
-  { time: '6:00 AM', moisture: 74, temp: 42, ph: 25 },
-  { time: '8:00 AM', moisture: 76, temp: 44, ph: 24 },
-  { time: '10:30 AM', moisture: 74, temp: 43, ph: 23 },
-];
+const API_URL = '/api';
 
 export default function Sensors() {
   const [activeTab, setActiveTab] = useState('24h');
+
+  // Backend Live State
+  const [isAutoMode, setIsAutoMode] = useState(true);
+  const [pumpStatus, setPumpStatus] = useState(false);
+  const [moisture, setMoisture] = useState(28);
+  const [trendData, setTrendData] = useState([]);
+  const [isOnline, setIsOnline] = useState(false);
+  const [lastUpdateTime, setLastUpdateTime] = useState(null);
+  const [timeAgoStr, setTimeAgoStr] = useState('Waiting for data...');
+
+  // Mock data for other sensors
+  const [mockTemp] = useState(24.6);
+  const [mockPh] = useState(6.7);
+
+  useEffect(() => {
+    fetchData();
+    const interval = setInterval(fetchData, 5000);
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      if (!isOnline) {
+        setTimeAgoStr('Sensor Offline');
+        return;
+      }
+      if (lastUpdateTime) {
+        const seconds = Math.floor((Date.now() - lastUpdateTime) / 1000);
+        if (seconds < 2) setTimeAgoStr('Just now');
+        else if (seconds < 60) setTimeAgoStr(`${seconds} seconds ago`);
+        else setTimeAgoStr(`${Math.floor(seconds/60)} mins ago`);
+      }
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [lastUpdateTime, isOnline]);
+
+  const fetchData = async () => {
+    try {
+      const stateRes = await fetch(`${API_URL}/state`);
+      const stateData = await stateRes.json();
+      if (stateData.state) {
+        setIsAutoMode(stateData.state.isAutoMode);
+        setPumpStatus(stateData.state.pumpIsOn);
+      }
+      setMoisture(stateData.currentMoisture || 0);
+      
+      const online = stateData.isOnline !== undefined ? stateData.isOnline : false;
+      setIsOnline(online);
+      
+      if (online) {
+        setLastUpdateTime(Date.now());
+      }
+
+      const trendRes = await fetch(`${API_URL}/trend`);
+      const trendJson = await trendRes.json();
+      
+      const formattedTrend = trendJson.map(item => ({
+        time: new Date(item.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        moisture: item.moistureLevel,
+        temp: mockTemp + (Math.random() * 2 - 1), // Fake temp around mock
+        ph: mockPh + (Math.random() * 0.4 - 0.2) // Fake pH around mock
+      }));
+      setTrendData(formattedTrend.slice(-20)); // Keep last 20 for chart
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  };
+
+  const updateControl = async (updates) => {
+    try {
+      await fetch(`${API_URL}/control`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updates)
+      });
+      fetchData();
+    } catch (error) {
+      console.error("Error updating control:", error);
+    }
+  };
+
+  const handleAutoToggle = (e) => {
+    const newVal = e.target.checked;
+    setIsAutoMode(newVal);
+    updateControl({ isAutoMode: newVal });
+  };
+
+  const handleManualToggle = () => {
+    const newVal = !pumpStatus;
+    setPumpStatus(newVal);
+    updateControl({ pumpIsOn: newVal, isManualOverride: true });
+  };
 
   return (
     <div className="flex flex-col gap-6 max-w-7xl mx-auto">
@@ -29,12 +108,12 @@ export default function Sensors() {
           <p className="text-slate-500">Real-time soil monitoring</p>
         </div>
         <div className="flex items-center gap-6">
-          <div className="flex items-center gap-2 text-sm text-slate-600 bg-white px-4 py-2 rounded-lg border border-slate-200">
-            <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-            Device Online
+          <div className={`flex items-center gap-2 text-sm text-slate-600 bg-white px-4 py-2 rounded-lg border border-slate-200 ${!isOnline && 'border-red-200'}`}>
+            <span className={`w-2 h-2 rounded-full ${isOnline ? 'bg-emerald-500 animate-pulse' : 'bg-red-500'}`}></span>
+            {isOnline ? 'Device Online' : 'Device Offline'}
           </div>
           <div className="text-sm text-slate-500">
-            Last Sync: <strong>Just now</strong>
+            Last Sync: <strong>{timeAgoStr}</strong>
           </div>
         </div>
       </div>
@@ -50,15 +129,21 @@ export default function Sensors() {
             <div>
               <p className="text-sm font-medium text-slate-500">Soil Moisture</p>
               <div className="flex items-baseline gap-1 mt-1">
-                <h3 className="text-3xl font-bold text-slate-800">28</h3>
+                <h3 className={`text-3xl font-bold ${!isOnline ? 'text-slate-400' : 'text-slate-800'}`}>{isOnline ? moisture : '--'}</h3>
                 <span className="text-lg font-semibold text-slate-600">%</span>
               </div>
-              <p className="text-emerald-500 text-sm font-medium mt-1">Optimal</p>
+              <p className={`${
+                !isOnline ? 'text-red-500' :
+                moisture < 40 ? 'text-orange-500' : 
+                moisture > 60 ? 'text-blue-500' : 'text-emerald-500'
+              } text-sm font-medium mt-1`}>
+                {!isOnline ? 'Disconnected' : moisture < 40 ? 'Dry' : moisture > 60 ? 'Wet' : 'Optimal'}
+              </p>
             </div>
           </div>
           <div className="h-12 mt-4">
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={mockData.slice(-6)}>
+              <LineChart data={trendData}>
                 <Line type="monotone" dataKey="moisture" stroke="#3b82f6" strokeWidth={2} dot={false} />
               </LineChart>
             </ResponsiveContainer>
@@ -74,15 +159,17 @@ export default function Sensors() {
             <div>
               <p className="text-sm font-medium text-slate-500">Soil Temperature</p>
               <div className="flex items-baseline gap-1 mt-1">
-                <h3 className="text-3xl font-bold text-slate-800">24.6</h3>
+                <h3 className={`text-3xl font-bold ${!isOnline ? 'text-slate-400' : 'text-slate-800'}`}>{isOnline ? mockTemp.toFixed(1) : '--'}</h3>
                 <span className="text-lg font-semibold text-slate-600">°C</span>
               </div>
-              <p className="text-emerald-500 text-sm font-medium mt-1">Optimal</p>
+              <p className={`${!isOnline ? 'text-red-500' : 'text-emerald-500'} text-sm font-medium mt-1`}>
+                {!isOnline ? 'Disconnected' : 'Optimal'}
+              </p>
             </div>
           </div>
           <div className="h-12 mt-4">
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={mockData.slice(-6)}>
+              <LineChart data={trendData}>
                 <Line type="monotone" dataKey="temp" stroke="#f97316" strokeWidth={2} dot={false} />
               </LineChart>
             </ResponsiveContainer>
@@ -98,14 +185,16 @@ export default function Sensors() {
             <div>
               <p className="text-sm font-medium text-slate-500">Soil pH</p>
               <div className="flex items-baseline gap-1 mt-1">
-                <h3 className="text-3xl font-bold text-slate-800">6.7</h3>
+                <h3 className={`text-3xl font-bold ${!isOnline ? 'text-slate-400' : 'text-slate-800'}`}>{isOnline ? mockPh.toFixed(1) : '--'}</h3>
               </div>
-              <p className="text-emerald-500 text-sm font-medium mt-1">Optimal</p>
+              <p className={`${!isOnline ? 'text-red-500' : 'text-emerald-500'} text-sm font-medium mt-1`}>
+                {!isOnline ? 'Disconnected' : 'Optimal'}
+              </p>
             </div>
           </div>
           <div className="h-12 mt-4">
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={mockData.slice(-6)}>
+              <LineChart data={trendData}>
                 <Line type="monotone" dataKey="ph" stroke="#a855f7" strokeWidth={2} dot={false} />
               </LineChart>
             </ResponsiveContainer>
@@ -233,6 +322,52 @@ export default function Sensors() {
           </div>
         </div>
 
+      </div>
+
+      {/* Motor Control Row */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 lg:col-span-3">
+          <div className="flex items-center gap-3 font-semibold text-slate-800 mb-6 text-lg">
+            <div className={`p-2 rounded-lg ${pumpStatus ? 'bg-emerald-100 text-emerald-600' : 'bg-slate-100 text-slate-500'}`}>
+              <Power size={20} />
+            </div>
+            Premium Motor Control
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="flex items-center justify-between p-6 bg-slate-50 rounded-xl border border-slate-200">
+              <div>
+                <div className="font-semibold text-slate-800 text-lg">Smart Auto-Irrigation</div>
+                <div className="text-sm text-slate-500 mt-1">AI-driven watering based on moisture thresholds.</div>
+              </div>
+              <label className="relative inline-flex items-center cursor-pointer scale-125 mr-2">
+                <input type="checkbox" className="sr-only peer" checked={isAutoMode} onChange={handleAutoToggle} />
+                <div className="w-14 h-7 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
+              </label>
+            </div>
+
+            <div className="flex flex-col justify-center">
+              <div className="flex justify-between items-center mb-3">
+                <span className="font-semibold text-slate-800">Manual Override</span>
+                <span className={`px-4 py-1.5 rounded-full text-xs font-bold tracking-wider ${pumpStatus ? 'bg-emerald-100 text-emerald-700 animate-pulse' : 'bg-slate-100 text-slate-500'}`}>
+                  {pumpStatus ? 'PUMP RUNNING' : 'PUMP OFF'}
+                </span>
+              </div>
+              
+              <button 
+                className={`w-full py-4 rounded-xl font-bold flex justify-center items-center gap-3 transition-all text-lg ${
+                  pumpStatus 
+                    ? 'bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow-lg shadow-blue-500/30' 
+                    : 'bg-gradient-to-r from-slate-700 to-slate-600 text-white shadow-lg shadow-slate-500/20'
+                }`}
+                onClick={handleManualToggle}
+              >
+                <Power size={24} />
+                {pumpStatus ? 'TAP TO TURN OFF MOTOR' : 'TAP TO START MOTOR'}
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Bottom Row */}
