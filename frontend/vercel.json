@@ -9,6 +9,10 @@
       "destination": "http://100.63.212.231/api/pest/predict"
     },
     {
+      "source": "/api/(.*)",
+      "destination": "http://18.215.153.77/api/$1"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }
