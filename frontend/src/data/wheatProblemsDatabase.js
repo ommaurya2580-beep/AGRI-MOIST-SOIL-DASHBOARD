@@ -2506,88 +2506,6 @@ export const wheatProblemsDatabase = {
     description: 'Issues affecting germination, emergence, tillering, heading, flowering, and grain fill.',
     subcategories: [
       {
-        id: 'early_growth',
-        title: 'Early Stage Problems',
-        groups: [
-          {
-            id: 'germination_emergence',
-            title: 'Germination & Emergence',
-            problems: [
-              {
-                id: 'poor_germination',
-                name: 'Poor Germination',
-                image: '/images/problems/wilting.jpg',
-                healthyImage: '/images/problems/all_good.jpg',
-                symptoms: [
-                  'Low emergence percentage',
-                  'Delayed emergence',
-                  'Missing seedlings or weak plants'
-                ],
-                causes: [
-                  'Poor seed quality or low viability',
-                  'Incorrect planting depth',
-                  'Low or excess soil moisture',
-                  'Temperature extremes or Soil crusting',
-                  'Salinity, seed-borne disease, or chemical injury'
-                ],
-                treatment: {
-                  primary: [
-                    'Improve moisture management or drainage depending on cause',
-                    'Use quality-tested seed for future planting',
-                    'Evaluate replanting based on crop stage and plant population'
-                  ],
-                  chemical: [],
-                },
-                fertilizer: {
-                  status: 'Not Primary Treatment',
-                  recommendation: [
-                    'Poor germination does not automatically require fertilizer'
-                  ]
-                },
-                management: [],
-                engineOutput: ['Check seed quality records', 'Check soil moisture/temperature', 'Check planting depth']
-              },
-              {
-                id: 'uneven_emergence',
-                name: 'Uneven Emergence',
-                image: '/images/problems/wilting.jpg',
-                healthyImage: '/images/problems/all_good.jpg',
-                symptoms: [
-                  'Plants emerge at different times',
-                  'Uneven plant height',
-                  'Patchy field appearance',
-                  'Variable seedling size'
-                ],
-                causes: [
-                  'Uneven planting depth',
-                  'Uneven soil moisture or seed-soil contact',
-                  'Soil compaction or crusting',
-                  'Uneven residue distribution',
-                  'Pest damage or seedling disease'
-                ],
-                treatment: {
-                  primary: [
-                    'Improve field uniformity and moisture imbalance',
-                    'Reduce soil compaction',
-                    'Improve future planting operation'
-                  ],
-                  chemical: [],
-                },
-                fertilizer: {
-                  status: 'Diagnosis Required',
-                  recommendation: [
-                    'Correct confirmed nutrient deficiency only',
-                    'Patchy emergence must not be classified directly as nutrient deficiency'
-                  ]
-                },
-                management: [],
-                engineOutput: ['Check planting depth variation', 'Check soil moisture variation']
-              }
-            ]
-          }
-        ]
-      },
-      {
         id: 'mid_late_growth',
         title: 'Mid to Late Stage Problems',
         groups: [
@@ -2742,6 +2660,104 @@ export const wheatProblemsDatabase = {
                 },
                 management: [],
                 engineOutput: ['Estimate recoverability', 'Check moisture and temperature']
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  seed_establishment: {
+    id: 'seed_establishment',
+    title: 'Seed & Establishment Problems',
+    description: 'Pre-emergence and early seedling establishment issues including seed quality and sowing errors.',
+    subcategories: [
+      {
+        id: 'pre_emergence',
+        title: 'Pre-emergence',
+        groups: [
+          {
+            id: 'seed_quality_group',
+            title: 'Seed Quality & Rot',
+            problems: [
+              {
+                id: 'poor_germination',
+                name: 'Poor Germination (Seed Viability)',
+                image: '/images/problems/wilting.jpg',
+                healthyImage: '/images/problems/all_good.jpg',
+                symptoms: [
+                  'Low emergence percentage',
+                  'Delayed emergence',
+                  'Seed rot in soil'
+                ],
+                causes: [
+                  'Poor seed quality or low viability',
+                  'Incorrect planting depth',
+                  'Temperature extremes or Soil crusting',
+                  'Seed-borne disease or Seed rot'
+                ],
+                treatment: {
+                  primary: [
+                    'Use quality-tested, certified seed for future planting',
+                    'Evaluate replanting based on crop stage and plant population'
+                  ],
+                  chemical: [],
+                },
+                fertilizer: {
+                  status: 'Not Primary Treatment',
+                  recommendation: [
+                    'Poor germination does not require fertilizer.'
+                  ]
+                },
+                management: [],
+                engineOutput: ['Check seed quality records', 'Check soil moisture/temperature', 'Check planting depth']
+              }
+            ]
+          }
+        ]
+      },
+      {
+        id: 'establishment',
+        title: 'Establishment',
+        groups: [
+          {
+            id: 'seedling_establishment',
+            title: 'Seedling Establishment',
+            problems: [
+              {
+                id: 'uneven_emergence',
+                name: 'Uneven Emergence & Weak Seedlings',
+                image: '/images/problems/wilting.jpg',
+                healthyImage: '/images/problems/all_good.jpg',
+                symptoms: [
+                  'Plants emerge at different times',
+                  'Patchy field appearance',
+                  'Weak seedlings',
+                  'Poor plant stand'
+                ],
+                causes: [
+                  'Uneven planting depth',
+                  'Uneven soil moisture or seed-soil contact',
+                  'Soil compaction or crusting',
+                  'Pest damage or seedling disease'
+                ],
+                treatment: {
+                  primary: [
+                    'Improve field uniformity and moisture imbalance',
+                    'Reduce soil compaction',
+                    'Improve future planting operation'
+                  ],
+                  chemical: [],
+                },
+                fertilizer: {
+                  status: 'Diagnosis Required',
+                  recommendation: [
+                    'Correct confirmed nutrient deficiency only',
+                    'Patchy emergence must not be classified directly as nutrient deficiency'
+                  ]
+                },
+                management: [],
+                engineOutput: ['Check planting depth variation', 'Check soil moisture variation']
               }
             ]
           }
