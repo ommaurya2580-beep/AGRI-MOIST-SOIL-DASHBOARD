@@ -1497,5 +1497,231 @@ export const wheatProblemsDatabase = {
         ]
       }
     ]
+  },
+  weather: {
+    id: 'weather',
+    title: 'Temperature & Weather Stress',
+    description: 'Physical or physiological damage from extreme temperatures, wind, or hail.',
+    subcategories: [
+      {
+        id: 'temperature_stress',
+        title: 'Temperature Stress',
+        groups: [
+          {
+            id: 'heat_stress_group',
+            title: 'Heat Stress',
+            problems: [
+              {
+                id: 'heat_stress',
+                name: 'High Temperature Stress',
+                image: '/images/problems/wilting.jpg',
+                healthyImage: '/images/problems/all_good.jpg',
+                symptoms: [
+                  'Leaf rolling or cupping',
+                  'Premature leaf senescence (drying)',
+                  'Slower growth rate'
+                ],
+                causes: [
+                  'High ambient air temperature',
+                  'High soil temperature',
+                  'Prolonged heat wave'
+                ],
+                treatment: {
+                  primary: [
+                    'Optimize irrigation to maintain cooling through transpiration',
+                    'Analyze crop stage for heat vulnerability'
+                  ],
+                  chemical: [],
+                },
+                fertilizer: {
+                  status: 'Not Primary Treatment',
+                  recommendation: [
+                    'Avoid heavy nitrogen application during peak heat stress',
+                    'Ensure adequate potassium to improve stress tolerance (if deficient)'
+                  ]
+                },
+                management: [],
+                engineOutput: ['Sensor/Weather inputs (Temp)', 'Crop stage analysis']
+              },
+              {
+                id: 'terminal_heat_stress',
+                name: 'Terminal Heat Stress',
+                image: '/images/problems/wilting.jpg',
+                healthyImage: '/images/problems/all_good.jpg',
+                symptoms: [
+                  'Forced maturity',
+                  'Shriveled grains',
+                  'White heads (blasting)'
+                ],
+                causes: [
+                  'High temperatures during heading, flowering, or grain filling',
+                  'Hot dry winds (loo)'
+                ],
+                treatment: {
+                  primary: [
+                    'Maintain optimal soil moisture during grain fill',
+                    'No direct corrective action once grain is shriveled'
+                  ],
+                  chemical: [],
+                },
+                fertilizer: {
+                  status: 'Not Primary Treatment',
+                  recommendation: [
+                    'Fertilizer will not reverse terminal heat damage',
+                    'Avoid late nitrogen applications which may exacerbate stress'
+                  ]
+                },
+                management: ['Use heat-tolerant varieties for future seasons'],
+                engineOutput: ['Critical growth stage (Heading/Flowering/Grain Fill)', 'Temperature analysis']
+              }
+            ]
+          },
+          {
+            id: 'cold_stress_group',
+            title: 'Cold & Frost Stress',
+            problems: [
+              {
+                id: 'frost_damage',
+                name: 'Frost Damage (Freezing Injury)',
+                image: '/images/problems/wilting.jpg',
+                healthyImage: '/images/problems/all_good.jpg',
+                symptoms: [
+                  'Water-soaked dark green leaves turning brown',
+                  'Stem splitting or blistering',
+                  'Head trapping or empty white heads'
+                ],
+                causes: [
+                  'Sub-zero temperatures during vulnerable stages',
+                  'Cold air pooling in low field areas'
+                ],
+                treatment: {
+                  primary: [
+                    'Assess crop recovery 7-10 days after the frost event',
+                    'Delay any immediate destructive action until damage is fully visible'
+                  ],
+                  chemical: [],
+                },
+                fertilizer: {
+                  status: 'Not Primary Treatment',
+                  recommendation: [
+                    'Do not apply fertilizer immediately to "heal" frost damage',
+                    'Re-evaluate nutrient needs based on surviving tiller density'
+                  ]
+                },
+                management: [],
+                engineOutput: ['Frost duration analysis', 'Crop stage analysis']
+              },
+              {
+                id: 'cold_stress',
+                name: 'Low Temperature Stress',
+                image: '/images/problems/wilting.jpg',
+                healthyImage: '/images/problems/all_good.jpg',
+                symptoms: [
+                  'Stunted or paused growth',
+                  'Purpling of leaves (temporary phosphorus deficiency)',
+                  'Yellowing of older leaves'
+                ],
+                causes: [
+                  'Prolonged cold air/soil temperatures',
+                  'Reduced root activity'
+                ],
+                treatment: {
+                  primary: [
+                    'Wait for soil to warm up',
+                    'Assess nutrient uptake recovery post-cold snap'
+                  ],
+                  chemical: [],
+                },
+                fertilizer: {
+                  status: 'Not Primary Treatment',
+                  recommendation: [
+                    'Avoid applying large amounts of fertilizer to cold, inactive roots',
+                    'Temporary nutrient deficiencies often self-correct as soils warm'
+                  ]
+                },
+                management: [],
+                engineOutput: ['Air/Soil temperature check', 'Exposure duration']
+              }
+            ]
+          }
+        ]
+      },
+      {
+        id: 'physical_weather',
+        title: 'Physical Weather Damage',
+        groups: [
+          {
+            id: 'hail_wind_group',
+            title: 'Hail & Wind Damage',
+            problems: [
+              {
+                id: 'hail_damage',
+                name: 'Hail Damage',
+                image: '/images/problems/spots.jpg',
+                healthyImage: '/images/problems/all_good.jpg',
+                symptoms: [
+                  'Torn, shredded, or bruised leaves',
+                  'Broken stems',
+                  'Shattered or detached heads'
+                ],
+                causes: [
+                  'Severe hail storm event'
+                ],
+                treatment: {
+                  primary: [
+                    'Assess damage severity and crop survival (wait 3-5 days)',
+                    'Monitor for opportunistic fungal diseases on wounds'
+                  ],
+                  chemical: [
+                    'Consider preventative fungicide if disease risk is high (consult agronomist)'
+                  ],
+                },
+                fertilizer: {
+                  status: 'Not Primary Treatment',
+                  recommendation: [
+                    'Do not blindly fertilize damaged plants',
+                    'Adjust future nutrient inputs based on the remaining viable yield potential'
+                  ]
+                },
+                management: [],
+                engineOutput: ['Weather event data', 'Damage severity assessment']
+              },
+              {
+                id: 'wind_damage',
+                name: 'Wind Damage',
+                image: '/images/problems/wilting.jpg',
+                healthyImage: '/images/problems/all_good.jpg',
+                symptoms: [
+                  'Lodging (plants falling over)',
+                  'Stem breakage or kinking',
+                  'Root lodging (plants uprooted)'
+                ],
+                causes: [
+                  'High wind speeds (often with heavy rain)',
+                  'Overly dense canopies',
+                  'Excessive early nitrogen causing weak stems'
+                ],
+                treatment: {
+                  primary: [
+                    'Assess lodging type (root vs stem)',
+                    'Evaluate if crop can partially stand back up (goose-necking)'
+                  ],
+                  chemical: [],
+                },
+                fertilizer: {
+                  status: 'Not Primary Treatment',
+                  recommendation: [
+                    'Fertilizer cannot correct wind damage',
+                    'Avoid excessive Nitrogen in future to reduce lodging risk'
+                  ]
+                },
+                management: [],
+                engineOutput: ['Wind event analysis', 'Stem damage assessment']
+              }
+            ]
+          }
+        ]
+      }
+    ]
   }
 };
