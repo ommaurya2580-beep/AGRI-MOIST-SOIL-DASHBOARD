@@ -11,11 +11,12 @@ const WIZARD_STEPS = [
     bgImage: 'https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?auto=format&fit=crop&q=80&w=1200',
     icon: Leaf,
     type: 'visual-select',
+    askDate: true,
     options: [
-      { id: 'seedling', label: 'Seedling', emoji: '🌱' },
-      { id: 'tillering', label: 'Tillering', emoji: '🌿' },
-      { id: 'flowering', label: 'Flowering', emoji: '🌾' },
-      { id: 'maturity', label: 'Maturity', emoji: '🍂' },
+      { id: 'seedling', label: 'Seedling', image: '/images/stages/seedling.jpg' },
+      { id: 'tillering', label: 'Tillering', image: '/images/stages/tillering.jpg' },
+      { id: 'flowering', label: 'Flowering', image: '/images/stages/flowering.jpg' },
+      { id: 'maturity', label: 'Maturity', image: '/images/stages/maturity.jpg' },
     ]
   },
   {
@@ -33,7 +34,9 @@ const WIZARD_STEPS = [
     subtitle: 'What fertilizer did you use recently?',
     bgImage: 'https://images.unsplash.com/photo-1625246333195-78d9c38ad449?auto=format&fit=crop&q=80&w=1200',
     icon: Leaf,
-    type: 'visual-select-with-other',
+    type: 'visual-select',
+    askDate: true,
+    hasOther: true,
     options: [
       { id: 'urea', label: 'Nitrogen (Urea)', image: '/images/fertilizers/urea.jpg' },
       { id: 'dap', label: 'Phosphorus (DAP/SSP)', image: '/images/fertilizers/dap.jpg' },
@@ -51,11 +54,12 @@ const WIZARD_STEPS = [
     bgImage: 'https://images.unsplash.com/photo-1592982537447-6f296c0bd5e8?auto=format&fit=crop&q=80&w=1200',
     icon: Spray,
     type: 'visual-select',
+    askDate: true,
     options: [
-      { id: 'pesticide', label: 'Pesticide / Insecticide', emoji: '🐛' },
-      { id: 'fungicide', label: 'Fungicide', emoji: '🦠' },
-      { id: 'herbicide', label: 'Herbicide (Weed Killer)', emoji: '🌿' },
-      { id: 'none', label: 'None applied', emoji: '✅' },
+      { id: 'pesticide', label: 'Pesticide / Insecticide', image: '/images/sprays/pesticide.jpg' },
+      { id: 'fungicide', label: 'Fungicide', image: '/images/sprays/fungicide.jpg' },
+      { id: 'herbicide', label: 'Herbicide (Weed Killer)', image: '/images/sprays/herbicide.jpg' },
+      { id: 'none', label: 'None applied', image: '/images/sprays/none.jpg' },
     ]
   },
   {
@@ -65,11 +69,12 @@ const WIZARD_STEPS = [
     bgImage: 'https://images.unsplash.com/photo-1561484930-998b6a7b22e8?auto=format&fit=crop&q=80&w=1200',
     icon: ThermometerSun,
     type: 'visual-select',
+    askDate: true,
     options: [
-      { id: 'hot', label: 'Very Hot & Dry', emoji: '☀️' },
-      { id: 'rain', label: 'Heavy Rain', emoji: '🌧️' },
-      { id: 'wind', label: 'Strong Winds', emoji: '💨' },
-      { id: 'normal', label: 'Normal / Good', emoji: '🌤️' },
+      { id: 'hot', label: 'Very Hot & Dry', image: '/images/weather/hot.jpg' },
+      { id: 'rain', label: 'Heavy Rain', image: '/images/weather/rain.jpg' },
+      { id: 'wind', label: 'Strong Winds', image: '/images/weather/wind.jpg' },
+      { id: 'normal', label: 'Normal / Good', image: '/images/weather/normal.jpg' },
     ]
   },
   {
@@ -79,15 +84,18 @@ const WIZARD_STEPS = [
     bgImage: 'https://images.unsplash.com/photo-1615811361523-6bd03d7748e7?auto=format&fit=crop&q=80&w=1200',
     icon: AlertTriangle,
     type: 'visual-select',
+    askDate: true,
     options: [
-      { id: 'yellow', label: 'Yellowing Leaves', emoji: '🍂' },
-      { id: 'spots', label: 'Spots on Leaves', emoji: '🟤' },
-      { id: 'insects', label: 'Insects visible', emoji: '🐛' },
-      { id: 'wilting', label: 'Wilting / Drying', emoji: '🥀' },
-      { id: 'all_good', label: 'Healthy (No issues)', emoji: '✅' },
+      { id: 'yellow', label: 'Yellowing Leaves', image: '/images/problems/yellow.jpg' },
+      { id: 'spots', label: 'Spots on Leaves', image: '/images/problems/spots.jpg' },
+      { id: 'insects', label: 'Insects visible', image: '/images/problems/insects.jpg' },
+      { id: 'wilting', label: 'Wilting / Drying', image: '/images/problems/wilting.jpg' },
+      { id: 'all_good', label: 'Healthy (No issues)', image: '/images/problems/all_good.jpg' },
     ]
   }
 ];
+
+const QUICK_DATES = ['Today', 'Yesterday', '3 Days Ago', '1 Week Ago'];
 
 export default function CropHistoryWizard() {
   const navigate = useNavigate();
@@ -119,13 +127,16 @@ export default function CropHistoryWizard() {
   const isStepValid = () => {
     const sel = selections[step.id];
     if (!sel) return false;
-    if (step.type === 'visual-select-with-other') {
-       if (!sel.selectedOption) return false;
-       if (sel.selectedOption === 'other' && !sel.otherName) return false;
-       if (!sel.approxDate) return false;
-       return true;
+    
+    if (step.type === 'visual-select') {
+      if (!sel.selectedOption) return false;
+      if (step.hasOther && sel.selectedOption === 'other' && !sel.otherName) return false;
+      
+      // If askDate is true, approxDate must be filled
+      if (step.askDate && !sel.approxDate) return false;
+      return true;
     }
-    return true;
+    return true; // For date-select
   };
 
   return (
@@ -167,24 +178,23 @@ export default function CropHistoryWizard() {
         <p className="text-lg md:text-xl text-slate-200 mb-10 max-w-md drop-shadow-md">{step.subtitle}</p>
 
         {/* Input Controls */}
-        <div className={`w-full transition-all duration-300 ${step.type === 'visual-select-with-other' && selections[step.id]?.selectedOption ? 'max-w-4xl' : 'max-w-xl'}`}>
+        <div className={`w-full transition-all duration-300 ${step.type === 'visual-select' && selections[step.id]?.selectedOption && step.askDate ? 'max-w-4xl' : 'max-w-xl'}`}>
           
-          {(step.type === 'visual-select' || step.type === 'visual-select-with-other') && (
-            <div className={`flex flex-col ${step.type === 'visual-select-with-other' && selections[step.id]?.selectedOption ? 'lg:flex-row' : ''} gap-6 items-start justify-center`}>
+          {step.type === 'visual-select' && (
+            <div className={`flex flex-col ${selections[step.id]?.selectedOption && step.askDate ? 'lg:flex-row' : ''} gap-6 items-start justify-center`}>
               
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4 w-full flex-1">
                 {step.options.map(opt => {
-                  const isSelected = selections[step.id]?.selectedOption === opt.id || selections[step.id] === opt.id;
+                  const isSelected = selections[step.id]?.selectedOption === opt.id;
                   
                   return (
                     <div 
                       key={opt.id}
                       onClick={() => {
-                        if (step.type === 'visual-select-with-other') {
-                          setSelections({ ...selections, [step.id]: { ...selections[step.id], selectedOption: opt.id } });
-                        } else {
-                          handleSelect(opt.id);
-                        }
+                        setSelections({ 
+                          ...selections, 
+                          [step.id]: { ...selections[step.id], selectedOption: opt.id } 
+                        });
                       }}
                       className={`cursor-pointer backdrop-blur-md p-4 rounded-2xl border-2 transition-all transform active:scale-95 flex flex-col items-center justify-center gap-3 ${
                         isSelected 
@@ -193,7 +203,7 @@ export default function CropHistoryWizard() {
                       }`}
                     >
                       {opt.image ? (
-                        <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-white/20 shadow-lg">
+                        <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-white/20 shadow-lg bg-slate-800">
                            <img src={opt.image} className="w-full h-full object-cover" alt={opt.label} />
                         </div>
                       ) : (
@@ -205,13 +215,13 @@ export default function CropHistoryWizard() {
                 })}
               </div>
 
-              {/* Show Extra Fields if type is visual-select-with-other */}
-              {step.type === 'visual-select-with-other' && selections[step.id]?.selectedOption && (
+              {/* Show Extra Fields if date/other is required */}
+              {selections[step.id]?.selectedOption && step.askDate && (
                 <div className="bg-slate-900/60 backdrop-blur-md p-6 rounded-2xl border border-white/10 space-y-5 animate-in slide-in-from-right-4 w-full lg:w-80 shrink-0 shadow-2xl">
                   
-                  {selections[step.id]?.selectedOption === 'other' && (
+                  {step.hasOther && selections[step.id]?.selectedOption === 'other' && (
                     <div>
-                      <p className="text-sm text-slate-300 font-semibold mb-2 text-left">Type Fertilizer Name:</p>
+                      <p className="text-sm text-slate-300 font-semibold mb-2 text-left">Type Name:</p>
                       <input 
                         type="text" 
                         placeholder="e.g. Calcium Nitrate"
@@ -224,12 +234,31 @@ export default function CropHistoryWizard() {
 
                   <div>
                     <p className="text-sm text-slate-300 font-semibold mb-2 text-left flex items-center gap-2">
-                      <CalIcon size={16} className="text-emerald-400" /> Approx Date Applied:
+                      <CalIcon size={16} className="text-emerald-400" /> Date (or Quick Select):
                     </p>
+                    
+                    {/* Quick Date Buttons */}
+                    <div className="grid grid-cols-2 gap-2 mb-3">
+                      {QUICK_DATES.map(qDate => (
+                        <div 
+                          key={qDate}
+                          onClick={() => setSelections({ ...selections, [step.id]: { ...selections[step.id], approxDate: qDate } })}
+                          className={`cursor-pointer text-xs font-semibold py-2 px-1 text-center rounded-lg border transition-all ${
+                            selections[step.id]?.approxDate === qDate
+                              ? 'bg-emerald-500/40 border-emerald-400 text-white'
+                              : 'bg-white/5 border-white/10 text-slate-300 hover:bg-white/10'
+                          }`}
+                        >
+                          {qDate}
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Manual Date Input */}
                     <input 
                       type="date" 
                       className="w-full bg-slate-800/50 border border-white/20 rounded-xl p-3 text-white outline-none focus:border-emerald-400 transition-colors [&::-webkit-calendar-picker-indicator]:filter-[invert(1)]"
-                      value={selections[step.id]?.approxDate || ''}
+                      value={!QUICK_DATES.includes(selections[step.id]?.approxDate) ? (selections[step.id]?.approxDate || '') : ''}
                       onChange={(e) => setSelections({ ...selections, [step.id]: { ...selections[step.id], approxDate: e.target.value } })}
                     />
                   </div>
