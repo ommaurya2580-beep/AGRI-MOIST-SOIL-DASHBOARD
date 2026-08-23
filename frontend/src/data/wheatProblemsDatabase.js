@@ -1286,5 +1286,216 @@ export const wheatProblemsDatabase = {
         ]
       }
     ]
+  },
+  water: {
+    id: 'water',
+    title: 'Water Problems',
+    description: 'Issues related to water deficit, waterlogging, and poor drainage.',
+    subcategories: [
+      {
+        id: 'water_deficit',
+        title: 'Water Deficit',
+        groups: [
+          {
+            id: 'drought_moisture',
+            title: 'Drought & Moisture Stress',
+            problems: [
+              {
+                id: 'drought_stress',
+                name: 'Drought Stress',
+                image: '/images/problems/wilting.jpg',
+                healthyImage: '/images/problems/all_good.jpg',
+                symptoms: [
+                  'Leaf rolling',
+                  'Wilting',
+                  'Stunted growth',
+                  'Reduced tillering',
+                  'Poor grain filling'
+                ],
+                causes: [
+                  'Low soil moisture',
+                  'Low rainfall',
+                  'Insufficient irrigation',
+                  'High temperature',
+                  'High evaporation'
+                ],
+                treatment: {
+                  primary: [
+                    'Restore soil moisture',
+                    'Prioritize critical growth stages',
+                    'Optimize irrigation'
+                  ],
+                  chemical: [],
+                },
+                fertilizer: {
+                  status: 'Not Primary Treatment',
+                  recommendation: [
+                    'Avoid heavy fertilizer on severely dry soil',
+                    'Reassess nutrients after recovery',
+                    'Use soil-test-based application'
+                  ]
+                },
+                management: [],
+                engineOutput: ['Check soil moisture', 'Check weather data']
+              },
+              {
+                id: 'moisture_stress',
+                name: 'Moisture Stress',
+                image: '/images/problems/wilting.jpg',
+                healthyImage: '/images/problems/all_good.jpg',
+                symptoms: [
+                  'Mild leaf rolling during peak heat',
+                  'Slower growth rate',
+                  'Reduced crop vigor'
+                ],
+                causes: [
+                  'Inadequate irrigation scheduling',
+                  'Uneven field moisture',
+                  'Dry spells'
+                ],
+                treatment: {
+                  primary: [
+                    'Adjust irrigation schedule',
+                    'Ensure even water distribution across field',
+                    'Monitor soil moisture sensors'
+                  ],
+                  chemical: [],
+                },
+                fertilizer: {
+                  status: 'Not Primary Treatment',
+                  recommendation: [
+                    'Do not apply fertilizer to stressed plants without water',
+                    'Ensure moisture is adequate before nutrient application'
+                  ]
+                },
+                management: [],
+                engineOutput: ['Check irrigation logs', 'Check soil moisture sensors']
+              }
+            ]
+          }
+        ]
+      },
+      {
+        id: 'excess_water',
+        title: 'Excess Water',
+        groups: [
+          {
+            id: 'waterlogging_flooding',
+            title: 'Waterlogging & Flooding',
+            problems: [
+              {
+                id: 'waterlogging',
+                name: 'Waterlogging',
+                image: '/images/problems/wilting.jpg',
+                healthyImage: '/images/problems/all_good.jpg',
+                symptoms: [
+                  'Yellowing',
+                  'Stunting',
+                  'Reduced tillering',
+                  'Root damage'
+                ],
+                causes: [
+                  'Excess soil moisture',
+                  'Saturated soil',
+                  'Heavy rainfall',
+                  'Poor drainage'
+                ],
+                treatment: {
+                  primary: [
+                    'Stop excess irrigation',
+                    'Remove standing water',
+                    'Improve drainage'
+                  ],
+                  chemical: [],
+                },
+                fertilizer: {
+                  status: 'Not Primary Treatment',
+                  recommendation: [
+                    'Do not apply automatically during active waterlogging',
+                    'Allow root-zone recovery',
+                    'Reassess nutrients after recovery'
+                  ]
+                },
+                management: [],
+                engineOutput: ['Check soil moisture (saturation)', 'Evaluate field slope']
+              },
+              {
+                id: 'flood_stress',
+                name: 'Flood Stress',
+                image: '/images/problems/wilting.jpg',
+                healthyImage: '/images/problems/all_good.jpg',
+                symptoms: [
+                  'Standing water',
+                  'Lodging',
+                  'Root stress',
+                  'Plant damage'
+                ],
+                causes: [
+                  'Severe rainfall events',
+                  'Overflowing water sources',
+                  'Extreme drainage failure'
+                ],
+                treatment: {
+                  primary: [
+                    'Remove water immediately',
+                    'Assess crop survival',
+                    'Check erosion',
+                    'Monitor for disease'
+                  ],
+                  chemical: [],
+                },
+                fertilizer: {
+                  status: 'Soil Test Required',
+                  recommendation: [
+                    'Do not blindly apply fertilizer',
+                    'Assess nutrient loss (leaching) post-flood',
+                    'Correct after testing'
+                  ]
+                },
+                management: [],
+                engineOutput: ['Evaluate extent of flooding', 'Check weather forecasts']
+              },
+              {
+                id: 'poor_drainage',
+                name: 'Poor Drainage',
+                image: '/images/problems/wilting.jpg',
+                healthyImage: '/images/problems/all_good.jpg',
+                symptoms: [
+                  'Persistent wet spots in field',
+                  'Uneven crop growth',
+                  'Localized yellowing'
+                ],
+                causes: [
+                  'Soil compaction',
+                  'Hardpan',
+                  'Heavy clay soil',
+                  'Poor slope',
+                  'Blocked drainage systems'
+                ],
+                treatment: {
+                  primary: [
+                    'Improve drainage infrastructure',
+                    'Reduce excess irrigation',
+                    'Assess soil compaction',
+                    'Improve root environment'
+                  ],
+                  chemical: [],
+                },
+                fertilizer: {
+                  status: 'Not Primary Treatment',
+                  recommendation: [
+                    'Correct drainage first',
+                    'Then reassess nutrient availability',
+                    'Use soil-test-based correction'
+                  ]
+                },
+                management: [],
+                engineOutput: ['Analyze field topography', 'Review soil compaction data']
+              }
+            ]
+          }
+        ]
+      }
+    ]
   }
 };
