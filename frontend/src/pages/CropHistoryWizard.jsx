@@ -56,10 +56,10 @@ const WIZARD_STEPS = [
     type: 'visual-select',
     askDate: true,
     options: [
-      { id: 'pesticide', label: 'Pesticide / Insecticide', image: '/images/sprays/pesticide.jpg' },
-      { id: 'fungicide', label: 'Fungicide', image: '/images/sprays/fungicide.jpg' },
-      { id: 'herbicide', label: 'Herbicide (Weed Killer)', image: '/images/sprays/herbicide.jpg' },
-      { id: 'none', label: 'None applied', image: '/images/sprays/none.jpg' },
+      { id: 'pesticide', label: 'Pesticide / Insecticide', image: '/images/sprays/pesticide.png' },
+      { id: 'fungicide', label: 'Fungicide', image: '/images/sprays/fungicide.png' },
+      { id: 'herbicide', label: 'Herbicide (Weed Killer)', image: '/images/sprays/herbicide.png' },
+      { id: 'none', label: 'None applied', image: '/images/sprays/none.png' },
     ]
   },
   {
