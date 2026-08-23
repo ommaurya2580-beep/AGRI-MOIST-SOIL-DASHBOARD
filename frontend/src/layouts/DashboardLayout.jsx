@@ -20,9 +20,6 @@ import AgriPulseBot from '../components/AgriPulseBot';
 const navItems = [
   { path: '/dashboard', label: 'Dashboard', icon: Home },
   { path: '/sensors', label: 'Sensors', icon: Cpu },
-  { path: '/soil-npk', label: 'Soil & NPK', icon: Activity },
-  { path: '/fields', label: 'Field Map', icon: Map },
-  { path: '/irrigation', label: 'Irrigation', icon: CloudRain }, // Using CloudRain or similar for now
   { path: '/fertilizer-guide', label: 'Fertilizer Guide', icon: Lightbulb },
   { path: '/weather', label: 'Weather', icon: CloudRain },
   { path: '/reports', label: 'Reports', icon: FileText },
