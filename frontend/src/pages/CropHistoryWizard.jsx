@@ -149,8 +149,8 @@ export default function CropHistoryWizard() {
           className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${idx === currentStepIndex ? 'opacity-100 z-0' : 'opacity-0 z-0 pointer-events-none'}`}
         >
           <img src={s.bgImage} alt={s.title} className="w-full h-full object-cover" />
-          {/* Gradient Overlay for text readability */}
-          <div className="absolute inset-0 bg-gradient-to-t from-slate-950/95 via-slate-900/80 to-slate-950/90" />
+          {/* Gradient Overlay reverted to original transparency */}
+          <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/40 to-slate-900/60" />
         </div>
       ))}
 
@@ -169,13 +169,14 @@ export default function CropHistoryWizard() {
 
       {/* Main Content Area */}
       <div className="relative z-10 flex-1 w-full overflow-y-auto scrollbar-none">
-        <div className="flex flex-col items-center justify-center min-h-full p-6 text-white text-center py-12">
+        <div className="flex flex-col items-center justify-center min-h-full p-6 text-center py-12">
         <div className="w-16 h-16 bg-emerald-500/20 backdrop-blur-md rounded-full flex items-center justify-center mb-6 border border-emerald-400/30">
           <step.icon size={32} className="text-emerald-300" />
         </div>
         
-        <h1 className="text-4xl md:text-5xl font-bold mb-3 drop-shadow-lg">{step.title}</h1>
-        <p className="text-lg md:text-xl text-slate-200 mb-10 max-w-md drop-shadow-md">{step.subtitle}</p>
+        {/* Changed text color and weight for better visibility without darkening whole bg */}
+        <h1 className="text-4xl md:text-5xl font-black mb-3 drop-shadow-xl text-emerald-400">{step.title}</h1>
+        <p className="text-lg md:text-xl font-bold text-slate-100 mb-10 max-w-md drop-shadow-lg">{step.subtitle}</p>
 
         {/* Input Controls */}
         <div className={`w-full transition-all duration-300 ${step.type === 'visual-select' && selections[step.id]?.selectedOption && step.askDate ? 'max-w-4xl' : 'max-w-xl'}`}>
