@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Search, ChevronRight, Bug, Activity, Droplets, ThermometerSun, Sprout, Map } from 'lucide-react';
+import { Search, ChevronRight, Bug, Activity, Droplets, ThermometerSun, Sprout, Map, ShieldAlert } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const SYMPTOM_CARDS = [
@@ -18,6 +18,7 @@ const CATEGORY_CARDS = [
   { id: 'pests', label: 'Insect Pests', icon: Bug, color: 'text-orange-500', bg: 'bg-orange-50' },
   { id: 'nematodes', label: 'Nematodes', icon: Bug, color: 'text-rose-500', bg: 'bg-rose-50' },
   { id: 'nutrient', label: 'Nutrient Deficiency', icon: Sprout, color: 'text-emerald-500', bg: 'bg-emerald-50' },
+  { id: 'toxicity', label: 'Nutrient Toxicity', icon: ShieldAlert, color: 'text-purple-500', bg: 'bg-purple-50' },
   { id: 'water', label: 'Water Problems', icon: Droplets, color: 'text-blue-500', bg: 'bg-blue-50' },
   { id: 'weather', label: 'Weather Stress', icon: ThermometerSun, color: 'text-amber-500', bg: 'bg-amber-50' },
   { id: 'soil', label: 'Soil Problems', icon: Map, color: 'text-stone-500', bg: 'bg-stone-50' },

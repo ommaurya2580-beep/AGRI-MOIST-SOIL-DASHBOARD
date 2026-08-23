@@ -1041,5 +1041,250 @@ export const wheatProblemsDatabase = {
         ]
       }
     ]
+  },
+  toxicity: {
+    id: 'toxicity',
+    title: 'Nutrient Excess / Toxicity',
+    description: 'Over-application of fertilizers or high natural concentrations causing crop damage.',
+    subcategories: [
+      {
+        id: 'nutrient_excess',
+        title: 'Nutrient Excess & Toxicity',
+        groups: [
+          {
+            id: 'macro_micro_excess',
+            title: 'Macronutrient & Micronutrient Excess',
+            problems: [
+              {
+                id: 'nitrogen_excess',
+                name: 'Nitrogen Excess',
+                image: '/images/problems/wilting.jpg',
+                healthyImage: '/images/problems/all_good.jpg',
+                symptoms: [
+                  'Very dark green leaves',
+                  'Excessive vegetative canopy growth',
+                  'Soft and succulent plant tissue',
+                  'Weak stems and increased lodging risk',
+                  'Delayed maturity'
+                ],
+                causes: [
+                  'Excess nitrogen fertilizer application',
+                  'Incorrect fertilizer dose calculation or split application',
+                  'Excessive manure / organic nutrient input',
+                  'Previous nitrogen-rich crop'
+                ],
+                treatment: {
+                  primary: [
+                    'Stop unnecessary nitrogen application',
+                    'Review remaining fertilizer schedule',
+                    'Monitor crop growth, lodging risk, and disease development'
+                  ],
+                  chemical: [],
+                },
+                fertilizer: {
+                  status: 'Not Primary Treatment',
+                  recommendation: [
+                    'Nitrogen fertilizer = HOLD / REDUCE',
+                    'Do not recommend urea or ammonium automatically',
+                    'Recalculate remaining nutrient requirement'
+                  ]
+                },
+                management: [
+                  'Manage irrigation carefully',
+                  'Do not add more nitrogen from image symptoms alone'
+                ],
+                engineOutput: ['Confirm excess probability', 'Check nitrogen application history', 'Decide: HOLD / REDUCE / NORMAL']
+              },
+              {
+                id: 'boron_toxicity',
+                name: 'Boron Toxicity',
+                image: '/images/problems/spots.jpg',
+                healthyImage: '/images/problems/all_good.jpg',
+                symptoms: [
+                  'Leaf tip injury and margin necrosis',
+                  'Yellowing followed by tissue damage',
+                  'Reduced growth'
+                ],
+                causes: [
+                  'Excess boron fertilizer',
+                  'High natural soil boron',
+                  'Boron-rich irrigation water',
+                  'Incorrect micronutrient dosage'
+                ],
+                treatment: {
+                  primary: [
+                    'Stop additional boron application',
+                    'Investigate soil and irrigation water',
+                    'Improve water management where appropriate'
+                  ],
+                  chemical: [],
+                },
+                fertilizer: {
+                  status: 'Not Primary Treatment',
+                  recommendation: [
+                    'Boron fertilizer = STOP',
+                    'Do not apply corrective boron without testing'
+                  ]
+                },
+                management: [
+                  'Warning: Boron has a very narrow safety margin between deficiency and toxicity'
+                ],
+                engineOutput: ['Soil boron', 'Water boron data', 'Fertilizer history']
+              },
+              {
+                id: 'manganese_toxicity',
+                name: 'Manganese Toxicity',
+                image: '/images/problems/spots.jpg',
+                healthyImage: '/images/problems/all_good.jpg',
+                symptoms: [
+                  'Leaf spotting and dark tissue damage',
+                  'Chlorosis in affected tissue',
+                  'Reduced root growth'
+                ],
+                causes: [
+                  'Excess available manganese',
+                  'Strongly acidic soil (Low pH)',
+                  'Waterlogged conditions changing availability',
+                  'Excess manganese fertilizer'
+                ],
+                treatment: {
+                  primary: [
+                    'Stop unnecessary manganese application',
+                    'Improve drainage if required',
+                    'Correct strongly acidic soil'
+                  ],
+                  chemical: [],
+                },
+                fertilizer: {
+                  status: 'Soil Test Required',
+                  recommendation: [
+                    'Manganese fertilizer = HOLD',
+                    'pH correction may be considered after testing'
+                  ]
+                },
+                management: ['Do not alter pH without soil analysis'],
+                engineOutput: ['Manganese toxicity likely', 'Acidic-soil-related availability likely']
+              },
+              {
+                id: 'iron_toxicity',
+                name: 'Iron Toxicity',
+                image: '/images/problems/spots.jpg',
+                healthyImage: '/images/problems/all_good.jpg',
+                symptoms: [
+                  'Bronzing or dark spotting may occur',
+                  'Leaf tissue damage',
+                  'Reduced root performance and plant growth'
+                ],
+                causes: [
+                  'Excess available iron',
+                  'Poor drainage and saturated soil conditions',
+                  'Reduced soil conditions',
+                  'Incorrect micronutrient application'
+                ],
+                treatment: {
+                  primary: [
+                    'Stop unnecessary iron fertilizer',
+                    'Improve drainage where required',
+                    'Reduce prolonged water saturation'
+                  ],
+                  chemical: [],
+                },
+                fertilizer: {
+                  status: 'Not Primary Treatment',
+                  recommendation: [
+                    'Iron fertilizer = HOLD',
+                    'Treat root-zone cause rather than adding fertilizer'
+                  ]
+                },
+                management: ['Investigate root-zone conditions'],
+                engineOutput: ['Soil iron', 'Soil pH', 'Soil moisture', 'Drainage condition']
+              }
+            ]
+          },
+          {
+            id: 'salt_sodium_toxicity',
+            title: 'Salinity & Sodium Toxicity',
+            problems: [
+              {
+                id: 'salinity',
+                name: 'Salinity (High Soluble Salts)',
+                image: '/images/problems/wilting.jpg',
+                healthyImage: '/images/problems/all_good.jpg',
+                symptoms: [
+                  'Poor germination and slow emergence',
+                  'Stunted growth and reduced tillering',
+                  'Leaf tip burn and margin scorch',
+                  'Severe cases may cause plant death'
+                ],
+                causes: [
+                  'High soluble salts in soil',
+                  'Saline irrigation water',
+                  'Excess fertilizer application',
+                  'Poor drainage and high evaporation'
+                ],
+                treatment: {
+                  primary: [
+                    'Avoid unnecessary fertilizer application',
+                    'Improve drainage and manage salt accumulation',
+                    'Review irrigation water quality',
+                    'Follow site-specific leaching requirements'
+                  ],
+                  chemical: [],
+                },
+                fertilizer: {
+                  status: 'Not Primary Treatment',
+                  recommendation: [
+                    'Pause unnecessary fertilizer input',
+                    'Do not apply additional salt-loading fertilizers blindly',
+                    'Base recommendation on soil EC and nutrient need'
+                  ]
+                },
+                management: [
+                  'Test irrigation water',
+                  'Salinity should not automatically be treated as a simple nutrient deficiency'
+                ],
+                engineOutput: ['Soil EC', 'Irrigation water EC', 'Drainage status']
+              },
+              {
+                id: 'sodium_toxicity',
+                name: 'Sodium Toxicity (Sodicity)',
+                image: '/images/problems/wilting.jpg',
+                healthyImage: '/images/problems/all_good.jpg',
+                symptoms: [
+                  'Poor growth and leaf scorch',
+                  'Reduced emergence and poor root development',
+                  'Soil structure deterioration',
+                  'Reduced water infiltration'
+                ],
+                causes: [
+                  'High sodium soil (Sodic soil)',
+                  'Sodium-rich irrigation water',
+                  'Poor drainage and salt accumulation'
+                ],
+                treatment: {
+                  primary: [
+                    'Stop unnecessary sodium input',
+                    'Improve drainage and restore soil structure',
+                    'Assess Calcium amendments (e.g. Gypsum) where analysis supports it',
+                    'Leaching where appropriate'
+                  ],
+                  chemical: [],
+                },
+                fertilizer: {
+                  status: 'Soil Test Required',
+                  recommendation: [
+                    'Do not add unnecessary fertilizer',
+                    'Correct sodium-related soil problem first',
+                    'Reassess nutrient availability after correction'
+                  ]
+                },
+                management: ['Investigate irrigation water quality'],
+                engineOutput: ['Sodicity probability', 'Recommend soil-analysis-based correction']
+              }
+            ]
+          }
+        ]
+      }
+    ]
   }
 };
