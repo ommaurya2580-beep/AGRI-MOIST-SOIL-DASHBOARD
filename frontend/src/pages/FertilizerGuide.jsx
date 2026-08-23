@@ -74,7 +74,7 @@ export default function FertilizerGuide() {
           {SYMPTOM_CARDS.map(symp => (
             <div 
               key={symp.id}
-              onClick={() => console.log('Navigate to symptom:', symp.id)}
+              onClick={() => navigate(`/fertilizer-guide`)}
               className={`cursor-pointer flex flex-col items-center justify-center p-6 rounded-2xl border-2 transition-all transform hover:-translate-y-1 bg-white shadow-sm hover:shadow-md ${symp.color}`}
             >
               <span className="text-5xl mb-4 drop-shadow-sm">{symp.emoji}</span>
@@ -96,7 +96,7 @@ export default function FertilizerGuide() {
           {CATEGORY_CARDS.map(cat => (
             <div 
               key={cat.id}
-              onClick={() => console.log('Navigate to category:', cat.id)}
+              onClick={() => navigate(`/fertilizer-guide/category/${cat.id}`)}
               className="cursor-pointer group flex items-center gap-4 p-5 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-lg transition-all"
             >
               <div className={`w-14 h-14 rounded-xl flex items-center justify-center ${cat.bg} group-hover:scale-110 transition-transform`}>

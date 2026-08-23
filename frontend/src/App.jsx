@@ -10,6 +10,9 @@ import Sensors from './pages/Sensors';
 import ESP32Connect from './pages/ESP32Connect';
 import FertilizerGuide from './pages/FertilizerGuide';
 
+import ProblemCategory from './pages/ProblemCategory';
+import ProblemDetail from './pages/ProblemDetail';
+
 // Legacy components mapped to new routes for now
 import PestDetection from './components/PestDetection';
 import CropAnalysis from './components/CropAnalysis';
@@ -29,7 +32,13 @@ function App() {
         <Route element={<DashboardLayout />}>
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="fields" element={<div className="p-4">Fields Map (Under Construction)</div>} />
-          <Route path="fertilizer-guide" element={<FertilizerGuide />} />
+          
+          <Route path="fertilizer-guide">
+            <Route index element={<FertilizerGuide />} />
+            <Route path="category/:categoryId" element={<ProblemCategory />} />
+            <Route path="problem/:problemId" element={<ProblemDetail />} />
+          </Route>
+          
           <Route path="irrigation" element={<div className="p-4">Irrigation (Under Construction)</div>} />
           <Route path="monitoring" element={<Monitoring />} />
           <Route path="sensors" element={<Sensors />} />
