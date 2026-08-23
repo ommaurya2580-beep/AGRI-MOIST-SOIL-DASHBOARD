@@ -11,7 +11,7 @@ const WIZARD_STEPS = [
     bgImage: '/images/stages/tillering.jpg',
     icon: Leaf,
     type: 'visual-select',
-    askDate: true,
+    askDate: false,
     options: [
       { id: 'seedling', label: 'Seedling', image: '/images/stages/seedling.jpg' },
       { id: 'tillering', label: 'Tillering', image: '/images/stages/tillering.jpg' },
@@ -66,15 +66,15 @@ const WIZARD_STEPS = [
     id: 'weather',
     title: 'Recent Weather Experience',
     subtitle: 'How was the weather in your field last week?',
-    bgImage: '/images/stages/tillering.jpg',
+    bgImage: '/images/weather/weather_bg.jpg',
     icon: ThermometerSun,
     type: 'visual-select',
-    askDate: true,
+    askDate: false,
     options: [
-      { id: 'hot', label: 'Very Hot & Dry', image: '/images/weather/hot.jpg' },
-      { id: 'rain', label: 'Heavy Rain', image: '/images/weather/rain.jpg' },
-      { id: 'wind', label: 'Strong Winds', image: '/images/weather/wind.jpg' },
-      { id: 'normal', label: 'Normal / Good', image: '/images/weather/normal.jpg' },
+      { id: 'hot', label: 'Very Hot & Dry', image: '/images/weather/hot.png' },
+      { id: 'rain', label: 'Heavy Rain', image: '/images/weather/rain.png' },
+      { id: 'wind', label: 'Strong Winds', image: '/images/weather/wind.png' },
+      { id: 'normal', label: 'Normal / Good', image: '/images/weather/normal.png' },
     ]
   },
   {
@@ -150,7 +150,7 @@ export default function CropHistoryWizard() {
         >
           <img src={s.bgImage} alt={s.title} className="w-full h-full object-cover" />
           {/* Gradient Overlay for text readability */}
-          <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/40 to-slate-900/60" />
+          <div className="absolute inset-0 bg-gradient-to-t from-slate-950/95 via-slate-900/80 to-slate-950/90" />
         </div>
       ))}
 
