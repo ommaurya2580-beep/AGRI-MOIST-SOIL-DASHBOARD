@@ -1723,5 +1723,322 @@ export const wheatProblemsDatabase = {
         ]
       }
     ]
+  },
+  soil: {
+    id: 'soil',
+    title: 'Soil Problems',
+    description: 'Physical, chemical, and root environment issues that restrict plant growth and nutrient uptake.',
+    subcategories: [
+      {
+        id: 'physical_problems',
+        title: 'Physical Problems',
+        groups: [
+          {
+            id: 'compaction_group',
+            title: 'Soil Compaction & Hardpan',
+            problems: [
+              {
+                id: 'soil_compaction',
+                name: 'Soil Compaction',
+                image: '/images/problems/wilting.jpg',
+                healthyImage: '/images/problems/all_good.jpg',
+                symptoms: [
+                  'Stunted plant growth',
+                  'Shallow or horizontal root growth',
+                  'Poor water infiltration'
+                ],
+                causes: [
+                  'Heavy machinery traffic (especially on wet soil)',
+                  'Lack of deep-rooted cover crops'
+                ],
+                treatment: {
+                  primary: [
+                    'Perform penetrometer test to identify compaction severity',
+                    'Implement deep tillage / subsoiling where appropriate',
+                    'Incorporate cover crops with deep taproots'
+                  ],
+                  chemical: [],
+                },
+                fertilizer: {
+                  status: 'Not Primary Treatment',
+                  recommendation: [
+                    'Do not apply extra fertilizer expecting to fix compaction',
+                    'Address soil structure first before increasing nutrient load'
+                  ]
+                },
+                management: [],
+                engineOutput: ['Check field traffic history', 'Soil penetrometer data']
+              },
+              {
+                id: 'hardpan',
+                name: 'Hardpan',
+                image: '/images/problems/wilting.jpg',
+                healthyImage: '/images/problems/all_good.jpg',
+                symptoms: [
+                  'Roots turning 90 degrees at a specific depth',
+                  'Water pooling on the surface',
+                  'Early drought stress'
+                ],
+                causes: [
+                  'Repeated plowing at the same depth',
+                  'Natural clay accumulation'
+                ],
+                treatment: {
+                  primary: [
+                    'Identify depth of hardpan',
+                    'Subsoiling below the pan depth'
+                  ],
+                  chemical: [],
+                },
+                fertilizer: {
+                  status: 'Soil Test Required',
+                  recommendation: [
+                    'Adjust nutrient placement (banding below or above pan if unbroken)',
+                    'Long-term fix requires mechanical breakage'
+                  ]
+                },
+                management: [],
+                engineOutput: ['Soil depth analysis']
+              },
+              {
+                id: 'poor_root_penetration',
+                name: 'Poor Root Penetration',
+                image: '/images/problems/wilting.jpg',
+                healthyImage: '/images/problems/all_good.jpg',
+                symptoms: [
+                  'Easily pulled plants',
+                  'Nutrient deficiency symptoms despite fertilization'
+                ],
+                causes: [
+                  'Compaction',
+                  'High EC (salts)',
+                  'Extreme pH'
+                ],
+                treatment: {
+                  primary: [
+                    'Identify root cause (pH, EC, moisture, or compaction)',
+                    'Treat specific soil constraint'
+                  ],
+                  chemical: [],
+                },
+                fertilizer: {
+                  status: 'Not Primary Treatment',
+                  recommendation: [
+                    'Reassess nutrients only after soil constraint is removed'
+                  ]
+                },
+                management: [],
+                engineOutput: ['pH Check', 'EC Check', 'Moisture Check']
+              }
+            ]
+          }
+        ]
+      },
+      {
+        id: 'chemical_problems',
+        title: 'Chemical Problems',
+        groups: [
+          {
+            id: 'ph_salinity_group',
+            title: 'pH, Salinity & Sodicity',
+            problems: [
+              {
+                id: 'low_ph',
+                name: 'Low pH / Acidity',
+                image: '/images/problems/spots.jpg',
+                healthyImage: '/images/problems/all_good.jpg',
+                symptoms: [
+                  'Stunted roots (often club-like due to Aluminum toxicity)',
+                  'Poor overall growth',
+                  'Deficiencies in Phosphorus, Calcium, or Magnesium'
+                ],
+                causes: [
+                  'Natural soil weathering',
+                  'Long-term use of ammonium-based fertilizers'
+                ],
+                treatment: {
+                  primary: [
+                    'Apply Agricultural Lime based on soil buffer pH test',
+                    'Monitor Aluminum risk'
+                  ],
+                  chemical: [],
+                },
+                fertilizer: {
+                  status: 'Recommended',
+                  recommendation: [
+                    'Support with Phosphorus (often tied up in acid soils)',
+                    'Avoid further acidifying fertilizers until pH is corrected'
+                  ]
+                },
+                management: [],
+                engineOutput: ['Soil pH data', 'Buffer pH test']
+              },
+              {
+                id: 'high_ph',
+                name: 'High pH / Alkalinity',
+                image: '/images/problems/yellow.jpg',
+                healthyImage: '/images/problems/all_good.jpg',
+                symptoms: [
+                  'Interveinal chlorosis (Iron/Zinc deficiency)',
+                  'Poor early vigor'
+                ],
+                causes: [
+                  'Calcareous soils',
+                  'High bicarbonates in irrigation water'
+                ],
+                treatment: {
+                  primary: [
+                    'Monitor micronutrient risks',
+                    'Use acidifying amendments (elemental sulfur) if economically viable'
+                  ],
+                  chemical: [],
+                },
+                fertilizer: {
+                  status: 'Soil Test Required',
+                  recommendation: [
+                    'Use chelated micronutrients (e.g. EDDHA Iron)',
+                    'Banding Phosphorus instead of broadcasting'
+                  ]
+                },
+                management: [],
+                engineOutput: ['Soil pH Confirmation']
+              },
+              {
+                id: 'soil_salinity',
+                name: 'Salinity (Soil EC)',
+                image: '/images/problems/wilting.jpg',
+                healthyImage: '/images/problems/all_good.jpg',
+                symptoms: [
+                  'Leaf margin scorch',
+                  'Poor germination',
+                  'White crust on soil surface'
+                ],
+                causes: [
+                  'High evaporation',
+                  'Saline irrigation water',
+                  'Poor drainage'
+                ],
+                treatment: {
+                  primary: [
+                    'Improve drainage',
+                    'Leach salts with high-quality water'
+                  ],
+                  chemical: [],
+                },
+                fertilizer: {
+                  status: 'Not Primary Treatment',
+                  recommendation: [
+                    'Manage fertilizer salt load (avoid high-salt index fertilizers)',
+                    'Only apply nutrients if soil test indicates deficiency'
+                  ]
+                },
+                management: [],
+                engineOutput: ['EC Testing', 'Irrigation Water Check']
+              },
+              {
+                id: 'soil_sodicity',
+                name: 'Sodicity (High Sodium)',
+                image: '/images/problems/wilting.jpg',
+                healthyImage: '/images/problems/all_good.jpg',
+                symptoms: [
+                  'Poor soil structure (crusting/sealing)',
+                  'Water logging due to zero infiltration'
+                ],
+                causes: [
+                  'High Exchangeable Sodium Percentage (ESP)'
+                ],
+                treatment: {
+                  primary: [
+                    'Evaluate and apply Gypsum',
+                    'Improve drainage and water management'
+                  ],
+                  chemical: [],
+                },
+                fertilizer: {
+                  status: 'Not Primary Treatment',
+                  recommendation: [
+                    'Fertilizer will not fix sodicity',
+                    'Address structure with calcium amendments first'
+                  ]
+                },
+                management: [],
+                engineOutput: ['Sodium Status (ESP)', 'Soil Structure Analysis']
+              }
+            ]
+          }
+        ]
+      },
+      {
+        id: 'root_environment',
+        title: 'Root Environment',
+        groups: [
+          {
+            id: 'aeration_group',
+            title: 'Aeration & Oxygen',
+            problems: [
+              {
+                id: 'poor_aeration',
+                name: 'Poor Aeration',
+                image: '/images/problems/wilting.jpg',
+                healthyImage: '/images/problems/all_good.jpg',
+                symptoms: [
+                  'Yellowing plants',
+                  'Shallow rooting'
+                ],
+                causes: [
+                  'Compaction',
+                  'High clay content without structure',
+                  'Excessive root-zone moisture'
+                ],
+                treatment: {
+                  primary: [
+                    'Improve drainage',
+                    'Alleviate compaction'
+                  ],
+                  chemical: [],
+                },
+                fertilizer: {
+                  status: 'Not Primary Treatment',
+                  recommendation: [
+                    'Reassess nutrients only after oxygen flow is restored'
+                  ]
+                },
+                management: [],
+                engineOutput: ['Root-Zone Moisture', 'Compaction Assessment']
+              },
+              {
+                id: 'low_root_oxygen',
+                name: 'Low Root Oxygen',
+                image: '/images/problems/yellow.jpg',
+                healthyImage: '/images/problems/all_good.jpg',
+                symptoms: [
+                  'Nitrogen deficiency symptoms (yellowing) despite N application',
+                  'Denitrification losses'
+                ],
+                causes: [
+                  'Prolonged saturation / flooding'
+                ],
+                treatment: {
+                  primary: [
+                    'Drainage action (remove excess water)',
+                    'Check for root damage risk and monitor recovery'
+                  ],
+                  chemical: [],
+                },
+                fertilizer: {
+                  status: 'Not Primary Treatment',
+                  recommendation: [
+                    'Do not confuse with simple Nitrogen deficiency; adding N to waterlogged soil causes loss',
+                    'Apply foliar nutrients if rescue is needed, but fix water first'
+                  ]
+                },
+                management: [],
+                engineOutput: ['Excess Water Detection']
+              }
+            ]
+          }
+        ]
+      }
+    ]
   }
 };
