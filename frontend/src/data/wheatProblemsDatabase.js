@@ -2040,5 +2040,221 @@ export const wheatProblemsDatabase = {
         ]
       }
     ]
+  },
+  chemical_damage: {
+    id: 'chemical_damage',
+    title: 'Chemical / Management Damage',
+    description: 'Crop injury caused by improper application of herbicides, pesticides, or fertilizers.',
+    subcategories: [
+      {
+        id: 'herbicide_pesticide',
+        title: 'Herbicide & Pesticide Injury',
+        groups: [
+          {
+            id: 'herbicide_group',
+            title: 'Herbicide Issues',
+            problems: [
+              {
+                id: 'herbicide_injury',
+                name: 'Herbicide Injury',
+                image: '/images/problems/wilting.jpg',
+                healthyImage: '/images/problems/all_good.jpg',
+                symptoms: [
+                  'Yellowing or Chlorosis',
+                  'Leaf twisting and curling',
+                  'Stunted growth',
+                  'Burned leaf margins',
+                  'Poor tillering'
+                ],
+                causes: [
+                  'Wrong herbicide selection or excess rate',
+                  'Wrong crop growth stage or spray timing',
+                  'Temperature or water stress during application',
+                  'Chemical interaction'
+                ],
+                treatment: {
+                  primary: [
+                    'Stop further application',
+                    'Do not apply corrective chemicals immediately',
+                    'Reduce additional plant stress and maintain proper soil moisture'
+                  ],
+                  chemical: [],
+                },
+                fertilizer: {
+                  status: 'Not Primary Treatment',
+                  recommendation: [
+                    'Do not automatically apply fertilizer',
+                    'Avoid high-rate nitrogen during severe stress',
+                    'Correct nutrients only when confirmed deficient by a soil test'
+                  ]
+                },
+                management: [],
+                engineOutput: ['Check application history', 'Check field pattern', 'Compare symptoms with nutrient deficiency']
+              },
+              {
+                id: 'herbicide_drift',
+                name: 'Herbicide Drift',
+                image: '/images/problems/spots.jpg',
+                healthyImage: '/images/problems/all_good.jpg',
+                symptoms: [
+                  'Field-edge damage with directional injury pattern',
+                  'Leaf distortion, twisting, or cupping',
+                  'Uneven chlorosis and growth suppression',
+                  'Patchy plant death'
+                ],
+                causes: [
+                  'Wind during spraying',
+                  'Small spray droplets or high spray boom',
+                  'Temperature inversion or volatilization',
+                  'Nearby herbicide application'
+                ],
+                treatment: {
+                  primary: [
+                    'Stop exposure source',
+                    'Avoid additional chemical stress',
+                    'Evaluate crop stand before replanting decisions'
+                  ],
+                  chemical: [],
+                },
+                fertilizer: {
+                  status: 'Not Primary Treatment',
+                  recommendation: [
+                    'No automatic fertilizer recommendation',
+                    'Avoid fertilizer as a substitute for drift diagnosis'
+                  ]
+                },
+                management: [],
+                engineOutput: ['Damage concentrated on one side', 'Wind direction matches damage pattern']
+              }
+            ]
+          },
+          {
+            id: 'pesticide_group',
+            title: 'Pesticide Injury',
+            problems: [
+              {
+                id: 'pesticide_injury',
+                name: 'Pesticide Injury',
+                image: '/images/problems/spots.jpg',
+                healthyImage: '/images/problems/all_good.jpg',
+                symptoms: [
+                  'Leaf burn',
+                  'Chlorosis or necrosis',
+                  'Leaf spotting',
+                  'Wilting and stunted growth'
+                ],
+                causes: [
+                  'Incorrect product or excess concentration',
+                  'Incorrect tank mixing',
+                  'Application under crop stress or high temperature',
+                  'Poor spray-water quality'
+                ],
+                treatment: {
+                  primary: [
+                    'Stop suspected product',
+                    'Check label compatibility and mixing records',
+                    'Avoid repeated stress treatments'
+                  ],
+                  chemical: [],
+                },
+                fertilizer: {
+                  status: 'Not Primary Treatment',
+                  recommendation: [
+                    'Do not apply fertilizer immediately for visual recovery',
+                    'Test soil before correction'
+                  ]
+                },
+                management: [],
+                engineOutput: ['Check mixing records', 'Check weather data during spray']
+              }
+            ]
+          }
+        ]
+      },
+      {
+        id: 'fertilizer_issues',
+        title: 'Fertilizer Mismanagement',
+        groups: [
+          {
+            id: 'fert_burn_group',
+            title: 'Fertilizer Burn & Excess',
+            problems: [
+              {
+                id: 'fertilizer_burn',
+                name: 'Fertilizer Burn',
+                image: '/images/problems/wilting.jpg',
+                healthyImage: '/images/problems/all_good.jpg',
+                symptoms: [
+                  'Leaf tip burn and margin scorch',
+                  'Wilting and brown tissue',
+                  'Root damage',
+                  'Poor emergence or plant death'
+                ],
+                causes: [
+                  'Excess fertilizer concentration',
+                  'Fertilizer placed too close to seed or roots',
+                  'High nitrogen concentration and salt accumulation',
+                  'Dry soil during application'
+                ],
+                treatment: {
+                  primary: [
+                    'Stop further fertilizer application',
+                    'Use appropriate irrigation only when drainage allows',
+                    'Reassess crop survival'
+                  ],
+                  chemical: [],
+                },
+                fertilizer: {
+                  status: 'Not Primary Treatment',
+                  recommendation: [
+                    'DO NOT add more fertilizer',
+                    'Suspend nutrient recommendation',
+                    'Resume only after soil/crop assessment'
+                  ]
+                },
+                management: [],
+                engineOutput: ['Check EC and soil moisture', 'Check fertilizer history']
+              },
+              {
+                id: 'over_fertilization',
+                name: 'Over-Fertilization',
+                image: '/images/problems/yellow.jpg',
+                healthyImage: '/images/problems/all_good.jpg',
+                symptoms: [
+                  'Excessive vegetative growth and dark green foliage',
+                  'Soft plant growth',
+                  'Lodging risk',
+                  'Salt stress and nutrient imbalance',
+                  'Micronutrient uptake problems'
+                ],
+                causes: [
+                  'Excess nitrogen, phosphorus, or potassium',
+                  'Incorrect dose calculation or repeated application',
+                  'No soil test'
+                ],
+                treatment: {
+                  primary: [
+                    'Stop additional fertilizer',
+                    'Identify excessive nutrient',
+                    'Correct irrigation where appropriate and monitor salinity'
+                  ],
+                  chemical: [],
+                },
+                fertilizer: {
+                  status: 'Not Primary Treatment',
+                  recommendation: [
+                    '"NO ADDITIONAL FERTILIZER" alert',
+                    'Avoid unnecessary foliar feeding',
+                    'Use future nutrient applications only after assessment'
+                  ]
+                },
+                management: [],
+                engineOutput: ['Identify probable excess nutrient', 'Check soil EC']
+              }
+            ]
+          }
+        ]
+      }
+    ]
   }
 };
