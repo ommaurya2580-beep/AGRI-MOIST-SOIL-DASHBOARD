@@ -23,7 +23,7 @@ const WIZARD_STEPS = [
     id: 'irrigation',
     title: 'Last Irrigation',
     subtitle: 'When was the field last watered?',
-    bgImage: '/images/sprays/none.png',
+    bgImage: '/images/sprays/none.jpg',
     icon: Droplets,
     type: 'date-select',
     options: ['Today', 'Yesterday', '3 Days Ago', '1 Week Ago', 'More than 2 weeks']
@@ -51,15 +51,15 @@ const WIZARD_STEPS = [
     id: 'spray',
     title: 'Crop Protection',
     subtitle: 'Did you spray any chemicals recently?',
-    bgImage: '/images/sprays/none.png',
+    bgImage: '/images/sprays/none.jpg',
     icon: Spray,
     type: 'visual-select',
     askDate: true,
     options: [
-      { id: 'pesticide', label: 'Pesticide / Insecticide', image: '/images/sprays/pesticide.png' },
-      { id: 'fungicide', label: 'Fungicide', image: '/images/sprays/fungicide.png' },
-      { id: 'herbicide', label: 'Herbicide (Weed Killer)', image: '/images/sprays/herbicide.png' },
-      { id: 'none', label: 'None applied', image: '/images/sprays/none.png' },
+      { id: 'pesticide', label: 'Pesticide / Insecticide', image: '/images/sprays/pesticide.jpg' },
+      { id: 'fungicide', label: 'Fungicide', image: '/images/sprays/fungicide.jpg' },
+      { id: 'herbicide', label: 'Herbicide (Weed Killer)', image: '/images/sprays/herbicide.jpg' },
+      { id: 'none', label: 'None applied', image: '/images/sprays/none.jpg' },
     ]
   },
   {
@@ -71,10 +71,10 @@ const WIZARD_STEPS = [
     type: 'visual-select',
     askDate: false,
     options: [
-      { id: 'hot', label: 'Very Hot & Dry', image: '/images/weather/hot.png' },
-      { id: 'rain', label: 'Heavy Rain', image: '/images/weather/rain.png' },
-      { id: 'wind', label: 'Strong Winds', image: '/images/weather/wind.png' },
-      { id: 'normal', label: 'Normal / Good', image: '/images/weather/normal.png' },
+      { id: 'hot', label: 'Very Hot & Dry', image: '/images/weather/hot.jpg' },
+      { id: 'rain', label: 'Heavy Rain', image: '/images/weather/rain.jpg' },
+      { id: 'wind', label: 'Strong Winds', image: '/images/weather/wind.jpg' },
+      { id: 'normal', label: 'Normal / Good', image: '/images/weather/normal.jpg' },
     ]
   },
   {
