@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Search, ChevronRight, Bug, Activity, Droplets, ThermometerSun, Sprout, Map, ShieldAlert, FlaskConical, Leaf } from 'lucide-react';
+import { Search, ChevronRight, Bug, Activity, Droplets, ThermometerSun, Sprout, Map, ShieldAlert, FlaskConical, Leaf, TrendingUp } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const SYMPTOM_CARDS = [
@@ -24,6 +24,7 @@ const CATEGORY_CARDS = [
   { id: 'soil', label: 'Soil Problems', icon: Map, color: 'text-stone-500', bg: 'bg-stone-50' },
   { id: 'chemical_damage', label: 'Chemical Damage', icon: FlaskConical, color: 'text-pink-500', bg: 'bg-pink-50' },
   { id: 'physiological', label: 'Physiological', icon: Leaf, color: 'text-lime-500', bg: 'bg-lime-50' },
+  { id: 'growth_problems', label: 'Growth & Development', icon: TrendingUp, color: 'text-teal-500', bg: 'bg-teal-50' },
 ];
 
 export default function FertilizerGuide() {

@@ -2499,5 +2499,254 @@ export const wheatProblemsDatabase = {
         ]
       }
     ]
+  },
+  growth_problems: {
+    id: 'growth_problems',
+    title: 'Growth & Development Problems',
+    description: 'Issues affecting germination, emergence, tillering, heading, flowering, and grain fill.',
+    subcategories: [
+      {
+        id: 'early_growth',
+        title: 'Early Stage Problems',
+        groups: [
+          {
+            id: 'germination_emergence',
+            title: 'Germination & Emergence',
+            problems: [
+              {
+                id: 'poor_germination',
+                name: 'Poor Germination',
+                image: '/images/problems/wilting.jpg',
+                healthyImage: '/images/problems/all_good.jpg',
+                symptoms: [
+                  'Low emergence percentage',
+                  'Delayed emergence',
+                  'Missing seedlings or weak plants'
+                ],
+                causes: [
+                  'Poor seed quality or low viability',
+                  'Incorrect planting depth',
+                  'Low or excess soil moisture',
+                  'Temperature extremes or Soil crusting',
+                  'Salinity, seed-borne disease, or chemical injury'
+                ],
+                treatment: {
+                  primary: [
+                    'Improve moisture management or drainage depending on cause',
+                    'Use quality-tested seed for future planting',
+                    'Evaluate replanting based on crop stage and plant population'
+                  ],
+                  chemical: [],
+                },
+                fertilizer: {
+                  status: 'Not Primary Treatment',
+                  recommendation: [
+                    'Poor germination does not automatically require fertilizer'
+                  ]
+                },
+                management: [],
+                engineOutput: ['Check seed quality records', 'Check soil moisture/temperature', 'Check planting depth']
+              },
+              {
+                id: 'uneven_emergence',
+                name: 'Uneven Emergence',
+                image: '/images/problems/wilting.jpg',
+                healthyImage: '/images/problems/all_good.jpg',
+                symptoms: [
+                  'Plants emerge at different times',
+                  'Uneven plant height',
+                  'Patchy field appearance',
+                  'Variable seedling size'
+                ],
+                causes: [
+                  'Uneven planting depth',
+                  'Uneven soil moisture or seed-soil contact',
+                  'Soil compaction or crusting',
+                  'Uneven residue distribution',
+                  'Pest damage or seedling disease'
+                ],
+                treatment: {
+                  primary: [
+                    'Improve field uniformity and moisture imbalance',
+                    'Reduce soil compaction',
+                    'Improve future planting operation'
+                  ],
+                  chemical: [],
+                },
+                fertilizer: {
+                  status: 'Diagnosis Required',
+                  recommendation: [
+                    'Correct confirmed nutrient deficiency only',
+                    'Patchy emergence must not be classified directly as nutrient deficiency'
+                  ]
+                },
+                management: [],
+                engineOutput: ['Check planting depth variation', 'Check soil moisture variation']
+              }
+            ]
+          }
+        ]
+      },
+      {
+        id: 'mid_late_growth',
+        title: 'Mid to Late Stage Problems',
+        groups: [
+          {
+            id: 'tillering_heading',
+            title: 'Tillering & Heading',
+            problems: [
+              {
+                id: 'poor_tillering',
+                name: 'Poor Tillering',
+                image: '/images/problems/wilting.jpg',
+                healthyImage: '/images/problems/all_good.jpg',
+                symptoms: [
+                  'Low tiller number',
+                  'Weak tillers',
+                  'Sparse crop canopy',
+                  'Uneven tillering'
+                ],
+                causes: [
+                  'Nitrogen or Phosphorus deficiency',
+                  'Poor establishment, water stress, or drought',
+                  'Waterlogging or low temperature stress',
+                  'High plant density or soil compaction',
+                  'Root disease or insect damage'
+                ],
+                treatment: {
+                  primary: [
+                    'Investigate establishment cause',
+                    'Correct irrigation problem if moisture stress',
+                    'Move to root disease management if applicable'
+                  ],
+                  chemical: [],
+                },
+                fertilizer: {
+                  status: 'Diagnosis Required',
+                  recommendation: [
+                    'If Nitrogen deficiency confirmed -> Recommend N according to soil and crop-stage guidance',
+                    'If Phosphorus deficiency confirmed -> Correct based on soil-test guidance',
+                    'Nitrogen should be recommended only after considering crop stage + plant population + nutrient status'
+                  ]
+                },
+                management: [],
+                engineOutput: ['Analyze tiller count', 'Check soil nitrogen/phosphorus status']
+              },
+              {
+                id: 'poor_heading',
+                name: 'Poor Heading',
+                image: '/images/problems/spots.jpg',
+                healthyImage: '/images/problems/all_good.jpg',
+                symptoms: [
+                  'Delayed head emergence',
+                  'Partial heading',
+                  'Reduced number of heads',
+                  'Poorly developed or uneven heads'
+                ],
+                causes: [
+                  'Heat stress, cold stress, or frost damage',
+                  'Severe drought or nutrient stress',
+                  'Root disease, severe pest pressure, or herbicide injury',
+                  'Variety / environmental mismatch'
+                ],
+                treatment: {
+                  primary: [
+                    'Prioritize stress management for environmental issues',
+                    'Use respective management module for disease/pest damage'
+                  ],
+                  chemical: [],
+                },
+                fertilizer: {
+                  status: 'Diagnosis Required',
+                  recommendation: [
+                    'If nutrient deficiency confirmed -> Provide stage-appropriate nutrient correction',
+                    'Avoid unnecessary late fertilizer application if crop stage is advanced'
+                  ]
+                },
+                management: [],
+                engineOutput: ['Heading problem requires crop-stage-aware diagnosis', 'Check temperature history']
+              }
+            ]
+          },
+          {
+            id: 'flowering_grain_fill',
+            title: 'Flowering & Grain Filling',
+            problems: [
+              {
+                id: 'poor_flowering',
+                name: 'Poor Flowering',
+                image: '/images/problems/spots.jpg',
+                healthyImage: '/images/problems/all_good.jpg',
+                symptoms: [
+                  'Reduced reproductive development',
+                  'Poor spike fertility and sterile florets',
+                  'Reduced grain set and poor yield potential'
+                ],
+                causes: [
+                  'Heat stress, frost stress, or severe drought',
+                  'Nutrient imbalance (e.g., Boron, Zinc)',
+                  'Disease stress or pest damage',
+                  'Adverse weather during reproductive development'
+                ],
+                treatment: {
+                  primary: [
+                    'Focus on stress mitigation for heat/frost',
+                    'Use specific treatment pathway for disease/pest',
+                    'Protect remaining yield potential'
+                  ],
+                  chemical: [],
+                },
+                fertilizer: {
+                  status: 'Diagnosis Required',
+                  recommendation: [
+                    'If nutrient deficiency confirmed -> Apply scientifically appropriate correction',
+                    'If irreversible reproductive damage -> Do not recommend unnecessary fertilizer'
+                  ]
+                },
+                management: [],
+                engineOutput: ['Check crop growth stage', 'Check temperature conditions']
+              },
+              {
+                id: 'poor_grain_filling',
+                name: 'Poor Grain Filling',
+                image: '/images/problems/yellow.jpg',
+                healthyImage: '/images/problems/all_good.jpg',
+                symptoms: [
+                  'Small or shriveled grains',
+                  'Low grain weight',
+                  'Poor grain development',
+                  'Reduced grain filling duration and yield'
+                ],
+                causes: [
+                  'Terminal heat stress or drought stress',
+                  'Water shortage or premature senescence',
+                  'Nitrogen or Potassium deficiency',
+                  'Severe disease, pest damage, root damage, or salinity'
+                ],
+                treatment: {
+                  primary: [
+                    'Maintain suitable soil moisture and reduce avoidable water stress',
+                    'Protect healthy green leaf area',
+                    'Manage confirmed disease/pest problems'
+                  ],
+                  chemical: [],
+                },
+                fertilizer: {
+                  status: 'Diagnosis Required',
+                  recommendation: [
+                    'Nitrogen only if deficiency and crop stage justify correction',
+                    'Potassium only if deficiency is confirmed',
+                    'Avoid excessive late nitrogen',
+                    'Do not recommend fertilizer after irreversible damage'
+                  ]
+                },
+                management: [],
+                engineOutput: ['Estimate recoverability', 'Check moisture and temperature']
+              }
+            ]
+          }
+        ]
+      }
+    ]
   }
 };
