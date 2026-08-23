@@ -92,6 +92,14 @@ const WIZARD_STEPS = [
       { id: 'wilting', label: 'Wilting / Drying', image: '/images/problems/wilting.jpg' },
       { id: 'all_good', label: 'Healthy (No issues)', image: '/images/problems/all_good.jpg' },
     ]
+  },
+  {
+    id: 'summary',
+    title: 'Review Your Farm Profile',
+    subtitle: 'Please review the information you provided.',
+    bgImage: '/images/weather/weather_bg.jpg',
+    icon: CheckCircle2,
+    type: 'summary',
   }
 ];
 
@@ -125,6 +133,8 @@ export default function CropHistoryWizard() {
   };
 
   const isStepValid = () => {
+    if (step.type === 'summary') return true;
+    
     const sel = selections[step.id];
     if (!sel) return false;
     
@@ -137,6 +147,12 @@ export default function CropHistoryWizard() {
       return true;
     }
     return true; // For date-select
+  };
+
+  const getLabelForOption = (step, optionId) => {
+    if (!step.options || !Array.isArray(step.options)) return optionId;
+    const opt = step.options.find(o => o.id === optionId);
+    return opt ? opt.label : optionId;
   };
 
   return (
@@ -210,7 +226,7 @@ export default function CropHistoryWizard() {
                       ) : (
                         <span className="text-4xl">{opt.emoji}</span>
                       )}
-                      <span className="font-semibold text-white tracking-wide text-sm text-center">{opt.label}</span>
+                      <span className="font-bold text-white tracking-wide text-sm text-center drop-shadow-md">{opt.label}</span>
                     </div>
                   );
                 })}
@@ -222,11 +238,11 @@ export default function CropHistoryWizard() {
                   
                   {step.hasOther && selections[step.id]?.selectedOption === 'other' && (
                     <div>
-                      <p className="text-sm text-slate-300 font-semibold mb-2 text-left">Type Name:</p>
+                      <p className="text-sm text-slate-100 font-bold mb-2 text-left">Type Name:</p>
                       <input 
                         type="text" 
                         placeholder="e.g. Calcium Nitrate"
-                        className="w-full bg-slate-800/50 border border-white/20 rounded-xl p-3 text-white outline-none focus:border-emerald-400 transition-colors"
+                        className="w-full bg-slate-800/80 border border-white/30 rounded-xl p-3 text-white placeholder-slate-400 outline-none focus:border-emerald-400 transition-colors"
                         value={selections[step.id]?.otherName || ''}
                         onChange={(e) => setSelections({ ...selections, [step.id]: { ...selections[step.id], otherName: e.target.value } })}
                       />
@@ -234,7 +250,7 @@ export default function CropHistoryWizard() {
                   )}
 
                   <div>
-                    <p className="text-sm text-slate-300 font-semibold mb-2 text-left flex items-center gap-2">
+                    <p className="text-sm text-slate-100 font-bold mb-2 text-left flex items-center gap-2">
                       <CalIcon size={16} className="text-emerald-400" /> Date (or Quick Select):
                     </p>
                     
@@ -244,10 +260,10 @@ export default function CropHistoryWizard() {
                         <div 
                           key={qDate}
                           onClick={() => setSelections({ ...selections, [step.id]: { ...selections[step.id], approxDate: qDate } })}
-                          className={`cursor-pointer text-xs font-semibold py-2 px-1 text-center rounded-lg border transition-all ${
+                          className={`cursor-pointer text-xs font-bold py-2 px-1 text-center rounded-lg border transition-all ${
                             selections[step.id]?.approxDate === qDate
-                              ? 'bg-emerald-500/40 border-emerald-400 text-white'
-                              : 'bg-white/5 border-white/10 text-slate-300 hover:bg-white/10'
+                              ? 'bg-emerald-500/60 border-emerald-400 text-white shadow-lg'
+                              : 'bg-slate-800/80 border-white/20 text-slate-200 hover:bg-slate-700'
                           }`}
                         >
                           {qDate}
@@ -258,7 +274,7 @@ export default function CropHistoryWizard() {
                     {/* Manual Date Input */}
                     <input 
                       type="date" 
-                      className="w-full bg-slate-800/50 border border-white/20 rounded-xl p-3 text-white outline-none focus:border-emerald-400 transition-colors [&::-webkit-calendar-picker-indicator]:filter-[invert(1)]"
+                      className="w-full bg-slate-800/80 border border-white/30 rounded-xl p-3 text-white outline-none focus:border-emerald-400 transition-colors [&::-webkit-calendar-picker-indicator]:filter-[invert(1)]"
                       value={!QUICK_DATES.includes(selections[step.id]?.approxDate) ? (selections[step.id]?.approxDate || '') : ''}
                       onChange={(e) => setSelections({ ...selections, [step.id]: { ...selections[step.id], approxDate: e.target.value } })}
                     />
@@ -287,10 +303,10 @@ export default function CropHistoryWizard() {
                     <div 
                       key={opt}
                       onClick={() => handleSelect(opt)}
-                      className={`cursor-pointer backdrop-blur-md px-4 py-3 rounded-xl border transition-all text-sm font-semibold text-center ${
+                      className={`cursor-pointer backdrop-blur-md px-4 py-3 rounded-xl border transition-all text-sm font-bold text-center ${
                         isSelected 
-                          ? 'bg-emerald-500/40 border-emerald-400' 
-                          : 'bg-slate-900/40 border-white/10 hover:bg-slate-800/60'
+                          ? 'bg-emerald-500/60 border-emerald-400 text-white shadow-lg' 
+                          : 'bg-slate-800/80 border-white/20 text-slate-200 hover:bg-slate-700'
                       }`}
                     >
                       {opt}
@@ -298,6 +314,46 @@ export default function CropHistoryWizard() {
                   );
                 })}
               </div>
+            </div>
+          )}
+
+          {step.type === 'summary' && (
+            <div className="bg-slate-900/80 backdrop-blur-xl p-6 md:p-8 rounded-3xl border border-white/20 shadow-2xl text-left w-full max-w-2xl mx-auto animate-in fade-in zoom-in-95">
+              <h3 className="text-2xl font-black text-emerald-400 mb-6 border-b border-white/10 pb-4">Data Summary</h3>
+              <ul className="space-y-4">
+                {WIZARD_STEPS.slice(0, -1).map(s => {
+                  const sel = selections[s.id];
+                  if (!sel) return null;
+                  
+                  let displayValue = '';
+                  let dateInfo = '';
+                  
+                  if (s.type === 'date-select') {
+                    displayValue = sel;
+                  } else if (s.type === 'visual-select') {
+                    displayValue = getLabelForOption(s, sel.selectedOption);
+                    if (sel.selectedOption === 'other' && sel.otherName) {
+                      displayValue += ` (${sel.otherName})`;
+                    }
+                    if (sel.approxDate) {
+                      dateInfo = `(Date: ${sel.approxDate})`;
+                    }
+                  }
+
+                  return (
+                    <li key={s.id} className="flex flex-col md:flex-row md:items-start md:justify-between bg-slate-800/50 p-4 rounded-xl border border-white/5">
+                      <span className="font-bold text-emerald-200 mb-1 md:mb-0 md:w-1/3 flex items-center gap-2">
+                        <s.icon size={16} className="text-emerald-400" />
+                        {s.title}
+                      </span> 
+                      <div className="md:w-2/3 md:text-right">
+                        <span className="text-white font-semibold text-lg block">{displayValue}</span>
+                        {dateInfo && <span className="text-emerald-400/80 text-sm font-medium">{dateInfo}</span>}
+                      </div>
+                    </li>
+                  );
+                })}
+              </ul>
             </div>
           )}
 
@@ -325,7 +381,7 @@ export default function CropHistoryWizard() {
           }`}
           disabled={!isStepValid()}
         >
-          {isLastStep ? 'Save Farm Profile' : 'Continue'} 
+          {isLastStep ? 'Save & Submit' : 'Continue'} 
           {isLastStep ? <CheckCircle2 size={20} /> : <ChevronRight size={20} />}
         </button>
       </div>
