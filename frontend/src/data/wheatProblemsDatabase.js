@@ -2256,5 +2256,248 @@ export const wheatProblemsDatabase = {
         ]
       }
     ]
+  },
+  physiological: {
+    id: 'physiological',
+    title: 'Physiological Disorders',
+    description: 'Symptom-based disorders caused by multiple overlapping environmental or nutritional factors.',
+    subcategories: [
+      {
+        id: 'leaf_symptoms',
+        title: 'Leaf Symptoms',
+        groups: [
+          {
+            id: 'chlorosis_group',
+            title: 'Chlorosis & Discoloration',
+            problems: [
+              {
+                id: 'chlorosis',
+                name: 'Chlorosis (Yellowing)',
+                image: '/images/problems/yellow.jpg',
+                healthyImage: '/images/problems/all_good.jpg',
+                symptoms: [
+                  'Yellow or pale green leaves',
+                  'Interveinal chlorosis',
+                  'Can affect older or younger leaves depending on cause'
+                ],
+                causes: [
+                  'Important Note: Chlorosis is a symptom, not a single disease',
+                  'Nitrogen, Iron, Sulfur, Manganese, or Zinc deficiency',
+                  'High soil pH or Waterlogging',
+                  'Poor root oxygen, root damage, or salinity',
+                  'Chemical injury or disease-related root damage'
+                ],
+                treatment: {
+                  primary: [
+                    'Diagnose which leaves are affected (young vs. old, uniform vs. interveinal)',
+                    'Check soil pH, moisture, EC/salinity, and root condition',
+                    'Improve drainage if waterlogging is present before acting'
+                  ],
+                  chemical: [],
+                },
+                fertilizer: {
+                  status: 'Diagnosis Required',
+                  recommendation: [
+                    'If Nitrogen confirmed -> Recommend N according to soil-test',
+                    'If Sulfur confirmed -> Recommend S source',
+                    'If Iron availability problem -> Correct root-zone/pH',
+                    'If high pH causing unavailability -> Do not blindly add nutrients'
+                  ]
+                },
+                management: [],
+                engineOutput: ['Identify leaf age/pattern', 'Estimate possible root causes', 'Recommend nutrient only after cause filtering']
+              },
+              {
+                id: 'leaf_tip_burn',
+                name: 'Leaf Tip Burn',
+                image: '/images/problems/spots.jpg',
+                healthyImage: '/images/problems/all_good.jpg',
+                symptoms: [
+                  'Brown leaf tips',
+                  'Dry leaf tips',
+                  'Progressive tissue death (spreading downward in severe cases)'
+                ],
+                causes: [
+                  'Drought stress or Water stress',
+                  'Fertilizer burn or Chemical injury',
+                  'Salinity',
+                  'Potassium imbalance',
+                  'High temperature or Root damage'
+                ],
+                treatment: {
+                  primary: [
+                    'Check soil moisture, EC, and fertilizer/chemical history',
+                    'If drought -> Restore irrigation',
+                    'If salinity -> Apply salinity-management strategy',
+                    'If fertilizer/chemical burn -> Prevent further stress'
+                  ],
+                  chemical: [],
+                },
+                fertilizer: {
+                  status: 'Diagnosis Required',
+                  recommendation: [
+                    'No fertilizer recommendation without cause confirmation',
+                    'If confirmed potassium deficiency -> Recommend K based on soil test'
+                  ]
+                },
+                management: [],
+                engineOutput: ['Check Potassium status', 'Check EC / Salinity history']
+              },
+              {
+                id: 'leaf_scorch',
+                name: 'Leaf Scorch',
+                image: '/images/problems/wilting.jpg',
+                healthyImage: '/images/problems/all_good.jpg',
+                symptoms: [
+                  'Brown leaf edges',
+                  'Dry necrotic tissue with scorched appearance',
+                  'Reduced photosynthetic area'
+                ],
+                causes: [
+                  'Heat stress or Drought',
+                  'Salinity',
+                  'Fertilizer or Chemical injury',
+                  'Strong environmental stress or Root-zone problems'
+                ],
+                treatment: {
+                  primary: [
+                    'Reduce moisture stress and manage heat stress',
+                    'Check salinity',
+                    'Avoid additional chemical stress'
+                  ],
+                  chemical: [],
+                },
+                fertilizer: {
+                  status: 'Diagnosis Required',
+                  recommendation: [
+                    'Avoid blind fertilizer recommendation',
+                    'Correct nutrient imbalance only if confirmed'
+                  ]
+                },
+                management: [],
+                engineOutput: ['Primary cause ranking', 'Environmental stress warning']
+              }
+            ]
+          }
+        ]
+      },
+      {
+        id: 'growth_development',
+        title: 'Growth & Development',
+        groups: [
+          {
+            id: 'growth_issues_group',
+            title: 'Growth Abnormalities',
+            problems: [
+              {
+                id: 'premature_senescence',
+                name: 'Premature Senescence',
+                image: '/images/problems/yellow.jpg',
+                healthyImage: '/images/problems/all_good.jpg',
+                symptoms: [
+                  'Early yellowing and drying',
+                  'Reduced green leaf area',
+                  'Poor grain filling',
+                  'Early plant maturity appearance'
+                ],
+                causes: [
+                  'Nitrogen deficiency',
+                  'Drought or Heat stress (Terminal heat)',
+                  'Root disease or Salinity',
+                  'Severe nutrient imbalance or Pest damage'
+                ],
+                treatment: {
+                  primary: [
+                    'Check crop growth stage, Nitrogen status, moisture, and root health',
+                    'If drought -> Improve irrigation',
+                    'If disease/root damage -> Diagnose root cause'
+                  ],
+                  chemical: [],
+                },
+                fertilizer: {
+                  status: 'Diagnosis Required',
+                  recommendation: [
+                    'If Nitrogen deficiency confirmed -> Evaluate appropriate N correction',
+                    'If terminal heat -> Focus on stress mitigation, not unnecessary fertilizer'
+                  ]
+                },
+                management: [],
+                engineOutput: ['Consider crop growth stage before recommending treatment']
+              },
+              {
+                id: 'stunted_growth',
+                name: 'Stunted Growth',
+                image: '/images/problems/wilting.jpg',
+                healthyImage: '/images/problems/all_good.jpg',
+                symptoms: [
+                  'Slower growth rate than expected',
+                  'Reduced plant height',
+                  'Poor canopy development'
+                ],
+                causes: [
+                  'Nitrogen, Phosphorus, or Zinc deficiency',
+                  'Root disease or Soil compaction',
+                  'Waterlogging, Drought, or Cold stress',
+                  'Pest damage or Poor seed establishment'
+                ],
+                treatment: {
+                  primary: [
+                    'Evaluate crop age, height, root condition, and moisture',
+                    'If compaction -> Do not use fertilizer as primary solution',
+                    'If waterlogging -> Improve drainage',
+                    'If root disease -> Disease-specific management'
+                  ],
+                  chemical: [],
+                },
+                fertilizer: {
+                  status: 'Diagnosis Required',
+                  recommendation: [
+                    'Nutrient recommendation must match confirmed deficiency',
+                    'If multiple causes -> Multi-factor recommendation'
+                  ]
+                },
+                management: [],
+                engineOutput: ['Analyze plant height vs crop age', 'Multi-factor root cause ranking']
+              },
+              {
+                id: 'lodging',
+                name: 'Lodging',
+                image: '/images/problems/wilting.jpg',
+                healthyImage: '/images/problems/all_good.jpg',
+                symptoms: [
+                  'Plants bent or fallen',
+                  'Stem lodging or Root lodging',
+                  'Uneven canopy and reduced harvestability'
+                ],
+                causes: [
+                  'Excess nitrogen causing weak stem development',
+                  'Dense crop canopy',
+                  'Excess irrigation, heavy rain, or strong wind',
+                  'Disease-weakened stems or soil saturation'
+                ],
+                treatment: {
+                  primary: [
+                    'Stop unnecessary nitrogen application',
+                    'Avoid excess irrigation',
+                    'Assess disease involvement'
+                  ],
+                  chemical: [],
+                },
+                fertilizer: {
+                  status: 'Not Primary Treatment',
+                  recommendation: [
+                    'If nitrogen excess suspected -> NO ADDITIONAL NITROGEN',
+                    'If nutrient deficiency also exists -> Do not correct blindly without full balance assessment',
+                    'Prevent further vegetative overgrowth'
+                  ]
+                },
+                management: [],
+                engineOutput: ['Check N application history', 'Check moisture and weather history']
+              }
+            ]
+          }
+        ]
+      }
+    ]
   }
 };
