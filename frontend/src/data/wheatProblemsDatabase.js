@@ -677,5 +677,369 @@ export const wheatProblemsDatabase = {
         ]
       }
     ]
+  },
+  nutrient: {
+    id: 'nutrient',
+    title: 'Nutrient Deficiency',
+    description: 'Imbalances or shortages of essential elements required for wheat growth.',
+    subcategories: [
+      {
+        id: 'primary_macro',
+        title: 'Primary Macronutrients',
+        groups: [
+          {
+            id: 'macro_group',
+            title: 'Primary Macronutrients',
+            problems: [
+              {
+                id: 'nitrogen_def',
+                name: 'Nitrogen Deficiency',
+                image: '/images/problems/yellow.jpg',
+                healthyImage: '/images/problems/all_good.jpg',
+                symptoms: [
+                  'Older leaves become pale green',
+                  'Yellowing begins on older leaves and progresses toward younger leaves',
+                  'Reduced tillering',
+                  'Slow and stunted growth',
+                  'Lower biomass and yield potential'
+                ],
+                causes: [
+                  'Low available soil nitrogen',
+                  'Insufficient fertilizer application',
+                  'Nitrogen leaching',
+                  'Nitrogen loss through volatilization',
+                  'Waterlogging-related nitrogen loss',
+                  'Cold soil reducing nutrient uptake',
+                  'Poor root development'
+                ],
+                treatment: {
+                  primary: [
+                    'Check growth stage, soil test nitrogen, soil moisture, and pH',
+                    'Calculate site-specific requirement',
+                    'Apply via basal application, split application, or top-dressing according to local agronomics'
+                  ],
+                  chemical: [],
+                },
+                fertilizer: {
+                  status: 'Recommended',
+                  recommendation: [
+                    'Urea',
+                    'Ammonium Sulfate',
+                    'UAN solutions',
+                    'Calcium Ammonium Nitrate',
+                    'Other locally registered nitrogen sources'
+                  ]
+                },
+                management: [
+                  'Avoid excessive nitrogen (increases lodging and disease risk)',
+                  'Do not recommend solely from leaf image'
+                ],
+                engineOutput: ['AI leaf prediction', 'Soil nitrogen value', 'Soil moisture', 'Soil pH', 'Temperature', 'Crop growth stage']
+              },
+              {
+                id: 'phosphorus_def',
+                name: 'Phosphorus Deficiency',
+                image: '/images/problems/yellow.jpg',
+                healthyImage: '/images/problems/all_good.jpg',
+                symptoms: [
+                  'Slow early growth and stunted plants',
+                  'Poor root development and reduced tillering',
+                  'Dark green foliage',
+                  'Purpling may occur in some conditions'
+                ],
+                causes: [
+                  'Low available soil phosphorus',
+                  'High or low soil pH',
+                  'Cold soil',
+                  'Poor root development',
+                  'Phosphorus fixation in soil'
+                ],
+                treatment: {
+                  primary: [
+                    'Check soil phosphorus test, pH, crop stage, and temperature',
+                    'Determine phosphorus availability',
+                    'Prefer placement near root zone (important at early stages)'
+                  ],
+                  chemical: [],
+                },
+                fertilizer: {
+                  status: 'Recommended',
+                  recommendation: [
+                    'DAP',
+                    'MAP',
+                    'Triple Superphosphate',
+                    'Single Superphosphate',
+                    'Other locally suitable phosphorus fertilizers'
+                  ]
+                },
+                management: [
+                  'More fertilizer does not always mean more uptake',
+                  'High or low pH can reduce availability',
+                  'Correct soil conditions when required'
+                ],
+                engineOutput: ['AI prediction', 'Soil phosphorus', 'Soil pH', 'Temperature', 'Soil moisture', 'Growth stage']
+              },
+              {
+                id: 'potassium_def',
+                name: 'Potassium Deficiency',
+                image: '/images/problems/yellow.jpg',
+                healthyImage: '/images/problems/all_good.jpg',
+                symptoms: [
+                  'Older leaf symptoms',
+                  'Yellowing near leaf margins',
+                  'Leaf edge scorch or necrosis',
+                  'Weak stems',
+                  'Reduced stress tolerance',
+                  'Poor grain development'
+                ],
+                causes: [
+                  'Low available soil potassium',
+                  'Sandy or leached soils',
+                  'Poor root growth',
+                  'Nutrient imbalance',
+                  'High nutrient demand'
+                ],
+                treatment: {
+                  primary: [
+                    'Check soil potassium, texture, moisture, root condition, and crop stage',
+                    'Base recommendation on soil testing',
+                    'Select source according to soil conditions'
+                  ],
+                  chemical: [],
+                },
+                fertilizer: {
+                  status: 'Recommended',
+                  recommendation: [
+                    'MOP / Potassium Chloride',
+                    'SOP / Potassium Sulfate',
+                    'Other locally registered potassium sources'
+                  ]
+                },
+                management: [
+                  'Avoid unnecessary over-application'
+                ],
+                engineOutput: ['AI prediction', 'Soil potassium', 'Soil moisture', 'Soil texture', 'pH', 'Growth stage']
+              }
+            ]
+          }
+        ]
+      },
+      {
+        id: 'secondary_macro',
+        title: 'Secondary Macronutrients',
+        groups: [
+          {
+            id: 'secondary_macro_group',
+            title: 'Secondary Macronutrients',
+            problems: [
+              {
+                id: 'sulfur_def',
+                name: 'Sulfur Deficiency',
+                image: '/images/problems/yellow.jpg',
+                healthyImage: '/images/problems/all_good.jpg',
+                symptoms: [
+                  'Yellowing often on younger leaves',
+                  'Uniform chlorosis',
+                  'Reduced growth',
+                  'Reduced protein development'
+                ],
+                causes: [
+                  'Low sulfur soil supply',
+                  'Sandy soil',
+                  'Low organic matter',
+                  'Sulfur leaching'
+                ],
+                treatment: {
+                  primary: ['Evaluate soil sulfur, organic matter, rainfall, and growth stage'],
+                  chemical: [],
+                },
+                fertilizer: {
+                  status: 'Recommended',
+                  recommendation: [
+                    'Ammonium Sulfate',
+                    'Gypsum',
+                    'Sulfate-containing fertilizers',
+                    'Elemental sulfur where appropriate'
+                  ]
+                },
+                management: []
+              },
+              {
+                id: 'calcium_def',
+                name: 'Calcium Deficiency',
+                image: '/images/problems/wilting.jpg',
+                healthyImage: '/images/problems/all_good.jpg',
+                symptoms: [
+                  'Poor root development',
+                  'Weak plant tissue',
+                  'Reduced growth'
+                ],
+                causes: [
+                  'Low calcium availability',
+                  'Acidic soil',
+                  'Root damage'
+                ],
+                treatment: {
+                  primary: ['Evaluate soil pH, soil calcium, and root condition'],
+                  chemical: [],
+                },
+                fertilizer: {
+                  status: 'Recommended',
+                  recommendation: [
+                    'Agricultural lime where pH correction is required',
+                    'Gypsum where suitable',
+                    'Other soil-test-based calcium sources'
+                  ]
+                },
+                management: []
+              },
+              {
+                id: 'magnesium_def',
+                name: 'Magnesium Deficiency',
+                image: '/images/problems/yellow.jpg',
+                healthyImage: '/images/problems/all_good.jpg',
+                symptoms: [
+                  'Interveinal chlorosis',
+                  'Older leaves affected first',
+                  'Reduced photosynthetic performance'
+                ],
+                causes: [
+                  'Low magnesium availability',
+                  'Acidic soil',
+                  'Nutrient competition'
+                ],
+                treatment: {
+                  primary: ['Evaluate soil magnesium, pH, and competing nutrient levels'],
+                  chemical: [],
+                },
+                fertilizer: {
+                  status: 'Recommended',
+                  recommendation: [
+                    'Magnesium sulfate',
+                    'Dolomitic lime',
+                    'Other locally suitable magnesium fertilizers'
+                  ]
+                },
+                management: []
+              }
+            ]
+          }
+        ]
+      },
+      {
+        id: 'micro_nutrients',
+        title: 'Micronutrients',
+        groups: [
+          {
+            id: 'micro_group',
+            title: 'Micronutrients',
+            problems: [
+              {
+                id: 'zinc_def',
+                name: 'Zinc Deficiency',
+                image: '/images/problems/yellow.jpg',
+                healthyImage: '/images/problems/all_good.jpg',
+                symptoms: ['Stunted growth', 'Chlorosis', 'Poor tillering', 'Reduced root development'],
+                causes: ['High pH', 'High phosphorus interactions', 'Low soil zinc'],
+                treatment: {
+                  primary: ['Evaluate soil zinc, pH, and phosphorus status'],
+                  chemical: [],
+                },
+                fertilizer: {
+                  status: 'Recommended',
+                  recommendation: ['Zinc sulfate', 'Chelated zinc', 'Locally registered zinc fertilizers']
+                },
+                management: []
+              },
+              {
+                id: 'iron_def',
+                name: 'Iron Deficiency',
+                image: '/images/problems/yellow.jpg',
+                healthyImage: '/images/problems/all_good.jpg',
+                symptoms: ['Interveinal chlorosis', 'Young leaves often affected'],
+                causes: ['High pH', 'Alkaline soil', 'Low iron availability'],
+                treatment: {
+                  primary: ['Evaluate soil pH and iron status'],
+                  chemical: [],
+                },
+                fertilizer: {
+                  status: 'Recommended',
+                  recommendation: ['Iron sulfate', 'Chelated iron where appropriate']
+                },
+                management: []
+              },
+              {
+                id: 'manganese_def',
+                name: 'Manganese Deficiency',
+                image: '/images/problems/yellow.jpg',
+                healthyImage: '/images/problems/all_good.jpg',
+                symptoms: ['Chlorosis', 'Speckling', 'Reduced growth'],
+                causes: ['High soil pH', 'Low manganese availability'],
+                treatment: {
+                  primary: ['Evaluate soil pH and soil manganese'],
+                  chemical: [],
+                },
+                fertilizer: {
+                  status: 'Recommended',
+                  recommendation: ['Manganese sulfate', 'Registered manganese fertilizers']
+                },
+                management: []
+              },
+              {
+                id: 'boron_def',
+                name: 'Boron Deficiency',
+                image: '/images/problems/wilting.jpg',
+                healthyImage: '/images/problems/all_good.jpg',
+                symptoms: ['Poor reproductive development', 'Weak growing tissues'],
+                causes: ['Low boron availability', 'Dry soil conditions'],
+                treatment: {
+                  primary: ['Evaluate soil boron and soil moisture'],
+                  chemical: [],
+                },
+                fertilizer: {
+                  status: 'Recommended',
+                  recommendation: ['Borate fertilizers', 'Other registered boron products']
+                },
+                management: ['Warning: Narrow margin between deficiency and toxicity']
+              },
+              {
+                id: 'copper_def',
+                name: 'Copper Deficiency',
+                image: '/images/problems/wilting.jpg',
+                healthyImage: '/images/problems/all_good.jpg',
+                symptoms: ['Reduced growth', 'Weak stems', 'Poor reproductive development'],
+                causes: ['Low soil copper', 'High organic matter conditions'],
+                treatment: {
+                  primary: ['Evaluate soil copper and soil organic matter'],
+                  chemical: [],
+                },
+                fertilizer: {
+                  status: 'Recommended',
+                  recommendation: ['Copper sulfate', 'Registered copper fertilizers']
+                },
+                management: []
+              },
+              {
+                id: 'molybdenum_def',
+                name: 'Molybdenum Deficiency',
+                image: '/images/problems/yellow.jpg',
+                healthyImage: '/images/problems/all_good.jpg',
+                symptoms: ['Chlorosis', 'Reduced nitrogen metabolism'],
+                causes: ['Acidic soil', 'Low molybdenum availability'],
+                treatment: {
+                  primary: ['Evaluate soil pH and soil molybdenum'],
+                  chemical: [],
+                },
+                fertilizer: {
+                  status: 'Recommended',
+                  recommendation: ['Sodium molybdate', 'Other registered molybdenum sources']
+                },
+                management: []
+              }
+            ]
+          }
+        ]
+      }
+    ]
   }
 };
