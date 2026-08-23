@@ -610,5 +610,72 @@ export const wheatProblemsDatabase = {
         ]
       }
     ]
+  },
+  nematodes: {
+    id: 'nematodes',
+    title: 'Nematode Problems',
+    description: 'Microscopic worms affecting wheat roots and limiting water/nutrient uptake.',
+    subcategories: [
+      {
+        id: 'root_lesion',
+        title: 'Root-Lesion Nematodes',
+        groups: [
+          {
+            id: 'root_lesion_group',
+            title: 'Root-Lesion Nematodes',
+            problems: [
+              {
+                id: 'root_lesion_nematode',
+                name: 'Root-Lesion Nematodes (Pratylenchus spp.)',
+                image: '/images/problems/wilting.jpg',
+                healthyImage: '/images/problems/all_good.jpg',
+                symptoms: ['Stunted growth & poor vigor', 'Yellowing / chlorosis', 'Patchy field appearance', 'Brown/dark root lesions', 'Reduced feeder roots'],
+                causes: ['Root infection by plant-parasitic Pratylenchus spp.', 'Infested soil & susceptible crop history', 'Continuous cereal production'],
+                treatment: {
+                  primary: ['Confirm before treatment (do not assume nutrient deficiency only)', 'Reduce additional crop stress', 'Review crop history for host crops'],
+                  chemical: ['Nematicide management (only legally registered products, country-specific)', 'Biological management (research-supported products)'],
+                },
+                fertilizer: {
+                  status: 'Soil Test Required',
+                  recommendation: ['Fertilizer does not eliminate nematodes', 'Apply Nitrogen according to soil test', 'Correct confirmed Phosphorus deficiency to support root development', 'Maintain balanced nutrition for crop recovery']
+                },
+                management: ['Crop rotation planning', 'Use resistant/tolerant cultivars', 'Weed host management', 'Field hygiene to avoid moving infested soil'],
+                engineOutput: ['Primary Action: Confirm nematode diagnosis via lab', 'Fertilizer Action: Support root development post-soil test']
+              }
+            ]
+          }
+        ]
+      },
+      {
+        id: 'cereal_cyst',
+        title: 'Cereal Cyst Nematodes',
+        groups: [
+          {
+            id: 'cereal_cyst_group',
+            title: 'Cereal Cyst Nematodes',
+            problems: [
+              {
+                id: 'cereal_cyst_nematode',
+                name: 'Cereal Cyst Nematodes (Heterodera spp.)',
+                image: '/images/problems/wilting.jpg',
+                healthyImage: '/images/problems/all_good.jpg',
+                symptoms: ['Patchy growth and poor vigor', 'Stunting and chlorosis', 'Premature crop decline', 'Reduced and abnormal root development', 'Visible cysts on roots in some cases'],
+                causes: ['Root infection by cereal cyst nematodes', 'Continuous cereal cropping', 'Infested soil', 'Cyst survival in soil'],
+                treatment: {
+                  primary: ['Confirm nematode problem via soil sampling', 'Avoid incorrect fertilizer-only treatment', 'Use non-host crops for rotation'],
+                  chemical: ['Chemical / Nematicide Management (only approved products, follow label)'],
+                },
+                fertilizer: {
+                  status: 'Soil Test Required',
+                  recommendation: ['Fertilizer cannot remove established nematode infestation', 'Correct confirmed Phosphorus deficiency for root development', 'Balanced Nitrogen management', 'Micronutrient correction only if confirmed']
+                },
+                management: ['Resistant Cultivars', 'Crop Rotation', 'Equipment Cleaning', 'Host Weed Management'],
+                engineOutput: ['Primary Action: Nematode extraction and cyst identification', 'Chemical Action: Registered nematicides only']
+              }
+            ]
+          }
+        ]
+      }
+    ]
   }
 };
