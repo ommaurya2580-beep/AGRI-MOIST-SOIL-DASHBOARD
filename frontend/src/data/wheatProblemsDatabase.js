@@ -389,5 +389,226 @@ export const wheatProblemsDatabase = {
         ]
       }
     ]
+  },
+  pests: {
+    id: 'pests',
+    title: 'Insect Pests',
+    description: 'Common insects, mites, and soil pests affecting wheat.',
+    subcategories: [
+      {
+        id: 'sucking',
+        title: 'Sucking Pests',
+        groups: [
+          {
+            id: 'aphids',
+            title: 'Aphids',
+            problems: [
+              {
+                id: 'english_grain_aphid',
+                name: 'English Grain Aphid',
+                image: '/images/problems/insects.jpg',
+                healthyImage: '/images/problems/all_good.jpg',
+                symptoms: ['Small green/brown insects clustered on wheat heads or leaves', 'Honeydew stickiness'],
+                causes: ['Warm, dry weather conditions favoring aphid multiplication'],
+                treatment: {
+                  primary: ['Scout fields regularly', 'Check economic threshold before spraying', 'Preserve natural enemies (ladybugs, wasps)'],
+                  chemical: ['Registered systemic or contact insecticides', 'Seed treatments for early protection'],
+                },
+                fertilizer: {
+                  status: 'Not Primary Treatment',
+                  recommendation: ['Avoid excessive nitrogen (makes plants succulent and attractive to aphids)', 'Ensure balanced nutrition for recovery']
+                },
+                management: ['Plant at optimal time', 'Encourage beneficial insects'],
+                engineOutput: []
+              },
+              {
+                id: 'greenbug',
+                name: 'Greenbug',
+                image: '/images/problems/insects.jpg',
+                healthyImage: '/images/problems/all_good.jpg',
+                symptoms: ['Yellow or red spots on leaves where feeding occurred', 'Stunted growth', 'Pale green aphids with dark stripe'],
+                causes: ['Vector for Barley Yellow Dwarf Virus (BYDV)', 'Favorable weather'],
+                treatment: {
+                  primary: ['Monitor early in the season', 'Use resistant varieties if available', 'Apply insecticide only if threshold is reached'],
+                  chemical: ['Approved foliar insecticides'],
+                },
+                fertilizer: {
+                  status: 'Not Primary Treatment',
+                  recommendation: ['Fertilizer does not kill bugs', 'Excess nitrogen may increase greenbug populations']
+                },
+                management: ['Destroy volunteer wheat', 'Monitor for virus symptoms']
+              }
+            ]
+          }
+        ]
+      },
+      {
+        id: 'mites',
+        title: 'Mite Pests',
+        groups: [
+          {
+            id: 'mites_group',
+            title: 'Mites',
+            problems: [
+              {
+                id: 'wheat_curl_mite',
+                name: 'Wheat Curl Mite',
+                image: '/images/problems/insects.jpg',
+                healthyImage: '/images/problems/all_good.jpg',
+                symptoms: ['Leaves remain tightly rolled/curled', 'Trapped emerging leaves', 'Yellow streaking (due to Wheat Streak Mosaic Virus)'],
+                causes: ['Microscopic mites blown by wind from volunteer wheat'],
+                treatment: {
+                  primary: ['Primary threat is the virus they carry', 'Chemical control of mites is generally ineffective and not recommended'],
+                  chemical: ['Miticides are rarely economical or effective for this specific pest'],
+                },
+                fertilizer: {
+                  status: 'Not Primary Treatment',
+                  recommendation: ['Nutrients cannot cure the mite damage or the virus']
+                },
+                management: ['Destroy volunteer wheat at least 2 weeks before planting', 'Plant resistant varieties', 'Delay fall planting']
+              }
+            ]
+          }
+        ]
+      },
+      {
+        id: 'chewing',
+        title: 'Chewing Pests',
+        groups: [
+          {
+            id: 'chewing_group',
+            title: 'Caterpillars & Worms',
+            problems: [
+              {
+                id: 'armyworm',
+                name: 'Armyworm',
+                image: '/images/problems/insects.jpg',
+                healthyImage: '/images/problems/all_good.jpg',
+                symptoms: ['Chewed leaf margins', 'Stripped leaves leaving only the midrib', 'Head clipping in severe cases'],
+                causes: ['Moth migration and egg laying in dense canopy'],
+                treatment: {
+                  primary: ['Scout for larvae in the lower canopy/soil debris', 'Treat when larvae are small (less than 1 inch)'],
+                  chemical: ['Registered foliar insecticides when threshold is exceeded'],
+                },
+                fertilizer: {
+                  status: 'Not Primary Treatment',
+                  recommendation: ['Standard nutrient program']
+                },
+                management: ['Monitor flights', 'Natural predators often control populations']
+              },
+              {
+                id: 'cutworm',
+                name: 'Cutworm',
+                image: '/images/problems/insects.jpg',
+                healthyImage: '/images/problems/all_good.jpg',
+                symptoms: ['Seedlings cut off at or just below soil surface', 'Bare patches in field'],
+                causes: ['Larvae hiding in soil during day, feeding at night'],
+                treatment: {
+                  primary: ['Check for cut plants and dig around base for larvae', 'Spot treatment or field-wide if threshold met'],
+                  chemical: ['Insecticide seed treatments', 'Foliar rescue treatments applied late in the day'],
+                },
+                fertilizer: {
+                  status: 'Not Primary Treatment',
+                  recommendation: ['Fertilizer will not prevent cutting']
+                },
+                management: ['Weed control before planting (removes egg-laying sites)']
+              }
+            ]
+          }
+        ]
+      },
+      {
+        id: 'stem',
+        title: 'Stem Pests',
+        groups: [
+          {
+            id: 'stem_group',
+            title: 'Stem Borers & Sawflies',
+            problems: [
+              {
+                id: 'wheat_stem_sawfly',
+                name: 'Wheat Stem Sawfly',
+                image: '/images/problems/insects.jpg',
+                healthyImage: '/images/problems/all_good.jpg',
+                symptoms: ['Lodging (stems breaking near the ground)', 'Sawdust-like frass inside stems', 'White heads'],
+                causes: ['Larvae tunneling inside the stem'],
+                treatment: {
+                  primary: ['Use solid-stemmed wheat varieties', 'Chemical control is highly ineffective because larvae are protected inside stem'],
+                  chemical: ['Insecticides are generally not recommended or effective'],
+                },
+                fertilizer: {
+                  status: 'Not Primary Treatment',
+                  recommendation: ['Balanced nutrition helps standability but doesn\'t stop the insect']
+                },
+                management: ['Swath heavily infested fields early to save grain', 'Crop rotation', 'Tillage to expose larvae']
+              },
+              {
+                id: 'stem_borer',
+                name: 'Stem Borer',
+                image: '/images/problems/insects.jpg',
+                healthyImage: '/images/problems/all_good.jpg',
+                symptoms: ['Whiteheads (dead heads)', 'Entrance holes on stems', 'Hollowed stems'],
+                causes: ['Moth larvae boring into stems'],
+                treatment: {
+                  primary: ['Cultural control is most important', 'Chemical control is difficult once inside'],
+                  chemical: ['Systemic seed treatments or early foliar sprays (timing is critical)'],
+                },
+                fertilizer: {
+                  status: 'Not Primary Treatment',
+                  recommendation: ['Promote strong stems with adequate potassium, but it is not a cure']
+                },
+                management: ['Stubble destruction', 'Crop rotation']
+              }
+            ]
+          }
+        ]
+      },
+      {
+        id: 'soil_root',
+        title: 'Soil / Root Pests',
+        groups: [
+          {
+            id: 'soil_group',
+            title: 'Soil-Dwelling Insects',
+            problems: [
+              {
+                id: 'wireworms',
+                name: 'Wireworms',
+                image: '/images/problems/insects.jpg',
+                healthyImage: '/images/problems/all_good.jpg',
+                symptoms: ['Hollowed out seeds', 'Dead or wilted seedlings', 'Thin stands'],
+                causes: ['Hard, yellowish wire-like larvae in soil (click beetle larvae)'],
+                treatment: {
+                  primary: ['No rescue treatments exist once damage occurs', 'Prevention is key'],
+                  chemical: ['Insecticidal seed treatments are the only effective chemical control'],
+                },
+                fertilizer: {
+                  status: 'Not Primary Treatment',
+                  recommendation: ['Good fertility promotes rapid early growth to outgrow damage window']
+                },
+                management: ['Crop rotation', 'Seedbed preparation']
+              },
+              {
+                id: 'white_grubs',
+                name: 'White Grubs',
+                image: '/images/problems/insects.jpg',
+                healthyImage: '/images/problems/all_good.jpg',
+                symptoms: ['Stunted, yellowing, or dying seedlings', 'Roots pruned or eaten away'],
+                causes: ['C-shaped white larvae in soil (scarab beetle larvae)'],
+                treatment: {
+                  primary: ['Preventative seed treatments'],
+                  chemical: ['Seed treatments'],
+                },
+                fertilizer: {
+                  status: 'Not Primary Treatment',
+                  recommendation: ['Maintain good soil fertility']
+                },
+                management: ['Avoid planting wheat immediately after long-term pasture']
+              }
+            ]
+          }
+        ]
+      }
+    ]
   }
 };
