@@ -10,7 +10,7 @@
     },
     {
       "source": "/api/(.*)",
-      "destination": "http://18.215.153.77/api/$1"
+      "destination": "http://3.212.40.106/api/$1"
     },
     {
       "source": "/(.*)",
