@@ -35,12 +35,12 @@ const WIZARD_STEPS = [
     icon: Leaf,
     type: 'visual-select-with-other',
     options: [
-      { id: 'urea', label: 'Nitrogen (Urea)', image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/Urea.JPG/320px-Urea.JPG' },
-      { id: 'dap', label: 'Phosphorus (DAP/SSP)', image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/ad/Diammonium_phosphate.JPG/320px-Diammonium_phosphate.JPG' },
-      { id: 'potassium', label: 'Potassium (MOP)', image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/30/Sylvite.jpg/320px-Sylvite.jpg' },
-      { id: 'zinc', label: 'Zinc Sulphate', image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/13/Zinc_sulfate.JPG/320px-Zinc_sulfate.JPG' },
-      { id: 'sulphur', label: 'Sulphur', image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/44/Sulfur-sample.jpg/320px-Sulfur-sample.jpg' },
-      { id: 'organic', label: 'Organic (FYM)', image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/64/Manure.jpg/320px-Manure.jpg' },
+      { id: 'urea', label: 'Nitrogen (Urea)', image: '/images/fertilizers/urea.jpg' },
+      { id: 'dap', label: 'Phosphorus (DAP/SSP)', image: '/images/fertilizers/dap.jpg' },
+      { id: 'potassium', label: 'Potassium (MOP)', image: '/images/fertilizers/potassium.jpg' },
+      { id: 'zinc', label: 'Zinc Sulphate', image: '/images/fertilizers/zinc.jpg' },
+      { id: 'sulphur', label: 'Sulphur', image: '/images/fertilizers/sulphur.jpg' },
+      { id: 'organic', label: 'Organic (FYM)', image: '/images/fertilizers/organic.jpg' },
       { id: 'other', label: 'Other', emoji: '✏️' },
     ]
   },
