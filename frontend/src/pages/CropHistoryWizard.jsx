@@ -120,7 +120,7 @@ export default function CropHistoryWizard() {
   const handleNext = () => {
     if (isLastStep) {
       console.log("Saving visual crop profile:", selections);
-      navigate('/dashboard');
+      navigate('/weather-sync');
     } else {
       setCurrentStepIndex(prev => prev + 1);
     }

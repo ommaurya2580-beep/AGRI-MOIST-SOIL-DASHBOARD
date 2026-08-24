@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CloudRain, Wind, Droplets, ArrowRight } from 'lucide-react';
+import { CloudRain, Wind, Droplets, ArrowRight, FileText } from 'lucide-react';
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -57,6 +57,28 @@ export default function Dashboard() {
               <CloudRain size={14} className="mx-auto text-blue-400 mb-1" />
               <div className="text-xs font-semibold text-slate-700">20%</div>
             </div>
+          </div>
+        </div>
+      </div>
+      
+      {/* Smart Diagnostics Banner Card */}
+      <div 
+        onClick={() => navigate('/reports')}
+        className="mt-6 bg-gradient-to-r from-emerald-600 to-teal-700 rounded-2xl p-8 shadow-lg cursor-pointer hover:shadow-xl hover:-translate-y-1 transition-all group relative overflow-hidden"
+      >
+        <div className="absolute right-0 top-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -mr-20 -mt-20 group-hover:bg-white/20 transition-colors"></div>
+        <div className="relative z-10 flex items-center justify-between">
+          <div>
+            <h2 className="text-2xl font-bold text-white mb-2 flex items-center gap-3">
+              <FileText size={28} />
+              Smart Diagnostics & Root Cause Engine
+            </h2>
+            <p className="text-emerald-50 max-w-xl text-sm font-medium">
+              Combine Crop History, Weather, IoT Sensors, and AI Vision to find the exact root cause of any crop problem and get expert recommendations.
+            </p>
+          </div>
+          <div className="bg-white/20 p-4 rounded-full text-white group-hover:bg-white group-hover:text-emerald-700 transition-colors hidden md:block">
+            <ArrowRight size={24} />
           </div>
         </div>
       </div>

@@ -22,7 +22,7 @@ const navItems = [
   { path: '/sensors', label: 'Sensors', icon: Cpu },
   { path: '/fertilizer-guide', label: 'Fertilizer Guide', icon: Lightbulb },
   { path: '/weather', label: 'Weather', icon: CloudRain },
-  { path: '/reports', label: 'Reports', icon: FileText },
+  { path: '/reports', label: 'Smart Diagnostics', icon: FileText },
   { path: '/alerts', label: 'Alerts', icon: Bell },
   { path: '/esp32-connect', label: 'ESP32 Connect', icon: Cpu },
   { path: '/settings', label: 'Settings', icon: Settings },

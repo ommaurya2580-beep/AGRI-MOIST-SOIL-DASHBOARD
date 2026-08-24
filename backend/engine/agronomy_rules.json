@@ -1,0 +1,57 @@
+{
+  "problems": [
+    {
+      "id": "nitrogen_deficiency",
+      "name": "Nitrogen Deficiency",
+      "type": "Nutrient",
+      "max_possible_score": 90,
+      "scoring": {
+        "image_ai": { "condition": "prediction == 'Nitrogen_Deficiency'", "points": 35 },
+        "iot_sensor": { "condition": "npk.n < 30", "points": 25 },
+        "history": { "condition": "days_since_n_fertilizer > 30", "points": 20 },
+        "weather": { "condition": "rainfall_past_30d > 100", "points": 10 }
+      },
+      "conflicts": [
+        {
+          "condition": "iot_sensor.moisture > 85",
+          "action": "BLOCK_FERTILIZER_RECOMMENDATION",
+          "reason": "Waterlogging suspected. Applying fertilizer now will cause leaching and damage."
+        }
+      ]
+    },
+    {
+      "id": "waterlogging",
+      "name": "Waterlogging Stress",
+      "type": "Environmental",
+      "max_possible_score": 90,
+      "scoring": {
+        "iot_sensor": { "condition": "moisture > 85", "points": 40 },
+        "weather": { "condition": "rainfall_past_10d > 50", "points": 35 },
+        "image_ai": { "condition": "prediction == 'Nitrogen_Deficiency'", "points": 15, "note": "Yellow leaves from waterlogging often mimic N-deficiency" }
+      },
+      "conflicts": []
+    },
+    {
+      "id": "leaf_rust",
+      "name": "Leaf Rust (Brown Rust)",
+      "type": "Disease",
+      "max_possible_score": 80,
+      "scoring": {
+        "image_ai": { "condition": "prediction == 'Leaf_Rust'", "points": 50 },
+        "weather": { "condition": "humidity > 80 && temp_avg >= 15 && temp_avg <= 22", "points": 30 }
+      },
+      "conflicts": []
+    },
+    {
+      "id": "powdery_mildew",
+      "name": "Powdery Mildew",
+      "type": "Disease",
+      "max_possible_score": 80,
+      "scoring": {
+        "image_ai": { "condition": "prediction == 'Powdery_Mildew'", "points": 50 },
+        "weather": { "condition": "humidity > 85 && temp_avg >= 15 && temp_avg <= 22", "points": 30 }
+      },
+      "conflicts": []
+    }
+  ]
+}
