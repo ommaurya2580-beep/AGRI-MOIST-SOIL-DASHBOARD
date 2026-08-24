@@ -78,18 +78,18 @@ export class RootCauseEngine {
 
   // --- RULE 2: WEATHER RULES ---
   evaluateWeather() {
-    const rain = this.weather.metrics.rainfall_sum || 0;
-    const tempMax = this.weather.metrics.temperature_max || 25;
-    const humidity = this.weather.metrics.humidity_mean || 50;
+    const rain = this.weather.rain_sum || 0;
+    const tempAvg = this.weather.temp_avg || 25;
+    const humidity = this.weather.humidity_avg || 50;
 
     // Drought conditions
-    if (rain < 10 && tempMax > 32) {
+    if (rain < 10 && tempAvg > 30) {
       this.addScore(DIAGNOSES.WATER_STRESS_DROUGHT, 25, 'High temperatures with virtually no recent rainfall');
     }
 
     // Fungal conditions (High humidity + moderate/high temp)
-    if (humidity > 75 && tempMax > 20 && tempMax < 35) {
-      this.addScore(DIAGNOSES.FUNGAL_DISEASE_RUST, 30, `Weather conditions (Humidity: ${humidity.toFixed(0)}%) heavily favor fungal growth`);
+    if (humidity > 75 && tempAvg > 20 && tempAvg < 35) {
+      this.addScore(DIAGNOSES.FUNGAL_DISEASE_RUST, 30, `Weather conditions (Humidity: ${humidity}%) heavily favor fungal growth`);
     }
     
     // Overwatering conditions
@@ -100,35 +100,23 @@ export class RootCauseEngine {
 
   // --- RULE 3: HISTORY RULES ---
   evaluateHistory() {
-    // History data comes as { stage: { selectedOption: 'flowering' }, visual: { selectedOption: 'yellowing' } }
-    const rawObs = this.history.visual || this.history.visual_signs;
-    let obs = [];
-    if (typeof rawObs === 'string') {
-      obs = [rawObs];
-    } else if (Array.isArray(rawObs)) {
-      obs = rawObs;
-    } else if (rawObs && rawObs.selectedOption) {
-      obs = [rawObs.selectedOption];
-    }
+    const obs = this.history.problem_id || '';
     
-    const rawAction = this.history.irrigation || this.history.recent_action;
-    const recentAction = (rawAction && rawAction.selectedOption) ? rawAction.selectedOption : String(rawAction || '');
-    
-    if (obs.includes('yellowing_leaves') || obs.includes('yellowing')) {
+    if (obs === 'yellowing_leaves') {
       this.addScore(DIAGNOSES.NUTRIENT_DEFICIENCY_N, 35, 'Farmer observed yellowing leaves (Chlorosis)');
       this.addScore(DIAGNOSES.WATER_STRESS_OVERWATER, 15, 'Yellowing leaves can indicate root rot from overwatering');
     }
     
-    if (obs.includes('wilting')) {
+    if (obs === 'wilting') {
       this.addScore(DIAGNOSES.WATER_STRESS_DROUGHT, 30, 'Farmer observed wilting');
     }
 
-    if (obs.includes('spots_on_leaves') || obs.includes('spots')) {
+    if (obs === 'spots_on_leaves') {
       this.addScore(DIAGNOSES.FUNGAL_DISEASE_RUST, 20, 'Farmer observed spots on leaves');
     }
 
-    if (obs.includes('insects_visible') || obs.includes('holes_in_leaves') || obs.includes('insects') || obs.includes('holes')) {
-      this.addScore(DIAGNOSES.PEST_ATTACK_GENERAL, 40, 'Farmer visually confirmed pests or leaf damage');
+    if (obs === 'insects_visible' || obs === 'holes_in_leaves') {
+      this.addScore(DIAGNOSES.PEST_ATTACK_GENERAL, 35, 'Farmer observed insects or holes in leaves');
     }
   }
 

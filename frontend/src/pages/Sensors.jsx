@@ -13,25 +13,18 @@ export default function Sensors({ isDiagnosticMode = false }) {
   const handleDiagnosticConfirm = () => {
     const currentData = JSON.parse(localStorage.getItem('agripulse_diagnostic') || '{}');
     const iotPayload = {
-      soil_moisture_percent: moisture,
-      soil_temperature_c: mockTemp,
-      soil_ph: mockPh,
-      nitrogen_mg_kg: 45, // Using diagnostic mock for NPK as it's not live
-      phosphorus_mg_kg: 28,
-      potassium_mg_kg: 110,
-      device_id: "ESP32-WF-01",
+      moisture: moisture,
+      temperature: mockTemp,
+      pH: mockPh,
+      pump_state: pumpStatus,
       is_online: isOnline
     };
-    currentData.iot = iotPayload;
+    currentData.sensors = iotPayload;
     
     setSavedPayload(iotPayload);
     setIsSaving(true);
     
     localStorage.setItem('agripulse_diagnostic', JSON.stringify(currentData));
-    
-    setTimeout(() => {
-      navigate('/image-upload');
-    }, 2500);
   };
 
   const [activeTab, setActiveTab] = useState('24h');
@@ -128,6 +121,10 @@ export default function Sensors({ isDiagnosticMode = false }) {
     updateControl({ pumpIsOn: newVal, isManualOverride: true });
   };
 
+  const handleManualNext = () => {
+    navigate('/image-upload');
+  };
+
   return (
     <div className="flex flex-col gap-6 max-w-7xl mx-auto relative">
       
@@ -157,7 +154,7 @@ export default function Sensors({ isDiagnosticMode = false }) {
                 </div>
                 <div className="bg-white p-3 rounded-xl border border-slate-100 shadow-sm">
                   <span className="text-slate-400 text-xs uppercase font-bold tracking-wider block mb-1">Pump State</span>
-                  <span className="text-slate-800 font-semibold">{savedPayload?.pump_state}</span>
+                  <span className="text-slate-800 font-semibold">{savedPayload?.pump_state ? 'ON' : 'OFF'}</span>
                 </div>
               </div>
             </div>
