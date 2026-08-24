@@ -16,6 +16,9 @@ export default function Sensors({ isDiagnosticMode = false }) {
       moisture: moisture,
       temperature: mockTemp,
       pH: mockPh,
+      nitrogen: 45,
+      phosphorus: 28,
+      potassium: 110,
       pump_state: pumpStatus,
       is_online: isOnline
     };
@@ -156,6 +159,10 @@ export default function Sensors({ isDiagnosticMode = false }) {
                   <span className="text-slate-400 text-xs uppercase font-bold tracking-wider block mb-1">Pump State</span>
                   <span className="text-slate-800 font-semibold">{savedPayload?.pump_state ? 'ON' : 'OFF'}</span>
                 </div>
+                <div className="bg-white p-3 rounded-xl border border-slate-100 shadow-sm col-span-2">
+                  <span className="text-slate-400 text-xs uppercase font-bold tracking-wider block mb-1">NPK (Nitrogen, Phosphorus, Potassium)</span>
+                  <span className="text-slate-800 font-semibold">{savedPayload?.nitrogen} / {savedPayload?.phosphorus} / {savedPayload?.potassium}</span>
+                </div>
               </div>
             </div>
             
@@ -184,7 +191,7 @@ export default function Sensors({ isDiagnosticMode = false }) {
       </div>
 
       {/* Top Sensor Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {/* Soil Moisture */}
         <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 flex flex-col justify-between">
           <div className="flex items-start gap-4">
@@ -263,24 +270,6 @@ export default function Sensors({ isDiagnosticMode = false }) {
                 <Line type="monotone" dataKey="ph" stroke="#a855f7" strokeWidth={2} dot={false} />
               </LineChart>
             </ResponsiveContainer>
-          </div>
-        </div>
-
-        {/* Update Interval */}
-        <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 flex flex-col justify-center relative overflow-hidden">
-          <div className="absolute top-0 right-0 p-4 opacity-5">
-            <Clock size={100} />
-          </div>
-          <div className="flex items-center gap-2 text-slate-600 mb-4">
-            <Clock size={18} />
-            <h3 className="font-semibold">Update Interval</h3>
-          </div>
-          <p className="text-sm text-slate-500">Update Every</p>
-          <h2 className="text-2xl font-bold text-slate-800 mb-4">15 Minutes</h2>
-          
-          <div className="space-y-1">
-            <p className="text-xs text-slate-500">Last Updated</p>
-            <p className="text-sm font-semibold text-slate-700">10:30 AM</p>
           </div>
         </div>
       </div>

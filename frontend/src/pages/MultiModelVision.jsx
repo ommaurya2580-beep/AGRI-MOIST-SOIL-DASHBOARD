@@ -266,11 +266,12 @@ export default function MultiModelVision() {
               {/* Sensors Row */}
               <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
                 <h3 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2 border-b pb-2"><Zap className="text-amber-500"/> Step 3: IoT Sensors</h3>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
                   <div><span className="block text-xs text-slate-400 uppercase font-bold">Moisture</span><span className="font-medium">{fullData.sensors?.moisture}</span></div>
                   <div><span className="block text-xs text-slate-400 uppercase font-bold">Temp</span><span className="font-medium">{fullData.sensors?.temperature}°C</span></div>
                   <div><span className="block text-xs text-slate-400 uppercase font-bold">pH</span><span className="font-medium">{fullData.sensors?.pH}</span></div>
                   <div><span className="block text-xs text-slate-400 uppercase font-bold">Pump</span><span className="font-medium">{fullData.sensors?.pump_state ? 'ON' : 'OFF'}</span></div>
+                  <div><span className="block text-xs text-slate-400 uppercase font-bold">NPK (N/P/K)</span><span className="font-medium">{fullData.sensors?.nitrogen}/{fullData.sensors?.phosphorus}/{fullData.sensors?.potassium}</span></div>
                 </div>
               </div>
 
