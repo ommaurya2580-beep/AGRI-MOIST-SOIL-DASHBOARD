@@ -5,6 +5,71 @@ import {
   Camera, Zap, Layers, RefreshCw
 } from 'lucide-react';
 
+const CONFIDENCE_THRESHOLD = 0.25;
+
+function BoundingBoxImage({ src, detections }) {
+  const canvasRef = useRef(null);
+  const imageRef = useRef(null);
+  const [loaded, setLoaded] = useState(false);
+
+  useEffect(() => {
+    if (loaded && detections && detections.length > 0) {
+      const canvas = canvasRef.current;
+      const ctx = canvas.getContext('2d');
+      const img = imageRef.current;
+
+      if (!img || !canvas) return;
+
+      canvas.width = img.naturalWidth;
+      canvas.height = img.naturalHeight;
+      
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+      detections.forEach(det => {
+        if (det.confidence >= CONFIDENCE_THRESHOLD) {
+          const { x1, y1, x2, y2 } = det.bbox;
+          const width = x2 - x1;
+          const height = y2 - y1;
+
+          ctx.strokeStyle = '#3b82f6'; // Blue for Pest Radar
+          ctx.lineWidth = Math.max(3, canvas.width / 200);
+          ctx.strokeRect(x1, y1, width, height);
+
+          const text = `${det.class_name} ${(det.confidence * 100).toFixed(1)}%`;
+          ctx.font = `bold ${Math.max(16, canvas.width / 40)}px Arial`;
+          const textWidth = ctx.measureText(text).width;
+          
+          ctx.fillStyle = '#3b82f6';
+          ctx.fillRect(x1, y1 - 30, textWidth + 10, 30);
+          
+          ctx.fillStyle = '#ffffff';
+          ctx.fillText(text, x1 + 5, y1 - 8);
+        }
+      });
+    }
+  }, [loaded, detections, src]);
+
+  return (
+    <div className="relative w-full rounded-2xl overflow-hidden shadow-inner border border-slate-200 mb-3 bg-slate-50">
+      <img 
+        ref={imageRef} 
+        src={src} 
+        alt="Original" 
+        style={{ display: loaded && (!detections || detections.length === 0) ? 'block' : 'none', width: '100%', height: 'auto' }} 
+        onLoad={() => setLoaded(true)} 
+        className="w-full h-auto object-cover"
+      />
+      <canvas 
+        ref={canvasRef} 
+        style={{ display: loaded && detections && detections.length > 0 ? 'block' : 'none', width: '100%', height: 'auto' }} 
+        className="w-full h-auto object-cover"
+      />
+      {!loaded && <div className="h-48 w-full animate-pulse bg-slate-200"></div>}
+    </div>
+  );
+}
+
 export default function MultiModelVision() {
   const navigate = useNavigate();
   const fileInputRef = useRef(null);
@@ -84,7 +149,8 @@ export default function MultiModelVision() {
                       : "No pests detected", 
                     confidence: pestRes.value.detections && pestRes.value.detections.length > 0
                       ? Math.max(...pestRes.value.detections.map(d => d.confidence))
-                      : 1.0
+                      : 1.0,
+                    detections: pestRes.value.detections || []
                   } 
                 : { error: 'Failed' },
               color: 'blue'
@@ -332,55 +398,90 @@ export default function MultiModelVision() {
             </div>
           </div>
 
-          <div className="space-y-6">
-            {analysisResults.map((result, idx) => (
-              <div key={idx} className="bg-white rounded-3xl p-6 shadow-sm border border-slate-200 flex flex-col md:flex-row gap-8">
-                
-                {/* Image Thumbnail */}
-                <div className="shrink-0 flex flex-col items-center">
-                  <div className="w-32 h-32 rounded-2xl overflow-hidden shadow-inner border border-slate-200 mb-2">
-                    <img src={result.preview} alt="Analyzed Crop" className="w-full h-full object-cover" />
-                  </div>
-                  <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Image {idx + 1}</span>
-                </div>
-
-                {/* Model Results Grid */}
-                <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {result.models.map((model) => (
-                    <div key={model.id} className={`rounded-2xl p-4 border ${model.isOffline ? 'bg-slate-50 border-slate-200 border-dashed opacity-70' : `bg-${model.color}-50 border-${model.color}-200`}`}>
-                      <div className="flex items-center gap-2 mb-3">
-                        <div className={`p-1.5 rounded-lg bg-${model.color}-100 text-${model.color}-600`}>
-                          <model.icon size={16} />
-                        </div>
-                        <span className={`text-xs font-bold text-${model.color}-700`}>{model.name}</span>
-                      </div>
-                      
-                      {model.isOffline ? (
-                        <div className="text-sm text-slate-500 font-medium">Pending future update</div>
-                      ) : model.data.error ? (
-                        <div className="text-sm text-red-600 font-medium flex items-center gap-1">
-                          <AlertTriangle size={14}/> Error analyzing
-                        </div>
-                      ) : (
-                        <div>
-                          <div className="text-lg font-bold text-slate-800 leading-tight mb-1">
-                            {model.data.label}
-                          </div>
-                          {model.data.confidence !== undefined && (
-                            <div className="text-xs font-medium text-slate-500">
-                              Confidence: {typeof model.data.confidence === 'number' ? (model.data.confidence * (model.id === 'model1' ? 1 : 100)).toFixed(1) + '%' : model.data.confidence}
-                            </div>
-                          )}
-                          <div className="mt-2 text-xs text-slate-600 bg-white/60 p-2 rounded-lg">
-                            Visual features extracted successfully. Ready for Engine.
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            
+            {/* Column 1: Model 1 (Disease) */}
+            <div className="space-y-6">
+              <div className="bg-emerald-600 rounded-t-2xl p-4 text-white text-center shadow-md">
+                <Activity className="mx-auto mb-2" size={32} />
+                <h3 className="font-bold text-lg">Model 1: Disease</h3>
+                <p className="text-emerald-200 text-xs mt-1">Classification Output</p>
               </div>
-            ))}
+              <div className="bg-slate-50 border border-slate-200 rounded-b-2xl p-4 shadow-sm space-y-6">
+                {analysisResults.map((result, idx) => (
+                  <div key={idx} className="bg-white rounded-xl p-4 shadow-sm border border-emerald-100 flex flex-col items-center text-center">
+                    <span className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Image {idx + 1}</span>
+                    <div className="w-full rounded-xl overflow-hidden mb-3 border border-slate-200">
+                      <img src={result.preview} alt="Crop" className="w-full h-auto object-cover" />
+                    </div>
+                    {result.models[0].data.error ? (
+                      <div className="text-red-500 font-bold text-sm flex items-center gap-1"><AlertTriangle size={16}/> Error</div>
+                    ) : (
+                      <>
+                        <div className="text-lg font-bold text-emerald-800 leading-tight mb-1">{result.models[0].data.label}</div>
+                        <div className="text-xs font-medium text-slate-500">
+                          Confidence: {typeof result.models[0].data.confidence === 'number' ? (result.models[0].data.confidence * 1).toFixed(1) + '%' : result.models[0].data.confidence}
+                        </div>
+                      </>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Column 2: Model 2 (Pest Radar YOLO) */}
+            <div className="space-y-6">
+              <div className="bg-blue-600 rounded-t-2xl p-4 text-white text-center shadow-md">
+                <Bug className="mx-auto mb-2" size={32} />
+                <h3 className="font-bold text-lg">Model 2: Pest Radar</h3>
+                <p className="text-blue-200 text-xs mt-1">YOLO Object Detection</p>
+              </div>
+              <div className="bg-slate-50 border border-slate-200 rounded-b-2xl p-4 shadow-sm space-y-6">
+                {analysisResults.map((result, idx) => (
+                  <div key={idx} className="bg-white rounded-xl p-4 shadow-sm border border-blue-100 flex flex-col items-center text-center">
+                    <span className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Image {idx + 1}</span>
+                    
+                    <BoundingBoxImage 
+                      src={result.preview} 
+                      detections={result.models[1].data.detections} 
+                    />
+
+                    {result.models[1].data.error ? (
+                      <div className="text-red-500 font-bold text-sm flex items-center gap-1"><AlertTriangle size={16}/> Error</div>
+                    ) : (
+                      <>
+                        <div className="text-lg font-bold text-blue-800 leading-tight mb-1">{result.models[1].data.label}</div>
+                        <div className="text-xs font-medium text-slate-500">
+                          Max Confidence: {typeof result.models[1].data.confidence === 'number' ? (result.models[1].data.confidence * 100).toFixed(1) + '%' : result.models[1].data.confidence}
+                        </div>
+                      </>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Column 3: Model 3 (Future) */}
+            <div className="space-y-6">
+              <div className="bg-purple-600 rounded-t-2xl p-4 text-white text-center shadow-md opacity-80">
+                <Brain className="mx-auto mb-2" size={32} />
+                <h3 className="font-bold text-lg">Model 3: Stress</h3>
+                <p className="text-purple-200 text-xs mt-1">Future Integration</p>
+              </div>
+              <div className="bg-slate-50 border border-slate-200 border-dashed rounded-b-2xl p-4 space-y-6">
+                {analysisResults.map((result, idx) => (
+                  <div key={idx} className="bg-white rounded-xl p-4 border border-slate-200 border-dashed flex flex-col items-center text-center opacity-70">
+                    <span className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Image {idx + 1}</span>
+                    <div className="w-full rounded-xl overflow-hidden mb-3 border border-slate-200 grayscale">
+                      <img src={result.preview} alt="Crop" className="w-full h-auto object-cover" />
+                    </div>
+                    <div className="text-sm font-bold text-slate-500 leading-tight mb-1">Offline</div>
+                    <div className="text-xs font-medium text-slate-400">Pending future update</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
           </div>
 
           <div className="bg-white rounded-3xl p-8 shadow-lg border-2 border-indigo-100 flex flex-col md:flex-row items-center justify-between gap-6 sticky bottom-4 z-40">
