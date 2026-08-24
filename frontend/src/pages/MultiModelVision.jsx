@@ -279,14 +279,22 @@ export default function MultiModelVision() {
               <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
                 <h3 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2 border-b pb-2"><Camera className="text-purple-500"/> Step 4: AI Vision</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="bg-emerald-50 p-3 rounded-lg border border-emerald-100">
-                    <span className="block text-xs text-emerald-600 uppercase font-bold">Disease (M1)</span>
-                    <span className="font-semibold text-emerald-900">{analysisResults[0]?.models[0]?.data?.label || 'N/A'}</span>
-                  </div>
-                  <div className="bg-blue-50 p-3 rounded-lg border border-blue-100">
-                    <span className="block text-xs text-blue-600 uppercase font-bold">Pest (M2)</span>
-                    <span className="font-semibold text-blue-900">{analysisResults[0]?.models[1]?.data?.label || 'N/A'}</span>
-                  </div>
+                  {fullData.vision && fullData.vision.map((imgData, idx) => (
+                    <div key={idx} className="bg-slate-50 p-3 rounded-lg border border-slate-200">
+                      <span className="block text-xs text-slate-600 font-bold mb-1 border-b pb-1">Image {idx + 1}</span>
+                      <div className="flex justify-between items-center text-sm mb-1">
+                        <span className="text-emerald-600 font-semibold">Disease:</span>
+                        <span className="text-slate-800 font-bold">{imgData.disease?.label || 'N/A'}</span>
+                      </div>
+                      <div className="flex justify-between items-center text-sm">
+                        <span className="text-blue-600 font-semibold">Pests:</span>
+                        <span className="text-slate-800 font-bold">{imgData.pest?.label || 'N/A'}</span>
+                      </div>
+                    </div>
+                  ))}
+                  {(!fullData.vision || fullData.vision.length === 0) && (
+                    <div className="text-slate-500 text-sm">No images analyzed.</div>
+                  )}
                 </div>
               </div>
 
