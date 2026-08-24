@@ -6,6 +6,7 @@ import Dashboard from './pages/Dashboard';
 import Weather from './pages/Weather';
 import Monitoring from './pages/Monitoring';
 import WeatherSync from './pages/WeatherSync';
+import IoTSync from './pages/IoTSync';
 import CropHistoryWizard from './pages/CropHistoryWizard';
 import Sensors from './pages/Sensors';
 import ESP32Connect from './pages/ESP32Connect';
@@ -47,6 +48,7 @@ function App() {
           <Route path="soil-npk" element={<div className="p-4">Soil & NPK (Under Construction)</div>} />
           <Route path="weather" element={<Weather />} />
           <Route path="weather-sync" element={<WeatherSync />} />
+          <Route path="iot-sync" element={<IoTSync />} />
           <Route path="reports" element={<CropHistoryWizard />} />
           <Route path="alerts" element={<div className="p-4">Alerts & Notifications (Under Construction)</div>} />
           <Route path="recommendations" element={<div className="p-4">Recommendations (Under Construction)</div>} />
