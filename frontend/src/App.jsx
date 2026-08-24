@@ -8,6 +8,7 @@ import Monitoring from './pages/Monitoring';
 import WeatherSync from './pages/WeatherSync';
 import CropHistoryWizard from './pages/CropHistoryWizard';
 import MultiModelVision from './pages/MultiModelVision';
+import EngineCompute from './pages/EngineCompute';
 import Sensors from './pages/Sensors';
 import ESP32Connect from './pages/ESP32Connect';
 import FertilizerGuide from './pages/FertilizerGuide';
@@ -50,6 +51,7 @@ function App() {
           <Route path="weather-sync" element={<WeatherSync />} />
           <Route path="iot-sync" element={<Sensors isDiagnosticMode={true} />} />
           <Route path="image-upload" element={<MultiModelVision />} />
+          <Route path="engine-compute" element={<EngineCompute />} />
           <Route path="reports" element={<CropHistoryWizard />} />
           <Route path="alerts" element={<div className="p-4">Alerts & Notifications (Under Construction)</div>} />
           <Route path="recommendations" element={<div className="p-4">Recommendations (Under Construction)</div>} />
