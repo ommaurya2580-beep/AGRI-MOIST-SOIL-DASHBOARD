@@ -225,8 +225,8 @@ export default function MultiModelVision() {
         const fullData = JSON.parse(localStorage.getItem('agripulse_diagnostic') || '{}');
         
         return (
-        <div className="fixed inset-0 z-[100] bg-slate-900/95 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-white rounded-3xl max-w-4xl w-full shadow-2xl animate-in zoom-in-95 duration-300 border-4 border-indigo-500 overflow-hidden my-8">
+        <div className="fixed inset-0 z-[100] bg-slate-900/95 backdrop-blur-md flex items-start justify-center p-4 overflow-y-auto">
+          <div className="bg-white rounded-3xl max-w-4xl w-full shadow-2xl animate-in zoom-in-95 duration-300 border-4 border-indigo-500 overflow-hidden my-8 mt-12 flex-shrink-0">
             <div className="bg-indigo-600 p-6 text-center text-white">
               <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Brain size={32} />
