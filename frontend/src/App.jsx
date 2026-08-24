@@ -6,7 +6,6 @@ import Dashboard from './pages/Dashboard';
 import Weather from './pages/Weather';
 import Monitoring from './pages/Monitoring';
 import WeatherSync from './pages/WeatherSync';
-import IoTSync from './pages/IoTSync';
 import CropHistoryWizard from './pages/CropHistoryWizard';
 import Sensors from './pages/Sensors';
 import ESP32Connect from './pages/ESP32Connect';
