@@ -162,9 +162,9 @@ export default function Sensors({ isDiagnosticMode = false }) {
               </div>
             </div>
             
-            <p className="text-sm font-bold text-slate-400 mt-6 text-center animate-pulse flex items-center justify-center gap-2">
-              Proceeding to Step 4: Multi-Model AI Vision <ChevronRight size={16} />
-            </p>
+            <button onClick={handleManualNext} className="w-full mt-6 py-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold flex items-center justify-center gap-2 transition-colors shadow-lg shadow-emerald-500/30">
+              Proceed to Step 4: AI Vision <ChevronRight size={20} />
+            </button>
           </div>
         </div>
       )}

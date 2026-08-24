@@ -97,11 +97,10 @@ export default function WeatherSync() {
     setIsSaving(true);
     
     localStorage.setItem('agripulse_diagnostic', JSON.stringify(currentData));
-    
-    // Move to next step (IoT Sync) after showing the data for 2 seconds
-    setTimeout(() => {
-      navigate('/iot-sync');
-    }, 2500);
+  };
+
+  const handleManualNext = () => {
+    navigate('/iot-sync');
   };
 
   return (
@@ -138,9 +137,9 @@ export default function WeatherSync() {
               </div>
             </div>
             
-            <p className="text-sm font-bold text-slate-400 mt-6 text-center animate-pulse flex items-center justify-center gap-2">
-              Proceeding to Step 3: IoT Sensor Sync <ChevronRight size={16} />
-            </p>
+            <button onClick={handleManualNext} className="w-full mt-6 py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold flex items-center justify-center gap-2 transition-colors shadow-lg shadow-blue-500/30">
+              Proceed to Step 3: IoT Sensors <ChevronRight size={20} />
+            </button>
           </div>
         </div>
       )}

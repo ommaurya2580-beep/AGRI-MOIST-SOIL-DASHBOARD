@@ -194,62 +194,108 @@ export default function MultiModelVision() {
   };
 
   const handleConfirmAndProceed = () => {
-    setAppState('saving');
-    
-    // Save to local storage for the Engine
-    const currentData = JSON.parse(localStorage.getItem('agripulse_diagnostic') || '{}');
-    
-    // We pass the aggregated vision data to the engine
-    const visionPayload = analysisResults.map(res => ({
-      disease: res.models[0].data,
-      pest: res.models[1].data
-    }));
-    
-    currentData.vision = visionPayload;
-    localStorage.setItem('agripulse_diagnostic', JSON.stringify(currentData));
-    
-    // Finally, go to the Engine computing page
-    setTimeout(() => {
-      navigate('/engine-compute'); // <--- The next step after vision
-    }, 2500);
+    const handleFeedToEngine = () => {
+      setAppState('saving');
+      
+      const currentData = JSON.parse(localStorage.getItem('agripulse_diagnostic') || '{}');
+      
+      const visionPayload = analysisResults.map(r => ({
+        disease: {
+          label: r.models[0].data.label,
+          confidence: r.models[0].data.confidence
+        },
+        pest: {
+          label: r.models[1].data.label,
+          confidence: r.models[1].data.confidence,
+          detections: r.models[1].data.detections || []
+        }
+      }));
+
+      currentData.vision = visionPayload;
+      localStorage.setItem('agripulse_diagnostic', JSON.stringify(currentData));
+    };
+    handleFeedToEngine();
   };
 
   return (
     <div className="max-w-6xl mx-auto space-y-6 relative pb-20">
       
-      {/* Saving Overlay */}
-      {appState === 'saving' && (
-        <div className="fixed inset-0 z-[100] bg-slate-900/90 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl p-8 max-w-lg w-full shadow-2xl animate-in zoom-in-95 duration-300 border-2 border-indigo-500">
-            <div className="w-16 h-16 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Layers size={32} />
+      {/* Saving Overlay: MASTER SUMMARY BEFORE ENGINE */}
+      {appState === 'saving' && (() => {
+        const fullData = JSON.parse(localStorage.getItem('agripulse_diagnostic') || '{}');
+        
+        return (
+        <div className="fixed inset-0 z-[100] bg-slate-900/95 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-white rounded-3xl max-w-4xl w-full shadow-2xl animate-in zoom-in-95 duration-300 border-4 border-indigo-500 overflow-hidden my-8">
+            <div className="bg-indigo-600 p-6 text-center text-white">
+              <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Brain size={32} />
+              </div>
+              <h2 className="text-3xl font-black mb-1">Final Data Review</h2>
+              <p className="text-indigo-100">Review all captured data before running the Root Cause Engine</p>
             </div>
-            <h2 className="text-2xl font-bold text-slate-800 mb-1 text-center">Vision Data Finalized!</h2>
-            <p className="text-slate-500 mb-6 text-center text-sm">Aggregated multi-model results are ready</p>
             
-            <div className="bg-slate-50 rounded-2xl p-4 border border-slate-200">
-              <div className="grid grid-cols-2 gap-3 text-sm">
-                <div className="bg-white p-3 rounded-xl border border-slate-100 shadow-sm col-span-2">
-                  <span className="text-slate-400 text-xs uppercase font-bold tracking-wider block mb-1">Total Images Analyzed</span>
-                  <span className="text-slate-800 font-semibold">{analysisResults.length} Images</span>
-                </div>
-                <div className="bg-emerald-50 p-3 rounded-xl border border-emerald-100 shadow-sm">
-                  <span className="text-emerald-600 text-xs uppercase font-bold tracking-wider block mb-1">Disease Engine (M1)</span>
-                  <span className="text-emerald-900 font-semibold truncate block" title={analysisResults[0]?.models[0]?.data?.label}>{analysisResults[0]?.models[0]?.data?.label || 'N/A'}</span>
-                </div>
-                <div className="bg-blue-50 p-3 rounded-xl border border-blue-100 shadow-sm">
-                  <span className="text-blue-600 text-xs uppercase font-bold tracking-wider block mb-1">Pest Radar (M2)</span>
-                  <span className="text-blue-900 font-semibold truncate block" title={analysisResults[0]?.models[1]?.data?.label}>{analysisResults[0]?.models[1]?.data?.label || 'N/A'}</span>
+            <div className="p-8 space-y-8 bg-slate-50">
+              
+              {/* History Row */}
+              <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                <h3 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2 border-b pb-2"><Activity className="text-emerald-500"/> Step 1: Crop History</h3>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div><span className="block text-xs text-slate-400 uppercase font-bold">Stage</span><span className="font-medium">{fullData.history?.stage || 'N/A'}</span></div>
+                  <div><span className="block text-xs text-slate-400 uppercase font-bold">Irrigation</span><span className="font-medium">{fullData.history?.irrigation_date || 'N/A'}</span></div>
+                  <div><span className="block text-xs text-slate-400 uppercase font-bold">Fertilizer</span><span className="font-medium">{fullData.history?.fertilizer || 'N/A'}</span></div>
+                  <div><span className="block text-xs text-slate-400 uppercase font-bold">Observed</span><span className="font-medium">{fullData.history?.observed_problem || 'N/A'}</span></div>
                 </div>
               </div>
+
+              {/* Weather Row */}
+              <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                <h3 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2 border-b pb-2"><CloudRain className="text-blue-500"/> Step 2: Weather (30 Days)</h3>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div><span className="block text-xs text-slate-400 uppercase font-bold">Avg Temp</span><span className="font-medium">{fullData.weather?.metrics?.temperature_mean}°C</span></div>
+                  <div><span className="block text-xs text-slate-400 uppercase font-bold">Total Rain</span><span className="font-medium">{fullData.weather?.metrics?.rainfall_sum}mm</span></div>
+                  <div><span className="block text-xs text-slate-400 uppercase font-bold">Humidity</span><span className="font-medium">{fullData.weather?.metrics?.humidity_mean}%</span></div>
+                  <div><span className="block text-xs text-slate-400 uppercase font-bold">UV Max</span><span className="font-medium">{fullData.weather?.metrics?.uv_index_max}</span></div>
+                </div>
+              </div>
+
+              {/* Sensors Row */}
+              <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                <h3 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2 border-b pb-2"><Zap className="text-amber-500"/> Step 3: IoT Sensors</h3>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div><span className="block text-xs text-slate-400 uppercase font-bold">Moisture</span><span className="font-medium">{fullData.sensors?.moisture}</span></div>
+                  <div><span className="block text-xs text-slate-400 uppercase font-bold">Temp</span><span className="font-medium">{fullData.sensors?.temperature}°C</span></div>
+                  <div><span className="block text-xs text-slate-400 uppercase font-bold">pH</span><span className="font-medium">{fullData.sensors?.pH}</span></div>
+                  <div><span className="block text-xs text-slate-400 uppercase font-bold">Pump</span><span className="font-medium">{fullData.sensors?.pump_state ? 'ON' : 'OFF'}</span></div>
+                </div>
+              </div>
+
+              {/* Vision Row */}
+              <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                <h3 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2 border-b pb-2"><Camera className="text-purple-500"/> Step 4: AI Vision</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="bg-emerald-50 p-3 rounded-lg border border-emerald-100">
+                    <span className="block text-xs text-emerald-600 uppercase font-bold">Disease (M1)</span>
+                    <span className="font-semibold text-emerald-900">{analysisResults[0]?.models[0]?.data?.label || 'N/A'}</span>
+                  </div>
+                  <div className="bg-blue-50 p-3 rounded-lg border border-blue-100">
+                    <span className="block text-xs text-blue-600 uppercase font-bold">Pest (M2)</span>
+                    <span className="font-semibold text-blue-900">{analysisResults[0]?.models[1]?.data?.label || 'N/A'}</span>
+                  </div>
+                </div>
+              </div>
+
             </div>
             
-            <p className="text-sm font-bold text-slate-400 mt-6 text-center animate-pulse flex items-center justify-center gap-2">
-              Initializing Root Cause Engine <ChevronRight size={16} />
-            </p>
+            <div className="p-6 bg-white border-t border-slate-100">
+              <button onClick={() => navigate('/engine-compute')} className="w-full py-5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-black text-xl flex items-center justify-center gap-3 transition-all transform hover:scale-[1.02] shadow-xl shadow-indigo-500/30">
+                Run Root Cause Engine <ChevronRight size={24} />
+              </button>
+            </div>
           </div>
         </div>
-      )}
+        );
+      })()}
 
       {/* Header */}
       <div className="flex items-center justify-between mb-8">

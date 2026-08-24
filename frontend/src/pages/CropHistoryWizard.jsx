@@ -136,15 +136,23 @@ export default function CropHistoryWizard() {
       setIsSaving(true);
       
       const currentData = JSON.parse(localStorage.getItem('agripulse_diagnostic') || '{}');
-      currentData.history = historyPayload;
+      currentData.history = {
+        // Save raw IDs for the engine
+        stage_id: selections.stage?.selectedOption,
+        fertilizer_id: selections.fertilizer?.selectedOption,
+        spray_id: selections.spray?.selectedOption,
+        problem_id: selections.problem?.selectedOption,
+        // Save labels for the UI
+        ...historyPayload
+      };
       localStorage.setItem('agripulse_diagnostic', JSON.stringify(currentData));
-
-      setTimeout(() => {
-        navigate('/weather-sync');
-      }, 2500);
     } else {
       setCurrentStepIndex(prev => prev + 1);
     }
+  };
+
+  const handleManualNext = () => {
+    navigate('/weather-sync');
   };
 
   const handleBack = () => {
@@ -200,9 +208,9 @@ export default function CropHistoryWizard() {
               </div>
             </div>
             
-            <p className="text-sm font-bold text-slate-400 mt-6 text-center animate-pulse flex items-center justify-center gap-2">
-              Proceeding to Step 2: Weather Sync <ChevronRight size={16} />
-            </p>
+            <button onClick={handleManualNext} className="w-full mt-6 py-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold flex items-center justify-center gap-2 transition-colors shadow-lg shadow-emerald-500/30">
+              Proceed to Step 2: Weather <ChevronRight size={20} />
+            </button>
           </div>
         </div>
       )}
