@@ -126,10 +126,13 @@ export default function CropHistoryWizard() {
       const historyPayload = {
         stage: getLabelForOption(WIZARD_STEPS.find(s => s.id === 'stage'), selections.stage?.selectedOption),
         irrigation_date: selections.irrigation,
-        fertilizer: getLabelForOption(WIZARD_STEPS.find(s => s.id === 'fertilizer'), selections.fertilizer?.selectedOption),
+        fertilizer: getLabelForOption(WIZARD_STEPS.find(s => s.id === 'fertilizer'), selections.fertilizer?.selectedOption) + (selections.fertilizer?.otherName ? ` (${selections.fertilizer.otherName})` : ''),
         fertilizer_date: selections.fertilizer?.approxDate,
         spray: getLabelForOption(WIZARD_STEPS.find(s => s.id === 'spray'), selections.spray?.selectedOption),
-        observed_problem: getLabelForOption(WIZARD_STEPS.find(s => s.id === 'problem'), selections.problem?.selectedOption)
+        spray_date: selections.spray?.approxDate,
+        weather_experience: getLabelForOption(WIZARD_STEPS.find(s => s.id === 'weather'), selections.weather?.selectedOption),
+        observed_problem: getLabelForOption(WIZARD_STEPS.find(s => s.id === 'problem'), selections.problem?.selectedOption),
+        problem_date: selections.problem?.approxDate
       };
 
       setSavedPayload(historyPayload);
@@ -141,6 +144,7 @@ export default function CropHistoryWizard() {
         stage_id: selections.stage?.selectedOption,
         fertilizer_id: selections.fertilizer?.selectedOption,
         spray_id: selections.spray?.selectedOption,
+        weather_id: selections.weather?.selectedOption,
         problem_id: selections.problem?.selectedOption,
         // Save labels for the UI
         ...historyPayload
@@ -197,13 +201,15 @@ export default function CropHistoryWizard() {
             <h2 className="text-2xl font-bold text-slate-800 mb-1 text-center">History Captured!</h2>
             <p className="text-slate-500 mb-6 text-center text-sm">Data structured for Root Cause Engine</p>
             
-            <div className="bg-slate-50 rounded-2xl p-4 border border-slate-200">
+            <div className="bg-slate-50 rounded-2xl p-4 border border-slate-200 max-h-[400px] overflow-y-auto">
               <div className="grid grid-cols-2 gap-3 text-sm">
                 {savedPayload && Object.entries(savedPayload).map(([key, value]) => (
-                  <div key={key} className="bg-white p-3 rounded-xl border border-slate-100 shadow-sm">
-                    <span className="text-slate-400 text-xs uppercase font-bold tracking-wider block mb-1">{key.replace('_', ' ')}</span>
-                    <span className="text-slate-800 font-semibold">{Array.isArray(value) ? value.join(', ') : (typeof value === 'object' ? value.selectedOption : value)}</span>
-                  </div>
+                  value ? (
+                    <div key={key} className="bg-white p-3 rounded-xl border border-slate-100 shadow-sm">
+                      <span className="text-slate-400 text-xs uppercase font-bold tracking-wider block mb-1">{key.replace('_', ' ')}</span>
+                      <span className="text-slate-800 font-semibold">{Array.isArray(value) ? value.join(', ') : (typeof value === 'object' ? value.selectedOption : value)}</span>
+                    </div>
+                  ) : null
                 ))}
               </div>
             </div>

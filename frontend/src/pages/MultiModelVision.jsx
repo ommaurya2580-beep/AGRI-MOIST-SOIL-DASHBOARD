@@ -243,8 +243,10 @@ export default function MultiModelVision() {
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   <div><span className="block text-xs text-slate-400 uppercase font-bold">Stage</span><span className="font-medium">{fullData.history?.stage || 'N/A'}</span></div>
                   <div><span className="block text-xs text-slate-400 uppercase font-bold">Irrigation</span><span className="font-medium">{fullData.history?.irrigation_date || 'N/A'}</span></div>
-                  <div><span className="block text-xs text-slate-400 uppercase font-bold">Fertilizer</span><span className="font-medium">{fullData.history?.fertilizer || 'N/A'}</span></div>
-                  <div><span className="block text-xs text-slate-400 uppercase font-bold">Observed</span><span className="font-medium">{fullData.history?.observed_problem || 'N/A'}</span></div>
+                  <div><span className="block text-xs text-slate-400 uppercase font-bold">Fertilizer</span><span className="font-medium block">{fullData.history?.fertilizer || 'N/A'}</span><span className="text-xs text-slate-500">{fullData.history?.fertilizer_date}</span></div>
+                  <div><span className="block text-xs text-slate-400 uppercase font-bold">Spray</span><span className="font-medium block">{fullData.history?.spray || 'N/A'}</span><span className="text-xs text-slate-500">{fullData.history?.spray_date}</span></div>
+                  <div><span className="block text-xs text-slate-400 uppercase font-bold">Weather Exp.</span><span className="font-medium block">{fullData.history?.weather_experience || 'N/A'}</span></div>
+                  <div className="col-span-2"><span className="block text-xs text-slate-400 uppercase font-bold">Observed Problem</span><span className="font-medium block">{fullData.history?.observed_problem || 'N/A'}</span><span className="text-xs text-slate-500">{fullData.history?.problem_date}</span></div>
                 </div>
               </div>
 
