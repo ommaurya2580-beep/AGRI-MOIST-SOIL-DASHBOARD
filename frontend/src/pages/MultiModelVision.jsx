@@ -253,11 +253,13 @@ export default function MultiModelVision() {
               {/* Weather Row */}
               <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
                 <h3 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2 border-b pb-2"><CloudRain className="text-blue-500"/> Step 2: Weather (30 Days)</h3>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <div><span className="block text-xs text-slate-400 uppercase font-bold">Avg Temp</span><span className="font-medium">{fullData.weather?.metrics?.temperature_mean}°C</span></div>
-                  <div><span className="block text-xs text-slate-400 uppercase font-bold">Total Rain</span><span className="font-medium">{fullData.weather?.metrics?.rainfall_sum}mm</span></div>
-                  <div><span className="block text-xs text-slate-400 uppercase font-bold">Humidity</span><span className="font-medium">{fullData.weather?.metrics?.humidity_mean}%</span></div>
-                  <div><span className="block text-xs text-slate-400 uppercase font-bold">UV Max</span><span className="font-medium">{fullData.weather?.metrics?.uv_index_max}</span></div>
+                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                  {Object.entries(fullData.weather?.raw_metrics || {}).map(([key, val]) => (
+                    <div key={key}>
+                      <span className="block text-[10px] text-slate-400 uppercase font-bold">{key.replace(/([A-Z])/g, ' $1').trim()}</span>
+                      <span className="font-medium text-sm">{val}</span>
+                    </div>
+                  ))}
                 </div>
               </div>
 

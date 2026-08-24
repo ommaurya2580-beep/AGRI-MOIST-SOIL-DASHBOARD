@@ -90,7 +90,9 @@ export default function WeatherSync() {
       temp_avg: parseInt(weatherData?.metrics?.temp) || 25,
       rain_sum: parseInt(weatherData?.metrics?.rain) || 0,
       humidity_avg: parseInt(weatherData?.metrics?.humidity) || 60,
-      uv_max: parseInt(weatherData?.metrics?.uvIndex) || 5
+      uv_max: parseInt(weatherData?.metrics?.uvIndex) || 5,
+      // Full raw data for UI
+      raw_metrics: weatherData?.metrics || {}
     };
 
     currentData.weather = weatherPayload;
@@ -109,32 +111,24 @@ export default function WeatherSync() {
       
       {/* Saving Data Overlay */}
       {isSaving && (
-        <div className="fixed inset-0 z-[100] bg-slate-900/90 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl p-8 max-w-lg w-full shadow-2xl animate-in zoom-in-95 duration-300 border-2 border-blue-500">
+        <div className="fixed inset-0 z-[100] bg-slate-900/90 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-white rounded-3xl p-8 max-w-2xl w-full shadow-2xl animate-in zoom-in-95 duration-300 border-2 border-blue-500 my-8">
             <div className="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
               <CloudRain size={32} />
             </div>
             <h2 className="text-2xl font-bold text-slate-800 mb-1 text-center">Weather Captured!</h2>
-            <p className="text-slate-500 mb-6 text-center text-sm">Data structured for Root Cause Engine</p>
+            <p className="text-slate-500 mb-6 text-center text-sm">Full 30-day snapshot structured for Root Cause Engine</p>
             
             <div className="bg-slate-50 rounded-2xl p-4 border border-slate-200">
-              <div className="grid grid-cols-2 gap-3 text-sm">
-                <div className="bg-white p-3 rounded-xl border border-slate-100 shadow-sm">
-                  <span className="text-slate-400 text-xs uppercase font-bold tracking-wider block mb-1">Avg Temp</span>
-                  <span className="text-slate-800 font-semibold">{JSON.parse(localStorage.getItem('agripulse_diagnostic')).weather?.temp_avg}°C</span>
-                </div>
-                <div className="bg-white p-3 rounded-xl border border-slate-100 shadow-sm">
-                  <span className="text-slate-400 text-xs uppercase font-bold tracking-wider block mb-1">Total Rainfall</span>
-                  <span className="text-slate-800 font-semibold">{JSON.parse(localStorage.getItem('agripulse_diagnostic')).weather?.rain_sum} mm</span>
-                </div>
-                <div className="bg-white p-3 rounded-xl border border-slate-100 shadow-sm">
-                  <span className="text-slate-400 text-xs uppercase font-bold tracking-wider block mb-1">Humidity</span>
-                  <span className="text-slate-800 font-semibold">{JSON.parse(localStorage.getItem('agripulse_diagnostic')).weather?.humidity_avg}%</span>
-                </div>
-                <div className="bg-white p-3 rounded-xl border border-slate-100 shadow-sm">
-                  <span className="text-slate-400 text-xs uppercase font-bold tracking-wider block mb-1">UV Max</span>
-                  <span className="text-slate-800 font-semibold">{JSON.parse(localStorage.getItem('agripulse_diagnostic')).weather?.uv_max}</span>
-                </div>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-3 text-sm">
+                {Object.entries(JSON.parse(localStorage.getItem('agripulse_diagnostic')).weather?.raw_metrics || {}).map(([key, val]) => (
+                  <div key={key} className="bg-white p-3 rounded-xl border border-slate-100 shadow-sm">
+                    <span className="text-slate-400 text-[10px] uppercase font-bold tracking-wider block mb-1">
+                      {key.replace(/([A-Z])/g, ' $1').trim()}
+                    </span>
+                    <span className="text-slate-800 font-semibold text-sm">{val}</span>
+                  </div>
+                ))}
               </div>
             </div>
             
