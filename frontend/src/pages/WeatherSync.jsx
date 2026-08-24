@@ -17,9 +17,27 @@ export default function WeatherSync() {
     
     // Simulate API fetch for 30 days of weather data based on location
     setTimeout(() => {
+      // Generate 30 days of mock history data
+      const history = [];
+      const today = new Date();
+      for (let i = 30; i >= 1; i--) {
+        const d = new Date(today);
+        d.setDate(d.getDate() - i);
+        // Randomize weather to make it look realistic for 'Heavy Rainfall' past 15 days
+        const isRainy = i <= 15;
+        history.push({
+          date: d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+          condition: isRainy ? (i % 3 === 0 ? 'Cloudy' : 'Rain') : (i % 4 === 0 ? 'Cloudy' : 'Sunny'),
+          temp: isRainy ? Math.floor(Math.random() * 5 + 22) : Math.floor(Math.random() * 8 + 28), // 22-26 if rain, 28-35 if sunny
+          rain: isRainy ? Math.floor(Math.random() * 20 + 5) : 0, // 5-25mm if rain
+          humidity: isRainy ? Math.floor(Math.random() * 15 + 80) : Math.floor(Math.random() * 20 + 40) // 80-95% if rain
+        });
+      }
+
       setWeatherData({
         location: loc,
         summary: "Heavy Rainfall in the past 15 days. High humidity.",
+        dailyHistory: history.reverse(), // most recent first
         metrics: {
           rain: "124 mm",
           temp: "24°C Avg",
@@ -171,6 +189,50 @@ export default function WeatherSync() {
             <MetricCard icon={Gauge} label="Pressure" value={weatherData.metrics.pressure} color="text-purple-500" bg="bg-purple-50" />
             <MetricCard icon={Eye} label="Visibility" value={weatherData.metrics.visibility} color="text-cyan-500" bg="bg-cyan-50" />
             <MetricCard icon={Droplets} label="Dew Point" value={weatherData.metrics.dewPoint} color="text-sky-500" bg="bg-sky-50" />
+          </div>
+
+          {/* 30-Day Day-by-Day List */}
+          <div className="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm">
+            <h3 className="text-xl font-bold text-slate-800 mb-6 flex items-center gap-2">
+              <CloudRain className="text-blue-500" /> 30-Day Weather Log
+            </h3>
+            <div className="overflow-x-auto">
+              <div className="max-h-96 overflow-y-auto pr-2 custom-scrollbar">
+                <table className="w-full text-left border-collapse">
+                  <thead className="sticky top-0 bg-slate-50 border-b border-slate-200 z-10">
+                    <tr>
+                      <th className="py-3 px-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Date</th>
+                      <th className="py-3 px-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Condition</th>
+                      <th className="py-3 px-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Avg Temp</th>
+                      <th className="py-3 px-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Rainfall</th>
+                      <th className="py-3 px-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Humidity</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {weatherData.dailyHistory.map((day, idx) => (
+                      <tr key={idx} className="hover:bg-slate-50 transition-colors">
+                        <td className="py-3 px-4 font-medium text-slate-800">{day.date}</td>
+                        <td className="py-3 px-4 flex items-center gap-2">
+                          {day.condition === 'Sunny' && <Sun size={16} className="text-orange-500" />}
+                          {day.condition === 'Cloudy' && <Cloud size={16} className="text-slate-400" />}
+                          {day.condition === 'Rain' && <CloudRain size={16} className="text-blue-500" />}
+                          <span className={
+                            day.condition === 'Rain' ? 'text-blue-600 font-medium' : 'text-slate-600'
+                          }>{day.condition}</span>
+                        </td>
+                        <td className="py-3 px-4 text-slate-600">{day.temp}°C</td>
+                        <td className="py-3 px-4 text-slate-600">
+                          {day.rain > 0 ? (
+                            <span className="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-xs font-bold">{day.rain} mm</span>
+                          ) : '-'}
+                        </td>
+                        <td className="py-3 px-4 text-slate-600">{day.humidity}%</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
           </div>
 
           <div className="bg-white rounded-2xl p-6 md:p-8 border border-slate-200 shadow-sm flex flex-col md:flex-row items-center justify-between gap-6">
