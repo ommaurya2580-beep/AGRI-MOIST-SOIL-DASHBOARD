@@ -100,10 +100,21 @@ export class RootCauseEngine {
 
   // --- RULE 3: HISTORY RULES ---
   evaluateHistory() {
-    const obs = this.history.visual_signs || [];
-    const recentAction = this.history.recent_action || '';
+    // History data comes as { stage: { selectedOption: 'flowering' }, visual: { selectedOption: 'yellowing' } }
+    const rawObs = this.history.visual || this.history.visual_signs;
+    let obs = [];
+    if (typeof rawObs === 'string') {
+      obs = [rawObs];
+    } else if (Array.isArray(rawObs)) {
+      obs = rawObs;
+    } else if (rawObs && rawObs.selectedOption) {
+      obs = [rawObs.selectedOption];
+    }
     
-    if (obs.includes('yellowing_leaves')) {
+    const rawAction = this.history.irrigation || this.history.recent_action;
+    const recentAction = (rawAction && rawAction.selectedOption) ? rawAction.selectedOption : String(rawAction || '');
+    
+    if (obs.includes('yellowing_leaves') || obs.includes('yellowing')) {
       this.addScore(DIAGNOSES.NUTRIENT_DEFICIENCY_N, 35, 'Farmer observed yellowing leaves (Chlorosis)');
       this.addScore(DIAGNOSES.WATER_STRESS_OVERWATER, 15, 'Yellowing leaves can indicate root rot from overwatering');
     }
@@ -112,11 +123,11 @@ export class RootCauseEngine {
       this.addScore(DIAGNOSES.WATER_STRESS_DROUGHT, 30, 'Farmer observed wilting');
     }
 
-    if (obs.includes('spots_on_leaves')) {
+    if (obs.includes('spots_on_leaves') || obs.includes('spots')) {
       this.addScore(DIAGNOSES.FUNGAL_DISEASE_RUST, 20, 'Farmer observed spots on leaves');
     }
 
-    if (obs.includes('insects_visible') || obs.includes('holes_in_leaves')) {
+    if (obs.includes('insects_visible') || obs.includes('holes_in_leaves') || obs.includes('insects') || obs.includes('holes')) {
       this.addScore(DIAGNOSES.PEST_ATTACK_GENERAL, 40, 'Farmer visually confirmed pests or leaf damage');
     }
   }

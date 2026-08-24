@@ -100,8 +100,11 @@ export default function MultiModelVision() {
     if (images.length === 0) return;
     setAppState('analyzing');
 
-    // Process ALL images and ALL models completely in parallel
-    const imagePromises = images.map(async (imageObj) => {
+    const resultsArray = [];
+
+    // Process each image sequentially to prevent overloading the backend server,
+    // but run models in parallel for each individual image.
+    for (const imageObj of images) {
       const formData = new FormData();
       formData.append('file', imageObj.file);
 
@@ -112,18 +115,32 @@ export default function MultiModelVision() {
           icon: Brain,
           status: 'Offline',
           result: 'Pending Future Update'
-        }), 800); // reduced mock delay to 800ms
+        }), 800);
       });
 
       try {
-        // Parallel execution of real models for THIS image
+        const controller1 = new AbortController();
+        const controller2 = new AbortController();
+        const timeout1 = setTimeout(() => controller1.abort(), 35000); // 35s timeout
+        const timeout2 = setTimeout(() => controller2.abort(), 35000);
+
+        // Parallel execution of real models for THIS image ONLY
         const [diseaseRes, pestRes, model3Res] = await Promise.allSettled([
-          fetch('/api/v1/disease/predict', { method: 'POST', body: formData }).then(res => res.json()),
-          fetch('/api/pest/predict', { method: 'POST', body: formData }).then(res => res.json()),
+          fetch('/api/v1/disease/predict', { 
+            method: 'POST', body: formData, signal: controller1.signal 
+          }).then(res => res.json()),
+          
+          fetch('/api/pest/predict', { 
+            method: 'POST', body: formData, signal: controller2.signal 
+          }).then(res => res.json()),
+          
           mockModel3
         ]);
 
-        return {
+        clearTimeout(timeout1);
+        clearTimeout(timeout2);
+
+        resultsArray.push({
           imageId: imageObj.id,
           preview: imageObj.preview,
           models: [
@@ -133,7 +150,7 @@ export default function MultiModelVision() {
               icon: Activity,
               data: diseaseRes.status === 'fulfilled' 
                 ? { label: diseaseRes.value.prediction || "Unknown", confidence: diseaseRes.value.confidence || 0 } 
-                : { error: 'Failed' },
+                : { error: 'Failed or Timeout' },
               color: 'emerald'
             },
             {
@@ -150,7 +167,7 @@ export default function MultiModelVision() {
                       : 1.0,
                     detections: pestRes.value.detections || []
                   } 
-                : { error: 'Failed' },
+                : { error: 'Failed or Timeout' },
               color: 'blue'
             },
             {
@@ -162,15 +179,13 @@ export default function MultiModelVision() {
               isOffline: true
             }
           ]
-        };
+        });
       } catch (err) {
         console.error("Error running models for image", err);
-        return null;
       }
-    });
+    }
 
-    const resolvedResults = await Promise.all(imagePromises);
-    setAnalysisResults(resolvedResults.filter(r => r !== null));
+    setAnalysisResults(resultsArray);
     
     // Slight delay for animation completion before showing results
     setTimeout(() => {
