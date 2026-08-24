@@ -1,10 +1,39 @@
 import React, { useState, useEffect } from 'react';
-import { Droplet, Thermometer, FlaskConical, Clock, Activity, Wifi, Link, CheckCircle, ExternalLink, Leaf, AlertCircle, Power } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Droplet, Thermometer, FlaskConical, Clock, Activity, Wifi, Link, CheckCircle, ExternalLink, Leaf, AlertCircle, Power, CheckCircle2, ChevronRight, Database } from 'lucide-react';
 import { LineChart, Line, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 
 const API_URL = '/api';
 
-export default function Sensors() {
+export default function Sensors({ isDiagnosticMode = false }) {
+  const navigate = useNavigate();
+  const [isSaving, setIsSaving] = useState(false);
+  const [savedPayload, setSavedPayload] = useState(null);
+
+  const handleDiagnosticConfirm = () => {
+    const currentData = JSON.parse(localStorage.getItem('agripulse_diagnostic') || '{}');
+    const iotPayload = {
+      soil_moisture_percent: moisture,
+      soil_temperature_c: mockTemp,
+      soil_ph: mockPh,
+      nitrogen_mg_kg: 45, // Using diagnostic mock for NPK as it's not live
+      phosphorus_mg_kg: 28,
+      potassium_mg_kg: 110,
+      device_id: "ESP32-WF-01",
+      is_online: isOnline
+    };
+    currentData.iot = iotPayload;
+    
+    setSavedPayload(iotPayload);
+    setIsSaving(true);
+    
+    localStorage.setItem('agripulse_diagnostic', JSON.stringify(currentData));
+    
+    setTimeout(() => {
+      navigate('/image-upload');
+    }, 2500);
+  };
+
   const [activeTab, setActiveTab] = useState('24h');
 
   // Backend Live State
@@ -100,7 +129,29 @@ export default function Sensors() {
   };
 
   return (
-    <div className="flex flex-col gap-6 max-w-7xl mx-auto">
+    <div className="flex flex-col gap-6 max-w-7xl mx-auto relative">
+      
+      {/* Diagnostic Saving Data Overlay */}
+      {isSaving && (
+        <div className="fixed inset-0 z-[100] bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl animate-in zoom-in-95 duration-300 text-center border-2 border-emerald-500">
+            <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Database size={32} />
+            </div>
+            <h2 className="text-2xl font-bold text-slate-800 mb-2">Live IoT Data Captured!</h2>
+            <p className="text-slate-500 mb-6">This real-time sensor data is being attached to your Engine Diagnosis:</p>
+            
+            <div className="bg-slate-900 rounded-xl p-4 text-left overflow-hidden">
+              <pre className="text-emerald-400 font-mono text-sm">
+                {JSON.stringify(savedPayload, null, 2)}
+              </pre>
+            </div>
+            
+            <p className="text-sm font-bold text-slate-400 mt-6 animate-pulse">Proceeding to Step 4: Crop Image Upload...</p>
+          </div>
+        </div>
+      )}
+
       {/* Top Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-2">
         <div>
@@ -454,6 +505,27 @@ export default function Sensors() {
         </div>
 
       </div>
+
+      {/* Diagnostic Flow Footer (Only visible when navigated from Weather Sync) */}
+      {isDiagnosticMode && (
+        <div className="bg-white rounded-2xl p-6 md:p-8 border border-slate-200 shadow-sm flex flex-col md:flex-row items-center justify-between gap-6 mt-4">
+          <div>
+            <div className="flex items-center gap-2 mb-1">
+              <span className="w-2.5 h-2.5 bg-emerald-500 rounded-full animate-pulse"></span>
+              <span className="text-emerald-500 font-bold text-xs uppercase tracking-wider">Live Link Active</span>
+            </div>
+            <h3 className="text-lg font-bold text-slate-800">Is this the live sensor data for your affected field?</h3>
+            <p className="text-slate-500 text-sm">We will use this real-time Ground Truth to cross-reference with Weather data.</p>
+          </div>
+          <button 
+            onClick={handleDiagnosticConfirm}
+            className="w-full md:w-auto flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white px-8 py-4 rounded-xl font-bold transition-all shadow-lg shadow-emerald-600/30 shrink-0"
+          >
+            <CheckCircle2 size={20} /> Attach Data & Continue <ChevronRight size={18} />
+          </button>
+        </div>
+      )}
+
     </div>
   );
 }

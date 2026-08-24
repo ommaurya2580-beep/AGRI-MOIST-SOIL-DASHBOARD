@@ -48,7 +48,7 @@ function App() {
           <Route path="soil-npk" element={<div className="p-4">Soil & NPK (Under Construction)</div>} />
           <Route path="weather" element={<Weather />} />
           <Route path="weather-sync" element={<WeatherSync />} />
-          <Route path="iot-sync" element={<IoTSync />} />
+          <Route path="iot-sync" element={<Sensors isDiagnosticMode={true} />} />
           <Route path="reports" element={<CropHistoryWizard />} />
           <Route path="alerts" element={<div className="p-4">Alerts & Notifications (Under Construction)</div>} />
           <Route path="recommendations" element={<div className="p-4">Recommendations (Under Construction)</div>} />
