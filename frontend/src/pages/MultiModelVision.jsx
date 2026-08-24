@@ -205,23 +205,33 @@ export default function MultiModelVision() {
       {/* Saving Overlay */}
       {appState === 'saving' && (
         <div className="fixed inset-0 z-[100] bg-slate-900/90 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl animate-in zoom-in-95 duration-300 text-center border-2 border-indigo-500">
+          <div className="bg-white rounded-3xl p-8 max-w-lg w-full shadow-2xl animate-in zoom-in-95 duration-300 border-2 border-indigo-500">
             <div className="w-16 h-16 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center mx-auto mb-4">
               <Layers size={32} />
             </div>
-            <h2 className="text-2xl font-bold text-slate-800 mb-2">Vision Data Finalized!</h2>
-            <p className="text-slate-500 mb-6">Aggregated multi-model results are ready for the Engine.</p>
+            <h2 className="text-2xl font-bold text-slate-800 mb-1 text-center">Vision Data Finalized!</h2>
+            <p className="text-slate-500 mb-6 text-center text-sm">Aggregated multi-model results are ready</p>
             
-            <div className="bg-slate-900 rounded-xl p-4 text-left overflow-hidden h-40 overflow-y-auto">
-              <pre className="text-indigo-400 font-mono text-xs">
-                {JSON.stringify(analysisResults.map(r => ({
-                  model1: r.models[0].data.label ? r.models[0].data : r.models[0].data.error,
-                  model2: r.models[1].data.label ? r.models[1].data : r.models[1].data.error
-                })), null, 2)}
-              </pre>
+            <div className="bg-slate-50 rounded-2xl p-4 border border-slate-200">
+              <div className="grid grid-cols-2 gap-3 text-sm">
+                <div className="bg-white p-3 rounded-xl border border-slate-100 shadow-sm col-span-2">
+                  <span className="text-slate-400 text-xs uppercase font-bold tracking-wider block mb-1">Total Images Analyzed</span>
+                  <span className="text-slate-800 font-semibold">{analysisResults.length} Images</span>
+                </div>
+                <div className="bg-emerald-50 p-3 rounded-xl border border-emerald-100 shadow-sm">
+                  <span className="text-emerald-600 text-xs uppercase font-bold tracking-wider block mb-1">Disease Engine (M1)</span>
+                  <span className="text-emerald-900 font-semibold truncate block" title={analysisResults[0]?.models[0]?.data?.label}>{analysisResults[0]?.models[0]?.data?.label || 'N/A'}</span>
+                </div>
+                <div className="bg-blue-50 p-3 rounded-xl border border-blue-100 shadow-sm">
+                  <span className="text-blue-600 text-xs uppercase font-bold tracking-wider block mb-1">Pest Radar (M2)</span>
+                  <span className="text-blue-900 font-semibold truncate block" title={analysisResults[0]?.models[1]?.data?.label}>{analysisResults[0]?.models[1]?.data?.label || 'N/A'}</span>
+                </div>
+              </div>
             </div>
             
-            <p className="text-sm font-bold text-slate-400 mt-6 animate-pulse">Initializing Root Cause Engine...</p>
+            <p className="text-sm font-bold text-slate-400 mt-6 text-center animate-pulse flex items-center justify-center gap-2">
+              Initializing Root Cause Engine <ChevronRight size={16} />
+            </p>
           </div>
         </div>
       )}

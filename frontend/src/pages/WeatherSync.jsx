@@ -107,23 +107,40 @@ export default function WeatherSync() {
   return (
     <div className="max-w-5xl mx-auto space-y-6 relative">
       
-      {/* Saving Data Overlay (Shows exactly what we are sending to the engine) */}
+      {/* Saving Data Overlay */}
       {isSaving && (
-        <div className="fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl animate-in zoom-in-95 duration-300 text-center border-2 border-emerald-500">
-            <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4">
-              <CheckCircle2 size={32} />
+        <div className="fixed inset-0 z-50 bg-slate-900/90 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl p-8 max-w-lg w-full shadow-2xl animate-in zoom-in-95 duration-300 border-2 border-blue-500">
+            <div className="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
+              <CloudRain size={32} />
             </div>
-            <h2 className="text-2xl font-bold text-slate-800 mb-2">Data Saved!</h2>
-            <p className="text-slate-500 mb-6">The following data is being sent to the Root Cause Engine:</p>
+            <h2 className="text-2xl font-bold text-slate-800 mb-1 text-center">Weather Captured!</h2>
+            <p className="text-slate-500 mb-6 text-center text-sm">Data structured for Root Cause Engine</p>
             
-            <div className="bg-slate-900 rounded-xl p-4 text-left overflow-hidden">
-              <pre className="text-emerald-400 font-mono text-sm">
-                {JSON.stringify(savedPayload, null, 2)}
-              </pre>
+            <div className="bg-slate-50 rounded-2xl p-4 border border-slate-200">
+              <div className="grid grid-cols-2 gap-3 text-sm">
+                <div className="bg-white p-3 rounded-xl border border-slate-100 shadow-sm">
+                  <span className="text-slate-400 text-xs uppercase font-bold tracking-wider block mb-1">Avg Temp</span>
+                  <span className="text-slate-800 font-semibold">{weatherData.metrics.temperature_mean}°C</span>
+                </div>
+                <div className="bg-white p-3 rounded-xl border border-slate-100 shadow-sm">
+                  <span className="text-slate-400 text-xs uppercase font-bold tracking-wider block mb-1">Total Rainfall</span>
+                  <span className="text-slate-800 font-semibold">{weatherData.metrics.rainfall_sum}mm</span>
+                </div>
+                <div className="bg-white p-3 rounded-xl border border-slate-100 shadow-sm">
+                  <span className="text-slate-400 text-xs uppercase font-bold tracking-wider block mb-1">Humidity</span>
+                  <span className="text-slate-800 font-semibold">{weatherData.metrics.humidity_mean}%</span>
+                </div>
+                <div className="bg-white p-3 rounded-xl border border-slate-100 shadow-sm">
+                  <span className="text-slate-400 text-xs uppercase font-bold tracking-wider block mb-1">UV Index</span>
+                  <span className="text-slate-800 font-semibold">{weatherData.metrics.uv_index_max}</span>
+                </div>
+              </div>
             </div>
             
-            <p className="text-sm font-bold text-slate-400 mt-6 animate-pulse">Proceeding to Step 3: IoT Sync...</p>
+            <p className="text-sm font-bold text-slate-400 mt-6 text-center animate-pulse flex items-center justify-center gap-2">
+              Proceeding to Step 3: IoT Sensor Sync <ChevronRight size={16} />
+            </p>
           </div>
         </div>
       )}

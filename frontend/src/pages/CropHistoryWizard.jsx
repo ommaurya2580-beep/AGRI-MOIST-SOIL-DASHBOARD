@@ -182,20 +182,27 @@ export default function CropHistoryWizard() {
       {/* Saving Data Overlay */}
       {isSaving && (
         <div className="absolute inset-0 z-50 bg-slate-900/90 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl animate-in zoom-in-95 duration-300 text-center border-2 border-emerald-500">
+          <div className="bg-white rounded-3xl p-8 max-w-lg w-full shadow-2xl animate-in zoom-in-95 duration-300 border-2 border-emerald-500">
             <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4">
               <CheckCircle2 size={32} />
             </div>
-            <h2 className="text-2xl font-bold text-slate-800 mb-2">History Saved!</h2>
-            <p className="text-slate-500 mb-6">The following data is being captured for the Root Cause Engine:</p>
+            <h2 className="text-2xl font-bold text-slate-800 mb-1 text-center">History Captured!</h2>
+            <p className="text-slate-500 mb-6 text-center text-sm">Data structured for Root Cause Engine</p>
             
-            <div className="bg-slate-900 rounded-xl p-4 text-left overflow-hidden">
-              <pre className="text-emerald-400 font-mono text-sm">
-                {JSON.stringify(savedPayload, null, 2)}
-              </pre>
+            <div className="bg-slate-50 rounded-2xl p-4 border border-slate-200">
+              <div className="grid grid-cols-2 gap-3 text-sm">
+                {savedPayload && Object.entries(savedPayload).map(([key, value]) => (
+                  <div key={key} className="bg-white p-3 rounded-xl border border-slate-100 shadow-sm">
+                    <span className="text-slate-400 text-xs uppercase font-bold tracking-wider block mb-1">{key.replace('_', ' ')}</span>
+                    <span className="text-slate-800 font-semibold">{Array.isArray(value) ? value.join(', ') : (typeof value === 'object' ? value.selectedOption : value)}</span>
+                  </div>
+                ))}
+              </div>
             </div>
             
-            <p className="text-sm font-bold text-slate-400 mt-6 animate-pulse">Proceeding to Step 2: Weather Sync...</p>
+            <p className="text-sm font-bold text-slate-400 mt-6 text-center animate-pulse flex items-center justify-center gap-2">
+              Proceeding to Step 2: Weather Sync <ChevronRight size={16} />
+            </p>
           </div>
         </div>
       )}
@@ -242,7 +249,7 @@ export default function CropHistoryWizard() {
           {step.type === 'visual-select' && (
             <div className={`flex flex-col ${selections[step.id]?.selectedOption && step.askDate ? 'lg:flex-row' : ''} gap-6 items-start justify-center`}>
               
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4 w-full flex-1">
+              <div className="grid grid-cols-3 sm:grid-cols-4 gap-3 w-full flex-1">
                 {step.options.map(opt => {
                   const isSelected = selections[step.id]?.selectedOption === opt.id;
                   
@@ -255,20 +262,20 @@ export default function CropHistoryWizard() {
                           [step.id]: { ...selections[step.id], selectedOption: opt.id } 
                         });
                       }}
-                      className={`cursor-pointer backdrop-blur-md p-4 rounded-2xl border-2 transition-all transform active:scale-95 flex flex-col items-center justify-center gap-3 ${
+                      className={`cursor-pointer backdrop-blur-md p-3 rounded-2xl border-2 transition-all transform active:scale-95 flex flex-col items-center justify-center gap-2 ${
                         isSelected 
-                          ? 'bg-emerald-500/40 border-emerald-400 shadow-[0_0_20px_rgba(52,211,153,0.3)]' 
+                          ? 'bg-emerald-500/40 border-emerald-400 shadow-[0_0_15px_rgba(52,211,153,0.3)]' 
                           : 'bg-slate-900/40 border-white/10 hover:bg-slate-800/60 hover:border-white/30'
                       }`}
                     >
                       {opt.image ? (
-                        <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-white/20 shadow-lg bg-slate-800">
+                        <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-white/20 shadow-lg bg-slate-800">
                            <img src={opt.image} className="w-full h-full object-cover" alt={opt.label} />
                         </div>
                       ) : (
-                        <span className="text-4xl">{opt.emoji}</span>
+                        <span className="text-3xl">{opt.emoji}</span>
                       )}
-                      <span className="font-bold text-white tracking-wide text-sm text-center drop-shadow-md">{opt.label}</span>
+                      <span className="text-white font-bold text-xs text-center">{opt.label}</span>
                     </div>
                   );
                 })}
