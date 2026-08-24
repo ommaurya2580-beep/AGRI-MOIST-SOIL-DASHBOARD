@@ -79,18 +79,55 @@ export default function WeatherSync() {
     }
   };
 
+  const [isSaving, setIsSaving] = useState(false);
+  const [savedPayload, setSavedPayload] = useState(null);
+
   const handleConfirm = () => {
-    // Save to local storage for the Engine
+    // Show what data is being saved before moving to the next step
     const currentData = JSON.parse(localStorage.getItem('agripulse_diagnostic') || '{}');
-    currentData.weather = weatherData;
+    const weatherPayload = {
+      location: weatherData.location,
+      total_rain: weatherData.metrics.rain,
+      avg_temp: weatherData.metrics.temp,
+      status: "High Waterlogging Risk"
+    };
+    currentData.weather = weatherPayload;
+    
+    setSavedPayload(weatherPayload);
+    setIsSaving(true);
+    
     localStorage.setItem('agripulse_diagnostic', JSON.stringify(currentData));
     
-    // Move to next step (IoT Sync)
-    navigate('/iot-sync');
+    // Move to next step (IoT Sync) after showing the data for 2 seconds
+    setTimeout(() => {
+      navigate('/iot-sync');
+    }, 2500);
   };
 
   return (
-    <div className="max-w-5xl mx-auto space-y-6">
+    <div className="max-w-5xl mx-auto space-y-6 relative">
+      
+      {/* Saving Data Overlay (Shows exactly what we are sending to the engine) */}
+      {isSaving && (
+        <div className="fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl animate-in zoom-in-95 duration-300 text-center border-2 border-emerald-500">
+            <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4">
+              <CheckCircle2 size={32} />
+            </div>
+            <h2 className="text-2xl font-bold text-slate-800 mb-2">Data Saved!</h2>
+            <p className="text-slate-500 mb-6">The following data is being sent to the Root Cause Engine:</p>
+            
+            <div className="bg-slate-900 rounded-xl p-4 text-left overflow-hidden">
+              <pre className="text-emerald-400 font-mono text-sm">
+                {JSON.stringify(savedPayload, null, 2)}
+              </pre>
+            </div>
+            
+            <p className="text-sm font-bold text-slate-400 mt-6 animate-pulse">Proceeding to Step 3: IoT Sync...</p>
+          </div>
+        </div>
+      )}
+
       <div className="mb-8 flex items-center justify-between">
         <div>
           <div className="flex items-center gap-2 mb-2">
