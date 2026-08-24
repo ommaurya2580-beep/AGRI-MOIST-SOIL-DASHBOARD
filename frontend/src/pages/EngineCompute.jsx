@@ -198,20 +198,30 @@ export default function EngineCompute() {
                 <div className="grid grid-cols-2 gap-2">
                   <div className="bg-slate-800 rounded-lg p-3 flex items-center gap-2">
                     <CloudRain className="text-blue-400" size={16}/> 
-                    <span className="font-medium">{payload?.weather?.metrics?.rainfall_sum || 0}mm</span>
+                    <span className="font-medium">{payload?.weather?.rain_sum || 0}mm</span>
                   </div>
                   <div className="bg-slate-800 rounded-lg p-3 flex items-center gap-2">
                     <Thermometer className="text-orange-400" size={16}/> 
-                    <span className="font-medium">{payload?.weather?.metrics?.temperature_max || 0}°C</span>
+                    <span className="font-medium">{payload?.weather?.temp_avg || 0}°C</span>
                   </div>
                 </div>
               </div>
               
               <div>
                 <div className="text-xs uppercase tracking-wider font-bold text-slate-500 mb-2">IoT Sensors</div>
-                <div className="bg-slate-800 rounded-lg p-3 flex items-center gap-3">
-                  <Droplets className="text-cyan-400 shrink-0" size={16}/> 
-                  <span className="font-medium">Moisture: {payload?.sensors?.moisture ?? 'N/A'} (Analog)</span>
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="bg-slate-800 rounded-lg p-3 flex items-center gap-3">
+                    <Droplets className="text-cyan-400 shrink-0" size={16}/> 
+                    <span className="font-medium text-sm">Moisture: {payload?.sensors?.moisture ?? 'N/A'}</span>
+                  </div>
+                  <div className="bg-slate-800 rounded-lg p-3 flex items-center gap-3">
+                    <Activity className="text-pink-400 shrink-0" size={16}/> 
+                    <span className="font-medium text-sm">pH: {payload?.sensors?.pH ?? 'N/A'}</span>
+                  </div>
+                  <div className="bg-slate-800 rounded-lg p-3 flex items-center gap-3 col-span-2">
+                    <Sprout className="text-emerald-400 shrink-0" size={16}/> 
+                    <span className="font-medium text-sm">N: {payload?.sensors?.nitrogen ?? 'N/A'} | P: {payload?.sensors?.phosphorus ?? 'N/A'} | K: {payload?.sensors?.potassium ?? 'N/A'}</span>
+                  </div>
                 </div>
               </div>
 
