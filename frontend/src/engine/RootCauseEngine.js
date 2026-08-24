@@ -219,8 +219,8 @@ export class RootCauseEngine {
     for (const [diagnosis, score] of Object.entries(this.scores)) {
       let probability = Math.max(0, Math.min(100, Math.round(score)));
       
-      if (diagnosis === DIAGNOSES.HEALTHY && score > 50) {
-        const hasIssue = Object.entries(this.scores).some(([k, v]) => k !== DIAGNOSES.HEALTHY && v > 40);
+      if (diagnosis === DIAGNOSES.HEALTHY) {
+        const hasIssue = Object.entries(this.scores).some(([k, v]) => k !== DIAGNOSES.HEALTHY && v >= 40);
         if (hasIssue) probability = 0;
       }
 
