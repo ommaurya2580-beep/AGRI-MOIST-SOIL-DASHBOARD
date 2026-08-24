@@ -7,19 +7,46 @@ import {
 
 export default function IoTSync() {
   const navigate = useNavigate();
-  const [connectionState, setConnectionState] = useState('searching'); // searching -> connecting -> connected
+  const [connectionState, setConnectionState] = useState('searching');
   const [sensorData, setSensorData] = useState(null);
   const [isSaving, setIsSaving] = useState(false);
   const [savedPayload, setSavedPayload] = useState(null);
+  const [errorMessage, setErrorMessage] = useState("");
 
-  useEffect(() => {
-    // Simulate searching for devices
-    const timer1 = setTimeout(() => {
-      setConnectionState('connecting');
-    }, 1500);
+  const fetchLiveData = async () => {
+    setConnectionState('connecting');
+    try {
+      const stateRes = await fetch('/api/state');
+      if (!stateRes.ok) throw new Error("Failed to connect to API");
+      const stateData = await stateRes.json();
+      
+      const online = stateData.isOnline !== undefined ? stateData.isOnline : false;
+      const liveMoisture = stateData.currentMoisture || 0;
+      
+      if (!online) {
+        setErrorMessage("ESP32 Sensor is currently OFFLINE. Showing last known or mock data.");
+      }
 
-    // Simulate connecting and fetching data
-    const timer2 = setTimeout(() => {
+      setSensorData({
+        moisture: { 
+          value: liveMoisture, 
+          unit: '%', 
+          status: liveMoisture > 80 ? 'High (Waterlogged)' : (liveMoisture < 30 ? 'Low (Dry)' : 'Optimal'), 
+          color: liveMoisture > 80 ? 'text-blue-500' : 'text-emerald-500' 
+        },
+        temperature: { value: 24.6, unit: '°C', status: 'Optimal', color: 'text-amber-500' }, // Using mock from their system
+        ph: { value: 6.7, unit: 'pH', status: 'Neutral (Good)', color: 'text-emerald-500' }, // Using mock
+        nitrogen: { value: 45, unit: 'mg/kg', status: 'Low', color: 'text-red-500' }, // Still mock for NPK as it's not live yet
+        phosphorus: { value: 28, unit: 'mg/kg', status: 'Optimal', color: 'text-teal-500' },
+        potassium: { value: 110, unit: 'mg/kg', status: 'Optimal', color: 'text-purple-500' },
+        lastUpdated: new Date().toLocaleTimeString(),
+        isOnline: online
+      });
+      setConnectionState('connected');
+    } catch (err) {
+      console.warn("Live API fetch failed, falling back to mock data for presentation.", err);
+      setErrorMessage("Could not connect to local server. Falling back to diagnostic simulation data.");
+      // Fallback
       setSensorData({
         moisture: { value: 85, unit: '%', status: 'High (Waterlogged)', color: 'text-blue-500' },
         temperature: { value: 22.4, unit: '°C', status: 'Optimal', color: 'text-amber-500' },
@@ -27,15 +54,20 @@ export default function IoTSync() {
         nitrogen: { value: 45, unit: 'mg/kg', status: 'Low', color: 'text-red-500' },
         phosphorus: { value: 28, unit: 'mg/kg', status: 'Optimal', color: 'text-teal-500' },
         potassium: { value: 110, unit: 'mg/kg', status: 'Optimal', color: 'text-purple-500' },
-        lastUpdated: new Date().toLocaleTimeString()
+        lastUpdated: new Date().toLocaleTimeString(),
+        isOnline: false
       });
       setConnectionState('connected');
-    }, 3500);
+    }
+  };
 
-    return () => {
-      clearTimeout(timer1);
-      clearTimeout(timer2);
-    };
+  useEffect(() => {
+    // Initial delay for visual effect
+    const timer = setTimeout(() => {
+      fetchLiveData();
+    }, 1500);
+
+    return () => clearTimeout(timer);
   }, []);
 
   const handleConfirm = () => {
@@ -144,14 +176,20 @@ export default function IoTSync() {
             </div>
             <button 
               onClick={() => {
-                setConnectionState('connecting');
-                setTimeout(() => setConnectionState('connected'), 1500);
+                fetchLiveData();
               }}
               className="relative z-10 flex items-center gap-2 bg-white/10 hover:bg-white/20 px-4 py-2 rounded-lg font-medium transition-colors"
             >
               <RefreshCw size={18} /> Refresh Data
             </button>
           </div>
+
+          {errorMessage && (
+            <div className="bg-red-50 border border-red-200 rounded-xl p-4 flex items-center gap-3 text-red-700">
+              <AlertTriangle size={20} />
+              <p className="text-sm font-medium">{errorMessage}</p>
+            </div>
+          )}
 
           {/* Sensor Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
