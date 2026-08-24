@@ -100,10 +100,8 @@ export default function MultiModelVision() {
     if (images.length === 0) return;
     setAppState('analyzing');
 
-    const resultsArray = [];
-
-    // Process each image in parallel across available models
-    for (const imageObj of images) {
+    // Process ALL images and ALL models completely in parallel
+    const imagePromises = images.map(async (imageObj) => {
       const formData = new FormData();
       formData.append('file', imageObj.file);
 
@@ -114,18 +112,18 @@ export default function MultiModelVision() {
           icon: Brain,
           status: 'Offline',
           result: 'Pending Future Update'
-        }), 2000);
+        }), 800); // reduced mock delay to 800ms
       });
 
       try {
-        // Parallel execution of real models
+        // Parallel execution of real models for THIS image
         const [diseaseRes, pestRes, model3Res] = await Promise.allSettled([
           fetch('/api/v1/disease/predict', { method: 'POST', body: formData }).then(res => res.json()),
           fetch('/api/pest/predict', { method: 'POST', body: formData }).then(res => res.json()),
           mockModel3
         ]);
 
-        resultsArray.push({
+        return {
           imageId: imageObj.id,
           preview: imageObj.preview,
           models: [
@@ -164,13 +162,15 @@ export default function MultiModelVision() {
               isOffline: true
             }
           ]
-        });
+        };
       } catch (err) {
-        console.error("Error running models", err);
+        console.error("Error running models for image", err);
+        return null;
       }
-    }
+    });
 
-    setAnalysisResults(resultsArray);
+    const resolvedResults = await Promise.all(imagePromises);
+    setAnalysisResults(resolvedResults.filter(r => r !== null));
     
     // Slight delay for animation completion before showing results
     setTimeout(() => {
