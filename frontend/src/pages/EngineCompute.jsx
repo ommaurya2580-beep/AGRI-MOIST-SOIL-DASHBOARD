@@ -12,6 +12,8 @@ export default function EngineCompute() {
   const [results, setResults] = useState(null);
   const [payload, setPayload] = useState(null);
 
+  const [errorMsg, setErrorMsg] = useState(null);
+
   useEffect(() => {
     // 1. Load data from localStorage (Aggregated across Steps 1 to 4)
     const storedData = localStorage.getItem('agripulse_diagnostic');
@@ -25,13 +27,25 @@ export default function EngineCompute() {
     setPayload(parsedData);
 
     // 2. Initialize Engine & Simulate Processing Time
-    const engine = new RootCauseEngine(parsedData);
-    
-    setTimeout(() => {
-      const finalReport = engine.compute();
-      setResults(finalReport);
+    try {
+      const engine = new RootCauseEngine(parsedData);
+      
+      setTimeout(() => {
+        try {
+          const finalReport = engine.compute();
+          setResults(finalReport);
+          setComputing(false);
+        } catch (err) {
+          console.error(err);
+          setErrorMsg(err.message || String(err));
+          setComputing(false);
+        }
+      }, 2500); // 2.5s for dramatic effect
+    } catch (err) {
+      console.error(err);
+      setErrorMsg(err.message || String(err));
       setComputing(false);
-    }, 2500); // 2.5s for dramatic effect
+    }
   }, [navigate]);
 
   const resetFlow = () => {
@@ -64,6 +78,17 @@ export default function EngineCompute() {
             <span>Synthesizing Multi-Model AI Vision...</span> <Activity size={16}/>
           </div>
         </div>
+      </div>
+    );
+  }
+
+  if (errorMsg) {
+    return (
+      <div className="max-w-4xl mx-auto mt-20 p-8 bg-red-50 border-2 border-red-200 rounded-3xl text-center">
+        <AlertTriangle className="mx-auto text-red-500 mb-4" size={48} />
+        <h2 className="text-2xl font-bold text-red-800 mb-2">Engine Crashed</h2>
+        <p className="text-red-600 mb-6">{errorMsg}</p>
+        <button onClick={resetFlow} className="px-6 py-2 bg-red-600 text-white rounded-lg font-bold">Start Over</button>
       </div>
     );
   }
@@ -202,7 +227,7 @@ export default function EngineCompute() {
                   </div>
                   <div className="bg-slate-800 rounded-lg p-3 flex items-center gap-2">
                     <Thermometer className="text-orange-400" size={16}/> 
-                    <span className="font-medium">{payload?.weather?.temp_avg || 0}°C</span>
+                    <span className="font-medium">{payload?.weather?.temp_avg || 0}&deg;C</span>
                   </div>
                 </div>
               </div>
