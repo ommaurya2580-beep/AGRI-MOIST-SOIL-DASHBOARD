@@ -168,6 +168,16 @@ export default function EngineCompute() {
                     ))}
                   </ul>
                 </div>
+                
+                <div className="mt-8 flex gap-4">
+                  <button 
+                    onClick={() => navigate('/guide')} 
+                    className={`flex items-center gap-2 px-8 py-4 rounded-xl text-white font-black text-lg shadow-xl transition-transform hover:scale-[1.02] ${topIssue.isCritical ? 'bg-red-600 hover:bg-red-700 shadow-red-500/30' : 'bg-orange-600 hover:bg-orange-700 shadow-orange-500/30'}`}
+                  >
+                    View Treatment Guide <ArrowRight size={24} />
+                  </button>
+                </div>
+
               </div>
             </div>
           ) : (
@@ -180,7 +190,13 @@ export default function EngineCompute() {
                   <ShieldCheck size={40} />
                 </div>
                 <h2 className="text-3xl font-extrabold text-emerald-900 mb-2">Crop is Healthy!</h2>
-                <p className="text-emerald-700 text-lg">No critical issues detected based on current data.</p>
+                <p className="text-emerald-700 text-lg mb-8">No critical issues detected based on current data.</p>
+                <button 
+                  onClick={() => navigate('/guide')} 
+                  className="inline-flex items-center gap-2 px-8 py-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-black text-lg shadow-xl shadow-emerald-500/30 transition-transform hover:scale-[1.02]"
+                >
+                  View Maintenance Guide <ArrowRight size={24} />
+                </button>
               </div>
             </div>
           )}
