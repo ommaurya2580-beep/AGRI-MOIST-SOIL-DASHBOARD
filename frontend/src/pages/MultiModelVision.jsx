@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   Upload, X, CheckCircle2, ChevronRight, Activity, Bug, Brain, AlertTriangle, 
-  Camera, Zap, Layers, RefreshCw
+  Camera, Zap, Layers, RefreshCw, CloudRain
 } from 'lucide-react';
 
 const CONFIDENCE_THRESHOLD = 0.25;
