@@ -68,14 +68,25 @@ export default function MultiModelVision() {
               id: 'model1',
               name: 'Disease Engine (M1)',
               icon: Activity,
-              data: diseaseRes.status === 'fulfilled' ? diseaseRes.value : { error: 'Failed' },
+              data: diseaseRes.status === 'fulfilled' 
+                ? { label: diseaseRes.value.prediction || "Unknown", confidence: diseaseRes.value.confidence || 0 } 
+                : { error: 'Failed' },
               color: 'emerald'
             },
             {
               id: 'model2',
               name: 'Pest Radar (M2)',
               icon: Bug,
-              data: pestRes.status === 'fulfilled' ? pestRes.value : { error: 'Failed' },
+              data: pestRes.status === 'fulfilled' 
+                ? { 
+                    label: pestRes.value.detections && pestRes.value.detections.length > 0 
+                      ? pestRes.value.detections.map(d => d.class_name).join(", ") 
+                      : "No pests detected", 
+                    confidence: pestRes.value.detections && pestRes.value.detections.length > 0
+                      ? Math.max(...pestRes.value.detections.map(d => d.confidence))
+                      : 1.0
+                  } 
+                : { error: 'Failed' },
               color: 'blue'
             },
             {
@@ -138,8 +149,8 @@ export default function MultiModelVision() {
             <div className="bg-slate-900 rounded-xl p-4 text-left overflow-hidden h-40 overflow-y-auto">
               <pre className="text-indigo-400 font-mono text-xs">
                 {JSON.stringify(analysisResults.map(r => ({
-                  model1: r.models[0].data.disease || r.models[0].data.error,
-                  model2: r.models[1].data.pest || r.models[1].data.error
+                  model1: r.models[0].data.label ? r.models[0].data : r.models[0].data.error,
+                  model2: r.models[1].data.label ? r.models[1].data : r.models[1].data.error
                 })), null, 2)}
               </pre>
             </div>
@@ -353,15 +364,15 @@ export default function MultiModelVision() {
                       ) : (
                         <div>
                           <div className="text-lg font-bold text-slate-800 leading-tight mb-1">
-                            {model.data.disease || model.data.pest || "Healthy"}
+                            {model.data.label}
                           </div>
-                          {model.data.confidence && (
+                          {model.data.confidence !== undefined && (
                             <div className="text-xs font-medium text-slate-500">
-                              Confidence: {model.data.confidence}
+                              Confidence: {typeof model.data.confidence === 'number' ? (model.data.confidence * (model.id === 'model1' ? 1 : 100)).toFixed(1) + '%' : model.data.confidence}
                             </div>
                           )}
                           <div className="mt-2 text-xs text-slate-600 bg-white/60 p-2 rounded-lg">
-                            {model.data.recommendation ? model.data.recommendation[0] : "Visual features extracted successfully."}
+                            Visual features extracted successfully. Ready for Engine.
                           </div>
                         </div>
                       )}
