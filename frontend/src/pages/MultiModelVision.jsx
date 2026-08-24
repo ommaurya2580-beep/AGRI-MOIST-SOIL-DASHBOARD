@@ -201,12 +201,12 @@ export default function MultiModelVision() {
       
       const visionPayload = analysisResults.map(r => ({
         disease: {
-          label: r.models[0].data.label,
-          confidence: r.models[0].data.confidence
+          label: r.models[0].data.label || r.models[0].data.error || 'Unknown',
+          confidence: r.models[0].data.confidence || 0
         },
         pest: {
-          label: r.models[1].data.label,
-          confidence: r.models[1].data.confidence,
+          label: r.models[1].data.label || r.models[1].data.error || 'Unknown',
+          confidence: r.models[1].data.confidence || 0,
           detections: r.models[1].data.detections || []
         }
       }));

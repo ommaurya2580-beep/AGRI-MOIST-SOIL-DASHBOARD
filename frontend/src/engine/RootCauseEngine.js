@@ -163,7 +163,7 @@ export class RootCauseEngine {
     let healthyCount = 0;
 
     this.vision.forEach((imgData, idx) => {
-      if (imgData.disease && imgData.disease.label) {
+      if (imgData.disease && typeof imgData.disease.label === 'string') {
         const label = imgData.disease.label.toLowerCase();
         const conf = parseFloat(imgData.disease.confidence || 0) * 100;
 
