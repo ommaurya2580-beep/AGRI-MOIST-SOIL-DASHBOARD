@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { RootCauseEngine } from '../engine/RootCauseEngine';
+import { getAIVerification } from '../services/LangflowService';
 import { 
   CheckCircle2, AlertTriangle, ShieldCheck, Sprout, CloudRain, Activity, 
-  Droplets, Thermometer, Bug, ArrowRight, FileText, Download, RotateCcw
+  Droplets, Thermometer, Bug, ArrowRight, FileText, Download, RotateCcw, Sparkles, X
 } from 'lucide-react';
 
 export default function EngineCompute() {
@@ -11,8 +12,12 @@ export default function EngineCompute() {
   const [computing, setComputing] = useState(true);
   const [results, setResults] = useState(null);
   const [payload, setPayload] = useState(null);
-
   const [errorMsg, setErrorMsg] = useState(null);
+  
+  // AI Verification State
+  const [isAskingAi, setIsAskingAi] = useState(false);
+  const [aiExplanation, setAiExplanation] = useState(null);
+  const [showAiModal, setShowAiModal] = useState(false);
 
   useEffect(() => {
     // 1. Load data from localStorage (Aggregated across Steps 1 to 4)
@@ -51,6 +56,29 @@ export default function EngineCompute() {
   const resetFlow = () => {
     localStorage.removeItem('agripulse_diagnostic');
     navigate('/reports');
+  };
+
+  const handleAskAI = async () => {
+    setShowAiModal(true);
+    if (aiExplanation) return; // Already fetched
+    
+    setIsAskingAi(true);
+    try {
+      // Prepare a clean payload for Langflow
+      const engineInput = {
+        primaryDiagnosis: results.topIssues.length > 0 ? results.topIssues[0].diagnosis : "Healthy",
+        confidence: results.topIssues.length > 0 ? results.topIssues[0].probability + "%" : "100%",
+        evidence: results.topIssues.length > 0 ? results.topIssues[0].evidence : ["All metrics optimal"],
+        iotData: payload.sensors
+      };
+      
+      const response = await getAIVerification(engineInput);
+      setAiExplanation(response);
+    } catch (err) {
+      setAiExplanation("Sorry, could not connect to local AI Agent. Make sure Langflow is running on port 7860.");
+    } finally {
+      setIsAskingAi(false);
+    }
   };
 
   if (computing) {
@@ -169,12 +197,18 @@ export default function EngineCompute() {
                   </ul>
                 </div>
                 
-                <div className="mt-8 flex gap-4">
+                <div className="mt-8 flex flex-col sm:flex-row gap-4">
                   <button 
                     onClick={() => navigate('/fertilizer-guide', { state: { rootCause: topIssue.diagnosis } })} 
-                    className={`flex items-center gap-2 px-8 py-4 rounded-xl text-white font-black text-lg shadow-xl transition-transform hover:scale-[1.02] ${topIssue.isCritical ? 'bg-red-600 hover:bg-red-700 shadow-red-500/30' : 'bg-orange-600 hover:bg-orange-700 shadow-orange-500/30'}`}
+                    className={`flex items-center justify-center gap-2 px-8 py-4 rounded-xl text-white font-black text-lg shadow-xl transition-transform hover:scale-[1.02] ${topIssue.isCritical ? 'bg-red-600 hover:bg-red-700 shadow-red-500/30' : 'bg-orange-600 hover:bg-orange-700 shadow-orange-500/30'}`}
                   >
                     View Treatment Guide <ArrowRight size={24} />
+                  </button>
+                  <button 
+                    onClick={handleAskAI}
+                    className="flex items-center justify-center gap-2 px-8 py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-lg shadow-xl shadow-indigo-500/30 transition-transform hover:scale-[1.02]"
+                  >
+                    <Sparkles size={24} /> Verify with AI
                   </button>
                 </div>
 
@@ -191,15 +225,62 @@ export default function EngineCompute() {
                 </div>
                 <h2 className="text-3xl font-extrabold text-emerald-900 mb-2">Crop is Healthy!</h2>
                 <p className="text-emerald-700 text-lg mb-8">No critical issues detected based on current data.</p>
-                <button 
-                  onClick={() => navigate('/fertilizer-guide', { state: { rootCause: topIssue.diagnosis } })} 
-                  className="inline-flex items-center gap-2 px-8 py-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-black text-lg shadow-xl shadow-emerald-500/30 transition-transform hover:scale-[1.02]"
-                >
-                  View Maintenance Guide <ArrowRight size={24} />
-                </button>
+                <div className="flex flex-col sm:flex-row justify-center gap-4">
+                  <button 
+                    onClick={() => navigate('/fertilizer-guide', { state: { rootCause: topIssue?.diagnosis } })} 
+                    className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-black text-lg shadow-xl shadow-emerald-500/30 transition-transform hover:scale-[1.02]"
+                  >
+                    View Maintenance Guide <ArrowRight size={24} />
+                  </button>
+                  <button 
+                    onClick={handleAskAI}
+                    className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-lg shadow-xl shadow-indigo-500/30 transition-transform hover:scale-[1.02]"
+                  >
+                    <Sparkles size={24} /> Ask AI
+                  </button>
+                </div>
               </div>
             </div>
           )}
+          
+          {/* AI Verification Modal */}
+          {showAiModal && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-in fade-in">
+              <div className="bg-white rounded-3xl shadow-2xl w-full max-w-2xl max-h-[80vh] flex flex-col overflow-hidden animate-in zoom-in-95">
+                <div className="bg-indigo-600 p-6 text-white flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <Sparkles size={28} />
+                    <h3 className="text-xl font-bold">AI Verification & Explanation</h3>
+                  </div>
+                  <button onClick={() => setShowAiModal(false)} className="text-white/80 hover:text-white hover:bg-white/10 p-2 rounded-full transition-colors">
+                    <X size={24} />
+                  </button>
+                </div>
+                
+                <div className="p-8 overflow-y-auto flex-1 bg-slate-50">
+                  {isAskingAi ? (
+                    <div className="flex flex-col items-center justify-center py-12 text-slate-500 space-y-4">
+                      <div className="w-12 h-12 relative">
+                        <div className="absolute inset-0 border-4 border-indigo-200 rounded-full"></div>
+                        <div className="absolute inset-0 border-4 border-indigo-600 rounded-full border-t-transparent animate-spin"></div>
+                      </div>
+                      <p className="font-medium animate-pulse">AI is verifying the Root Cause Engine results...</p>
+                    </div>
+                  ) : (
+                    <div className="prose prose-indigo max-w-none text-slate-700 whitespace-pre-wrap font-medium">
+                      {aiExplanation}
+                    </div>
+                  )}
+                </div>
+                <div className="bg-white p-4 border-t border-slate-200 flex justify-end">
+                   <button onClick={() => setShowAiModal(false)} className="px-6 py-2 bg-slate-100 text-slate-700 hover:bg-slate-200 rounded-lg font-bold transition-colors">
+                     Close
+                   </button>
+                </div>
+              </div>
+            </div>
+          )}
+
 
           {/* Secondary Issues */}
           {results.topIssues.length > 1 && (
