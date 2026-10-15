@@ -8,7 +8,7 @@ const char* ssid = "OPPO";
 const char* password = "00000000";
 
 // --- API Endpoint (Your EC2 Server IP) ---
-const char* serverName = "http://18.215.153.77/api/sensor";
+const char* serverName = "http://13.50.151.133/api/sensor";
 
 // --- Pin Definitions ---
 const int MOISTURE_PIN = A0;  // Analog pin for Moisture Sensor

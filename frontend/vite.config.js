@@ -8,13 +8,13 @@ export default defineConfig({
     proxy: {
       // Local dev proxy for Model 1 (Disease)
       '/api/v1/disease/predict': {
-        target: 'http://3.227.14.235',
+        target: 'http://16.192.162.67',
         changeOrigin: true,
         secure: false,
       },
       // Local dev proxy for Model 2 (Pest)
       '/api/pest/predict': {
-        target: 'http://100.63.212.231',
+        target: 'http://13.50.81.200',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api\/pest\/predict/, '/api/pest/predict')
       }

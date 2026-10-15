@@ -158,7 +158,8 @@ app.post('/api/analysis/disease', upload.single('image'), async (req, res) => {
     formData.append('plantPart', plantPart || 'leaf');
     
     // Call Python ML Service on AWS EC2
-    const mlResponse = await axios.post('http://127.0.0.1:8001/api/v1/disease/predict', formData, {
+    const model1Url = process.env.MODEL1_URL || 'http://16.192.162.67/api/v1/disease/predict';
+    const mlResponse = await axios.post(model1Url, formData, {
       headers: {
         ...formData.getHeaders()
       }
@@ -221,8 +222,9 @@ app.post('/api/analysis/pest', upload.single('image'), async (req, res) => {
       contentType: req.file.mimetype,
     });
     
-    // Using localhost since the Docker container is running on the same EC2 instance
-    const mlResponse = await axios.post('http://127.0.0.1:8000/predict', formData, {
+    // Using Model 2 EC2 Public IP
+    const model2Url = process.env.MODEL2_URL || 'http://13.50.81.200/api/pest/predict';
+    const mlResponse = await axios.post(model2Url, formData, {
       headers: {
         ...formData.getHeaders()
       }

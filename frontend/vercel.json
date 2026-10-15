@@ -2,15 +2,15 @@
   "rewrites": [
     {
       "source": "/api/v1/disease/predict",
-      "destination": "http://3.227.14.235/api/v1/disease/predict"
+      "destination": "http://16.192.162.67/api/v1/disease/predict"
     },
     {
       "source": "/api/pest/predict",
-      "destination": "http://100.63.212.231/api/pest/predict"
+      "destination": "http://13.50.81.200/api/pest/predict"
     },
     {
       "source": "/api/(.*)",
-      "destination": "http://3.212.40.106/api/$1"
+      "destination": "http://13.50.151.133/api/$1"
     },
     {
       "source": "/(.*)",
