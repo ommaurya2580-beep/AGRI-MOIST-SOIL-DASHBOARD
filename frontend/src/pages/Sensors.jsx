@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { 
   Radio, 
   RefreshCw, 
@@ -34,8 +34,10 @@ import {
   ResponsiveContainer 
 } from 'recharts';
 
-export default function Sensors() {
+export default function Sensors({ isDiagnosticMode = false }) {
   const navigate = useNavigate();
+  const location = useLocation();
+  const isDiag = isDiagnosticMode || location.pathname === '/iot-sync';
 
   // Live IoT States from Backend
   const [isAutoMode, setIsAutoMode] = useState(true);
@@ -54,6 +56,22 @@ export default function Sensors() {
   const [nitrogen] = useState(42);
   const [phosphorus] = useState(28);
   const [potassium] = useState(35);
+
+  const handleDiagnosticConfirm = () => {
+    const currentData = JSON.parse(localStorage.getItem('agripulse_diagnostic') || '{}');
+    currentData.sensors = {
+      moisture: moisture,
+      temperature: temperature,
+      pH: phVal,
+      nitrogen: nitrogen,
+      phosphorus: phosphorus,
+      potassium: potassium,
+      pump_state: pumpStatus,
+      is_online: isOnline
+    };
+    localStorage.setItem('agripulse_diagnostic', JSON.stringify(currentData));
+    navigate('/image-upload');
+  };
 
   const fetchDeviceData = async () => {
     setIsRefreshing(true);
@@ -720,6 +738,40 @@ export default function Sensors() {
         </div>
 
       </div>
+
+      {/* Diagnostic Flow Confirmation Bar (Visible when in Diagnostic Mode /iot-sync) */}
+      {isDiag && (
+        <div className="bg-white rounded-3xl p-6 lg:p-7 border-2 border-emerald-500 shadow-xl flex flex-col md:flex-row items-center justify-between gap-6 mt-8 animate-in slide-in-from-bottom-4">
+          <div className="flex items-start gap-4">
+            <div className="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0">
+              <Sprout size={26} />
+            </div>
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <span className="w-2.5 h-2.5 bg-emerald-500 rounded-full animate-pulse"></span>
+                <span className="text-emerald-700 font-bold text-xs uppercase tracking-wider">
+                  Diagnostic Flow: Step 3 of 4 (IoT Ground Truth Telemetry)
+                </span>
+              </div>
+              <h3 className="text-lg font-black text-slate-800">
+                Confirm Live Soil Data for Your Affected Field?
+              </h3>
+              <p className="text-xs text-slate-500 mt-0.5">
+                Current Ground Truth: Moisture {moisture}%, Temp {temperature}°C, pH {phVal}. This telemetry will be cross-referenced with your 30-day weather and vision data.
+              </p>
+            </div>
+          </div>
+
+          <button
+            onClick={handleDiagnosticConfirm}
+            className="w-full md:w-auto px-8 py-3.5 rounded-full bg-[#E8592A] hover:bg-[#D44A1E] text-white font-bold text-sm shadow-lg shadow-orange-500/30 flex items-center justify-center gap-2 shrink-0 transition-all active:scale-95"
+          >
+            <CheckCircle2 size={18} />
+            <span>Confirm Sensor Data & Proceed to AI Vision</span>
+            <ArrowRight size={16} />
+          </button>
+        </div>
+      )}
 
     </div>
   );

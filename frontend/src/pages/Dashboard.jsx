@@ -101,6 +101,66 @@ export default function Dashboard() {
         </div>
       </div>
 
+      {/* Smart Diagnostics & Root Cause Engine Banner (Core Feature) */}
+      <div 
+        onClick={() => navigate('/reports')}
+        className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-[#173026] via-[#1E4334] to-[#12271F] p-6 lg:p-7 text-white shadow-lg cursor-pointer hover:shadow-xl hover:scale-[1.006] transition-all group border border-emerald-900/60"
+      >
+        <div className="absolute right-0 top-0 bottom-0 w-1/3 opacity-15 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-emerald-400 to-transparent pointer-events-none"></div>
+        
+        <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-5">
+          <div className="space-y-2 max-w-2xl">
+            <div className="flex items-center gap-2">
+              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 uppercase tracking-widest">
+                Comprehensive 4-Tier Diagnostics
+              </span>
+              <span className="flex items-center gap-1 text-[11px] text-emerald-400 font-semibold">
+                <Sparkles size={13} />
+                Multi-Modal AI Engine
+              </span>
+            </div>
+
+            <h3 className="text-xl lg:text-2xl font-black text-white tracking-tight flex items-center gap-2.5">
+              <span>Smart Diagnostics & Root Cause Engine</span>
+            </h3>
+
+            <p className="text-xs sm:text-sm text-emerald-100/80 leading-relaxed font-normal">
+              Cross-reference <span className="text-emerald-300 font-semibold">Crop History</span>, <span className="text-emerald-300 font-semibold">30-Day Weather</span>, <span className="text-emerald-300 font-semibold">Live IoT Sensors</span>, and <span className="text-emerald-300 font-semibold">AI Vision</span> to find the exact root cause of any crop problem and get expert recommendations.
+            </p>
+
+            {/* 4 Steps Visual Flow */}
+            <div className="flex flex-wrap items-center gap-2 pt-1 text-[11px] font-semibold text-emerald-200/90">
+              <span className="px-2.5 py-1 rounded-lg bg-white/10 border border-white/10 flex items-center gap-1.5">
+                <span className="w-4 h-4 rounded-full bg-emerald-500 text-slate-900 font-bold text-[10px] flex items-center justify-center">1</span>
+                Crop History
+              </span>
+              <span className="text-emerald-400">→</span>
+              <span className="px-2.5 py-1 rounded-lg bg-white/10 border border-white/10 flex items-center gap-1.5">
+                <span className="w-4 h-4 rounded-full bg-emerald-500 text-slate-900 font-bold text-[10px] flex items-center justify-center">2</span>
+                30-Day Weather
+              </span>
+              <span className="text-emerald-400">→</span>
+              <span className="px-2.5 py-1 rounded-lg bg-white/10 border border-white/10 flex items-center gap-1.5">
+                <span className="w-4 h-4 rounded-full bg-emerald-500 text-slate-900 font-bold text-[10px] flex items-center justify-center">3</span>
+                IoT Soil Telemetry
+              </span>
+              <span className="text-emerald-400">→</span>
+              <span className="px-2.5 py-1 rounded-lg bg-white/10 border border-white/10 flex items-center gap-1.5">
+                <span className="w-4 h-4 rounded-full bg-emerald-500 text-slate-900 font-bold text-[10px] flex items-center justify-center">4</span>
+                Root Cause Synthesis
+              </span>
+            </div>
+          </div>
+
+          <button 
+            className="px-6 py-3 rounded-full bg-[#E8592A] hover:bg-[#D44A1E] text-white font-bold text-xs sm:text-sm shadow-md shadow-orange-500/30 flex items-center gap-2 shrink-0 group-hover:translate-x-1 transition-all"
+          >
+            <span>Start Full Diagnosis</span>
+            <ArrowRight size={16} />
+          </button>
+        </div>
+      </div>
+
       {/* 2. Top Metric / Status Cards (Row 1) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         

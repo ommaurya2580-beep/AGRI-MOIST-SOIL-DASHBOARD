@@ -13,12 +13,14 @@ import {
   ChevronDown, 
   Headphones, 
   ChevronRight,
-  Sprout
+  Sprout,
+  Sparkles
 } from 'lucide-react';
 import AgriPulseBot from '../components/AgriPulseBot';
 
 const navItems = [
   { path: '/dashboard', label: 'Dashboard', icon: Home },
+  { path: '/reports', label: 'Smart Diagnostics', icon: Sparkles },
   { path: '/crop-analysis', label: 'Analyse Crop', icon: ScanLine },
   { path: '/weather', label: 'Weather', icon: CloudSun },
   { path: '/sensors', label: 'Sensors (IoT)', icon: Radio },
