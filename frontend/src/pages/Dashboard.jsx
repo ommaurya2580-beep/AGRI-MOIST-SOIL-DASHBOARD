@@ -61,14 +61,14 @@ export default function Dashboard() {
       <div className="relative overflow-hidden rounded-3xl bg-[#FAF1EA] border border-[#EADBCE] shadow-sm min-h-[220px] flex items-center justify-between p-7 lg:p-10 group">
         
         {/* Background Image on Right */}
-        <div className="absolute right-0 top-0 bottom-0 w-full sm:w-1/2 lg:w-[48%] pointer-events-none overflow-hidden">
+        <div className="absolute right-0 top-0 bottom-0 w-full sm:w-2/3 lg:w-[60%] pointer-events-none overflow-hidden">
           <img 
-            src="/images/farmer_hero.jpg" 
-            alt="Farmer in wheat field" 
-            className="w-full h-full object-cover object-center opacity-95 group-hover:scale-105 transition-transform duration-700"
+            src="/images/farmer_hero_wide.png" 
+            alt="Farmer in wheat field at golden hour" 
+            className="w-full h-full object-cover object-right group-hover:scale-105 transition-transform duration-1000"
           />
           {/* Subtle gradient blend to left */}
-          <div className="absolute inset-0 bg-gradient-to-r from-[#FAF1EA] via-[#FAF1EA]/70 to-transparent"></div>
+          <div className="absolute inset-0 bg-gradient-to-r from-[#FAF1EA] via-[#FAF1EA]/80 sm:via-[#FAF1EA]/40 to-transparent"></div>
         </div>
 
         {/* Left Text Content */}
@@ -94,9 +94,9 @@ export default function Dashboard() {
         </div>
 
         {/* Handwritten Tagline Quote (Top Right) */}
-        <div className="absolute top-6 right-8 z-10 hidden md:block text-right pointer-events-none">
-          <p className="font-handwriting text-xl lg:text-2xl text-[#4A392B] font-bold leading-snug drop-shadow-sm rotate-[-1.5deg]">
-            "Healthy Crops<br />Stronger Farmers<br />Brighter Tomorrows"
+        <div className="absolute top-5 right-8 lg:right-12 z-10 hidden md:block text-right pointer-events-none">
+          <p className="font-handwriting text-2xl lg:text-3xl text-[#2F241C] font-bold leading-tight drop-shadow-sm rotate-[-2deg]">
+            “Healthy Crops<br />Stronger Farmers<br />Brighter Tomorrows”
           </p>
         </div>
       </div>
