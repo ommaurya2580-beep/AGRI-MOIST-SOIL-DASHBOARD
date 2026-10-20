@@ -47,53 +47,69 @@ initDeviceState();
 app.get('/api/state', async (req, res) => {
   try {
     const state = await DeviceState.findOne({ fieldId: 'Field 1' });
-    const latestSensorData = await SensorData.findOne({ fieldId: 'Field 1' }).sort({ timestamp: -1 });
     
-    // Check if physical hardware sent a packet in the last 90 seconds
+    // Check for physical hardware transmissions (source: 'hardware' or legacy documents)
+    const latestHardwareData = await SensorData.findOne({ 
+      fieldId: 'Field 1',
+      source: { $ne: 'simulation' }
+    }).sort({ timestamp: -1 });
+    
+    // Check if physical hardware sent a packet in the last 60 seconds
     let isHardwareLive = false;
-    let currentMoisture = 42;
+    let currentMoisture = null;
     
-    if (latestSensorData) {
-      const timeDiff = Date.now() - new Date(latestSensorData.timestamp).getTime();
-      if (timeDiff < 90000) {
+    if (latestHardwareData) {
+      const timeDiff = Date.now() - new Date(latestHardwareData.timestamp).getTime();
+      if (timeDiff < 60000) {
         isHardwareLive = true;
-      }
-      if (latestSensorData.moistureLevel !== undefined && latestSensorData.moistureLevel !== null) {
-        currentMoisture = latestSensorData.moistureLevel;
+        currentMoisture = latestHardwareData.moistureLevel;
       }
     }
     
+    // If hardware is live, show live values. If disconnected, values are null/offline.
     const readings = {
-      moisture: currentMoisture,
-      temperature: latestSensorData?.temperature ?? 24.0,
-      pH: latestSensorData?.pH ?? 6.8,
-      nitrogen: latestSensorData?.nitrogen ?? 42,
-      phosphorus: latestSensorData?.phosphorus ?? 28,
-      potassium: latestSensorData?.potassium ?? 35,
-      airTemperature: latestSensorData?.airTemperature ?? 28.0,
-      humidity: latestSensorData?.humidity ?? 65,
-      lightIntensity: latestSensorData?.lightIntensity ?? 850,
+      moisture: isHardwareLive ? currentMoisture : null,
+      temperature: isHardwareLive ? (latestHardwareData?.temperature ?? 24.0) : null,
+      pH: isHardwareLive ? (latestHardwareData?.pH ?? 6.8) : null,
+      nitrogen: isHardwareLive ? (latestHardwareData?.nitrogen ?? 42) : null,
+      phosphorus: isHardwareLive ? (latestHardwareData?.phosphorus ?? 28) : null,
+      potassium: isHardwareLive ? (latestHardwareData?.potassium ?? 35) : null,
+      airTemperature: isHardwareLive ? (latestHardwareData?.airTemperature ?? 28.0) : null,
+      humidity: isHardwareLive ? (latestHardwareData?.humidity ?? 65) : null,
+      lightIntensity: isHardwareLive ? (latestHardwareData?.lightIntensity ?? 850) : null,
       rainfall: 0
     };
 
+    // Stored historical / cached telemetry (from previous sessions)
+    const cachedReadings = latestHardwareData ? {
+      moisture: latestHardwareData.moistureLevel,
+      temperature: latestHardwareData.temperature ?? 24.0,
+      pH: latestHardwareData.pH ?? 6.8,
+      nitrogen: latestHardwareData.nitrogen ?? 42,
+      phosphorus: latestHardwareData.phosphorus ?? 28,
+      potassium: latestHardwareData.potassium ?? 35,
+      timestamp: latestHardwareData.timestamp
+    } : null;
+
     const device = {
-      name: isHardwareLive ? 'ESP32 / ESP8266 Live Node' : 'Node Disconnected (Waiting for Device)',
+      name: isHardwareLive ? 'ESP32 / ESP8266 Live Node' : 'No Hardware Connected',
       mac: isHardwareLive ? '24:6F:28:3A:7F:11' : 'None',
-      network: isHardwareLive ? 'Active Telemetry' : 'Offline / Standby',
-      ip: '13.50.151.133',
-      uptime: isHardwareLive ? 'Live Stream Active' : 'Waiting for Packets',
+      network: isHardwareLive ? 'Active Telemetry' : 'Disconnected',
+      ip: isHardwareLive ? '13.50.151.133' : 'None',
+      uptime: isHardwareLive ? 'Live Stream Active' : 'Offline',
       firmware: 'v1.0.6',
-      lastPacketTime: latestSensorData ? latestSensorData.timestamp : null
+      lastPacketTime: latestHardwareData ? latestHardwareData.timestamp : null
     };
     
     res.json({
       isOnline: isHardwareLive,
-      status: isHardwareLive ? 'online' : 'waiting_hardware',
-      statusText: isHardwareLive ? 'Device Online (Live Hardware)' : 'Waiting for ESP8266 / ESP32 Hardware Data',
+      status: isHardwareLive ? 'online' : 'disconnected',
+      statusText: isHardwareLive ? 'Device Online (Live Hardware)' : 'No Hardware Connected (Offline)',
       currentMoisture,
       readings,
+      cachedReadings,
       device,
-      lastPacketTime: latestSensorData ? latestSensorData.timestamp : null,
+      lastPacketTime: latestHardwareData ? latestHardwareData.timestamp : null,
       serverTime: new Date(),
       state
     });
@@ -224,11 +240,12 @@ app.post('/api/sensor', async (req, res) => {
       potassium,
       airTemperature,
       humidity,
-      lightIntensity
+      lightIntensity,
+      source: 'hardware'
     });
     await newData.save();
 
-    console.log(`[IoT Telemetry] Saved packet from ${req.ip}: moisture=${moistureLevel}%, temp=${temperature}C, pH=${pH}`);
+    console.log(`[IoT Telemetry] Saved REAL HARDWARE packet from ${req.ip}: moisture=${moistureLevel}%, temp=${temperature}C, pH=${pH}`);
 
     // Check logic if auto mode is on
     const state = await DeviceState.findOne({ fieldId: 'Field 1' });
@@ -263,10 +280,11 @@ app.post('/api/sensor/simulate', async (req, res) => {
       pH: Number((6.7 + Math.random() * 0.3).toFixed(1)),
       nitrogen: 40 + Math.floor(Math.random() * 6),
       phosphorus: 26 + Math.floor(Math.random() * 5),
-      potassium: 33 + Math.floor(Math.random() * 5)
+      potassium: 33 + Math.floor(Math.random() * 5),
+      source: 'simulation'
     });
     await newData.save();
-    res.json({ success: true, message: "IoT Sensor Packet Recorded", data: newData });
+    res.json({ success: true, message: "Simulation Demo Packet Recorded", data: newData });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

@@ -24,6 +24,7 @@ import {
   ChevronRight,
   ArrowRight,
   AlertTriangle,
+  WifiOff,
   Copy,
   Check,
   Terminal,
@@ -49,15 +50,19 @@ export default function Sensors({ isDiagnosticMode = false }) {
   const location = useLocation();
   const isDiag = isDiagnosticMode || location.pathname === '/iot-sync';
 
-  // Live IoT States from Backend
+  // Live IoT States from Backend (null when hardware is offline)
   const [isAutoMode, setIsAutoMode] = useState(true);
   const [pumpStatus, setPumpStatus] = useState(false);
-  const [moisture, setMoisture] = useState(42);
-  const [temperature, setTemperature] = useState(24.0);
-  const [phVal, setPhVal] = useState(6.8);
-  const [nitrogen, setNitrogen] = useState(42);
-  const [phosphorus, setPhosphorus] = useState(28);
-  const [potassium, setPotassium] = useState(35);
+  const [moisture, setMoisture] = useState(null);
+  const [temperature, setTemperature] = useState(null);
+  const [phVal, setPhVal] = useState(null);
+  const [nitrogen, setNitrogen] = useState(null);
+  const [phosphorus, setPhosphorus] = useState(null);
+  const [potassium, setPotassium] = useState(null);
+
+  // Cached / Historical Ground Truth (from previous sessions)
+  const [cachedData, setCachedData] = useState(null);
+  const [showHistorical, setShowHistorical] = useState(false);
   
   // Field Environment Overview
   const [airTemp, setAirTemp] = useState(28.0);
@@ -69,11 +74,11 @@ export default function Sensors({ isDiagnosticMode = false }) {
   const [isOnline, setIsOnline] = useState(false);
   const [lastPacketTime, setLastPacketTime] = useState(null);
   const [deviceInfo, setDeviceInfo] = useState({
-    name: 'ESP32 / ESP8266 Live Node',
-    mac: '24:6F:28:3A:7F:11',
-    network: 'Active Telemetry',
+    name: 'No Hardware Connected',
+    mac: 'None',
+    network: 'Disconnected',
     ip: '13.50.151.133',
-    uptime: 'Standby',
+    uptime: 'Offline',
     firmware: 'v1.0.6'
   });
   const [lastSyncTime, setLastSyncTime] = useState('Just now');
@@ -97,12 +102,12 @@ export default function Sensors({ isDiagnosticMode = false }) {
   const handleDiagnosticConfirm = () => {
     const currentData = JSON.parse(localStorage.getItem('agripulse_diagnostic') || '{}');
     currentData.sensors = {
-      moisture: moisture,
-      temperature: temperature,
-      pH: phVal,
-      nitrogen: nitrogen,
-      phosphorus: phosphorus,
-      potassium: potassium,
+      moisture: moisture ?? cachedData?.moisture ?? 42,
+      temperature: temperature ?? cachedData?.temperature ?? 24.0,
+      pH: phVal ?? cachedData?.pH ?? 6.8,
+      nitrogen: nitrogen ?? cachedData?.nitrogen ?? 42,
+      phosphorus: phosphorus ?? cachedData?.phosphorus ?? 28,
+      potassium: potassium ?? cachedData?.potassium ?? 35,
       pump_state: pumpStatus,
       is_online: isOnline
     };
@@ -126,19 +131,21 @@ export default function Sensors({ isDiagnosticMode = false }) {
             setLastPacketTime(`${pDate.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })}, ${pDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}`);
           }
 
+          if (data.cachedReadings) {
+            setCachedData(data.cachedReadings);
+          }
+
           if (data.readings) {
-            if (data.readings.moisture !== undefined) setMoisture(data.readings.moisture);
-            if (data.readings.temperature !== undefined) setTemperature(data.readings.temperature);
-            if (data.readings.pH !== undefined) setPhVal(data.readings.pH);
-            if (data.readings.nitrogen !== undefined) setNitrogen(data.readings.nitrogen);
-            if (data.readings.phosphorus !== undefined) setPhosphorus(data.readings.phosphorus);
-            if (data.readings.potassium !== undefined) setPotassium(data.readings.potassium);
-            if (data.readings.airTemperature !== undefined) setAirTemp(data.readings.airTemperature);
-            if (data.readings.humidity !== undefined) setHumidity(data.readings.humidity);
-            if (data.readings.lightIntensity !== undefined) setLightIntensity(data.readings.lightIntensity);
-            if (data.readings.rainfall !== undefined) setRainfall(data.readings.rainfall);
-          } else if (data.currentMoisture !== undefined) {
-            setMoisture(data.currentMoisture);
+            setMoisture(data.readings.moisture);
+            setTemperature(data.readings.temperature);
+            setPhVal(data.readings.pH);
+            setNitrogen(data.readings.nitrogen);
+            setPhosphorus(data.readings.phosphorus);
+            setPotassium(data.readings.potassium);
+            setAirTemp(data.readings.airTemperature ?? 28.0);
+            setHumidity(data.readings.humidity ?? 65);
+            setLightIntensity(data.readings.lightIntensity ?? 850);
+            setRainfall(data.readings.rainfall ?? 0);
           }
 
           if (data.state) {
@@ -240,6 +247,15 @@ export default function Sensors({ isDiagnosticMode = false }) {
   };
 
   // Fallback trend dataset if server hasn't sent 24h series yet
+  // Values to display: either live reading, or if showHistorical, cached reading, else null
+  const displayMoisture = isOnline ? moisture : (showHistorical ? cachedData?.moisture : null);
+  const displayTemp = isOnline ? temperature : (showHistorical ? cachedData?.temperature : null);
+  const displayPh = isOnline ? phVal : (showHistorical ? cachedData?.pH : null);
+  const displayN = isOnline ? nitrogen : (showHistorical ? cachedData?.nitrogen : null);
+  const displayP = isOnline ? phosphorus : (showHistorical ? cachedData?.phosphorus : null);
+  const displayK = isOnline ? potassium : (showHistorical ? cachedData?.potassium : null);
+
+  // Fallback trend dataset if server hasn't sent 24h series yet
   const defaultTrendSeries = {
     'Moisture': [
       { time: '12 AM', value: 38 },
@@ -247,9 +263,9 @@ export default function Sensors({ isDiagnosticMode = false }) {
       { time: '8 AM', value: 44 },
       { time: '12 PM', value: 46 },
       { time: '4 PM', value: 43 },
-      { time: '8 PM', value: moisture },
-      { time: '10 PM', value: moisture },
-      { time: '12 AM', value: moisture }
+      { time: '8 PM', value: displayMoisture ?? cachedData?.moisture ?? 42 },
+      { time: '10 PM', value: displayMoisture ?? cachedData?.moisture ?? 42 },
+      { time: '12 AM', value: displayMoisture ?? cachedData?.moisture ?? 42 }
     ],
     'Temperature': [
       { time: '12 AM', value: 19 },
@@ -257,44 +273,44 @@ export default function Sensors({ isDiagnosticMode = false }) {
       { time: '8 AM', value: 21 },
       { time: '12 PM', value: 27 },
       { time: '4 PM', value: 25 },
-      { time: '8 PM', value: temperature },
-      { time: '12 AM', value: temperature }
+      { time: '8 PM', value: displayTemp ?? cachedData?.temperature ?? 24 },
+      { time: '12 AM', value: displayTemp ?? cachedData?.temperature ?? 24 }
     ],
     'pH': [
       { time: '12 AM', value: 6.7 },
       { time: '4 AM', value: 6.7 },
       { time: '8 AM', value: 6.8 },
       { time: '12 PM', value: 6.9 },
-      { time: '4 PM', value: phVal },
-      { time: '8 PM', value: phVal },
-      { time: '12 AM', value: phVal }
+      { time: '4 PM', value: displayPh ?? cachedData?.pH ?? 6.8 },
+      { time: '8 PM', value: displayPh ?? cachedData?.pH ?? 6.8 },
+      { time: '12 AM', value: displayPh ?? cachedData?.pH ?? 6.8 }
     ],
     'Nitrogen (N)': [
       { time: '12 AM', value: 40 },
       { time: '4 AM', value: 40 },
       { time: '8 AM', value: 42 },
       { time: '12 PM', value: 43 },
-      { time: '4 PM', value: nitrogen },
-      { time: '8 PM', value: nitrogen },
-      { time: '12 AM', value: nitrogen }
+      { time: '4 PM', value: displayN ?? cachedData?.nitrogen ?? 42 },
+      { time: '8 PM', value: displayN ?? cachedData?.nitrogen ?? 42 },
+      { time: '12 AM', value: displayN ?? cachedData?.nitrogen ?? 42 }
     ],
     'Phosphorus (P)': [
       { time: '12 AM', value: 27 },
       { time: '4 AM', value: 27 },
       { time: '8 AM', value: 28 },
       { time: '12 PM', value: 29 },
-      { time: '4 PM', value: phosphorus },
-      { time: '8 PM', value: phosphorus },
-      { time: '12 AM', value: phosphorus }
+      { time: '4 PM', value: displayP ?? cachedData?.phosphorus ?? 28 },
+      { time: '8 PM', value: displayP ?? cachedData?.phosphorus ?? 28 },
+      { time: '12 AM', value: displayP ?? cachedData?.phosphorus ?? 28 }
     ],
     'Potassium (K)': [
       { time: '12 AM', value: 34 },
       { time: '4 AM', value: 34 },
       { time: '8 AM', value: 35 },
       { time: '12 PM', value: 36 },
-      { time: '4 PM', value: potassium },
-      { time: '8 PM', value: potassium },
-      { time: '12 AM', value: potassium }
+      { time: '4 PM', value: displayK ?? cachedData?.potassium ?? 35 },
+      { time: '8 PM', value: displayK ?? cachedData?.potassium ?? 35 },
+      { time: '12 AM', value: displayK ?? cachedData?.potassium ?? 35 }
     ]
   };
 
@@ -340,13 +356,13 @@ export default function Sensors({ isDiagnosticMode = false }) {
         {/* Status */}
         <div className="flex items-center gap-3 pr-4 border-r border-slate-100">
           <span className={`w-3.5 h-3.5 rounded-full ${
-            isOnline ? 'bg-emerald-500 animate-pulse ring-4 ring-emerald-100' : 'bg-amber-500 ring-4 ring-amber-100'
+            isOnline ? 'bg-emerald-500 animate-pulse ring-4 ring-emerald-100' : 'bg-rose-500 ring-4 ring-rose-100'
           }`}></span>
           <div>
             <div className={`flex items-center gap-1.5 font-bold text-xs ${
-              isOnline ? 'text-emerald-700' : 'text-amber-800'
+              isOnline ? 'text-emerald-700' : 'text-rose-700'
             }`}>
-              <span>{isOnline ? 'ESP Hardware Online (Live Streaming)' : 'Hardware Offline (Waiting for Board)'}</span>
+              <span>{isOnline ? 'ESP Hardware Online (Live Streaming)' : 'No Hardware Connected (Offline)'}</span>
             </div>
             <p className="text-[11px] text-slate-500">
               {isOnline 
@@ -359,21 +375,21 @@ export default function Sensors({ isDiagnosticMode = false }) {
         {/* Device Status */}
         <div className="flex items-center gap-3 pr-4 border-r border-slate-100">
           <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${
-            isOnline ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600'
+            isOnline ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'
           }`}>
             <Cpu size={17} />
           </div>
           <div>
             <span className="text-[10px] font-bold uppercase text-slate-400">Node Hardware</span>
-            <h4 className="text-xs font-bold text-slate-800">{isOnline ? 'ESP32 / ESP8266 (Active)' : 'Node Inactive / Standby'}</h4>
-            <p className="text-[10px] text-slate-400">{isOnline ? 'Telemetry frequency: 5s' : 'Waiting for POST /api/sensor'}</p>
+            <h4 className="text-xs font-bold text-slate-800">{isOnline ? 'ESP32 / ESP8266 (Active)' : 'Disconnected (No Board)'}</h4>
+            <p className="text-[10px] text-slate-400">{isOnline ? 'Telemetry frequency: 5s' : 'Waiting for hardware connection'}</p>
           </div>
         </div>
 
         {/* Network & Endpoint */}
         <div className="flex items-center gap-3 pr-4 border-r border-slate-100">
           <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${
-            isOnline ? 'bg-teal-50 text-teal-600' : 'bg-slate-100 text-slate-500'
+            isOnline ? 'bg-teal-50 text-teal-600' : 'bg-slate-100 text-slate-400'
           }`}>
             <Wifi size={17} />
           </div>
@@ -391,8 +407,8 @@ export default function Sensors({ isDiagnosticMode = false }) {
           </div>
           <div>
             <span className="text-[10px] font-bold uppercase text-slate-400">Channel Mode</span>
-            <h4 className="text-xs font-bold text-slate-800">{isOnline ? 'Live Hardware Stream' : 'Cached Ground Truth'}</h4>
-            <p className="text-[10px] text-slate-400">MongoDB Atlas Persistent</p>
+            <h4 className="text-xs font-bold text-slate-800">{isOnline ? 'Live Hardware Stream' : 'Standby / Offline'}</h4>
+            <p className="text-[10px] text-slate-400">{isOnline ? 'MongoDB Atlas Persistent' : 'No incoming packets'}</p>
           </div>
         </div>
 
@@ -408,16 +424,6 @@ export default function Sensors({ isDiagnosticMode = false }) {
           </button>
 
           <button
-            onClick={handleSimulatePacket}
-            disabled={isSimulating}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200/80 shadow-sm transition-all active:scale-95 disabled:opacity-50"
-            title="Inject test telemetry packet directly to MongoDB to verify pipeline"
-          >
-            <Zap size={13} className={isSimulating ? "animate-bounce text-amber-600" : "text-amber-500"} />
-            <span>{isSimulating ? "Transmitting..." : "Test Stream"}</span>
-          </button>
-
-          <button
             onClick={fetchDeviceData}
             disabled={isRefreshing}
             className="flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold bg-[#EBF4FF] hover:bg-[#DDEBFF] text-[#2B7FFF] border border-blue-200/60 shadow-sm transition-all active:scale-95 disabled:opacity-50"
@@ -429,48 +435,48 @@ export default function Sensors({ isDiagnosticMode = false }) {
 
       </div>
 
-      {/* Amber Hardware Offline Alert Banner (Displays when physical device is not sending data) */}
+      {/* Offline Alert Banner (Displays when physical device is not sending data) */}
       {!isOnline && (
-        <div className="bg-gradient-to-r from-amber-50 via-orange-50/50 to-amber-50 border border-amber-200/80 rounded-2xl p-4 sm:p-5 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4 animate-in fade-in">
+        <div className="bg-stone-50 border border-stone-200/90 rounded-2xl p-4 sm:p-5 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4 animate-in fade-in">
           <div className="flex items-start gap-3.5">
-            <div className="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center shrink-0 shadow-xs mt-0.5">
-              <AlertTriangle size={20} className="animate-pulse" />
+            <div className="w-10 h-10 rounded-xl bg-rose-100 text-rose-700 flex items-center justify-center shrink-0 shadow-xs mt-0.5">
+              <WifiOff size={20} />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h4 className="text-sm font-bold text-amber-950">
-                  Physical ESP Device Is Offline — Displaying Last Recorded Telemetry
+                <h4 className="text-sm font-bold text-slate-900">
+                  No Hardware Device Connected — Live Telemetry Is Offline
                 </h4>
-                <span className="px-2 py-0.5 text-[10px] font-bold bg-amber-200 text-amber-900 rounded-full">
-                  Waiting for Packets
+                <span className="px-2 py-0.5 text-[10px] font-bold bg-rose-100 text-rose-800 border border-rose-200 rounded-full">
+                  Offline
                 </span>
               </div>
-              <p className="text-xs text-amber-800/90 mt-1 max-w-3xl leading-relaxed">
-                The cloud backend server is running on AWS (<code className="font-mono bg-amber-100/80 px-1 py-0.5 rounded text-[11px]">http://13.50.151.133/api/sensor</code>), but no HTTP POST requests have arrived from your physical ESP32 / ESP8266 board in the last 90 seconds. To see your sensor readings move live on screen, make sure your phone hotspot is turned ON and flash the Arduino code below.
+              <p className="text-xs text-slate-600 mt-1 max-w-2xl leading-relaxed">
+                Aapne abhi koi physical hardware connect nahi kiya hai, isliye sensor readings <strong>"--" (No Signal)</strong> dikhayi de rahi hain. Apna ESP32 / ESP8266 board connect karte hi yahan real-time live data shuru ho jayega.
               </p>
               {lastPacketTime && (
-                <p className="text-[11px] text-amber-700 font-medium mt-1">
-                  ⏱ Last packet saved in database: <span className="font-bold">{lastPacketTime}</span> ({moisture}% Moisture)
+                <p className="text-[11px] text-slate-500 font-medium mt-1">
+                  ⏱ Last saved session in database: <span className="font-bold">{lastPacketTime}</span>
                 </p>
               )}
             </div>
           </div>
 
           <div className="flex items-center gap-2 shrink-0 w-full md:w-auto">
+            {cachedData && (
+              <button
+                onClick={() => setShowHistorical(!showHistorical)}
+                className="flex-1 md:flex-initial px-3.5 py-2.5 rounded-xl text-xs font-bold bg-white hover:bg-stone-100 text-slate-700 border border-stone-300 shadow-2xs transition-all"
+              >
+                {showHistorical ? "Hide Stored Data" : "View Last Stored Telemetry"}
+              </button>
+            )}
             <button
               onClick={() => setShowGuideModal(true)}
-              className="flex-1 md:flex-initial flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-bold bg-amber-600 hover:bg-amber-700 text-white shadow-sm transition-all active:scale-95"
+              className="flex-1 md:flex-initial flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-bold bg-slate-900 hover:bg-slate-800 text-white shadow-sm transition-all active:scale-95"
             >
               <Terminal size={14} />
-              <span>View Arduino Code & Setup</span>
-            </button>
-            <button
-              onClick={handleSimulatePacket}
-              disabled={isSimulating}
-              className="flex-1 md:flex-initial flex items-center justify-center gap-1 px-3 py-2.5 rounded-xl text-xs font-bold bg-white hover:bg-amber-50 text-amber-900 border border-amber-300 shadow-sm transition-all"
-            >
-              <Play size={13} className="text-amber-600" />
-              <span>Simulate Reading</span>
+              <span>Connect Device (Code)</span>
             </button>
           </div>
         </div>
@@ -480,24 +486,30 @@ export default function Sensors({ isDiagnosticMode = false }) {
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center">
+            <div className={`w-6 h-6 rounded-lg flex items-center justify-center ${
+              isOnline ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500'
+            }`}>
               <Sprout size={14} />
             </div>
-            <h3 className="font-extrabold text-base text-slate-900">Live Soil Sensor Readings</h3>
+            <h3 className="font-extrabold text-base text-slate-900">
+              {isOnline ? 'Live Soil Sensor Readings' : (showHistorical ? 'Stored Soil Telemetry (Historical)' : 'Live Soil Sensor Feed')}
+            </h3>
           </div>
           <div className="flex items-center gap-3">
             <span className="text-xs text-slate-400 hidden sm:inline">
-              {isOnline ? `Auto-refresh: 5s` : `Cached Ground Truth`}
+              {isOnline ? `Auto-refresh: 5s` : (showHistorical ? `Recorded: ${lastPacketTime}` : `Hardware Inactive`)}
             </span>
             <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold ${
               isOnline 
                 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' 
-                : 'bg-amber-50 text-amber-800 border border-amber-200'
+                : showHistorical
+                  ? 'bg-amber-50 text-amber-800 border border-amber-200'
+                  : 'bg-rose-50 text-rose-700 border border-rose-200'
             }`}>
               <span className={`w-1.5 h-1.5 rounded-full ${
-                isOnline ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'
+                isOnline ? 'bg-emerald-500 animate-pulse' : (showHistorical ? 'bg-amber-500' : 'bg-rose-500')
               }`}></span>
-              {isOnline ? 'Live Hardware Stream' : 'Historical Data (Offline)'}
+              {isOnline ? 'Live Hardware Stream' : (showHistorical ? 'Stored Telemetry' : 'Hardware Disconnected')}
             </span>
           </div>
         </div>
@@ -507,16 +519,26 @@ export default function Sensors({ isDiagnosticMode = false }) {
           {/* 1. Moisture */}
           <div className="bg-white rounded-2xl p-4 border border-stone-200/70 shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
             <div className="flex items-center gap-2.5 mb-2">
-              <div className="w-8 h-8 rounded-xl bg-blue-50 text-blue-500 flex items-center justify-center">
+              <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${
+                displayMoisture !== null ? 'bg-blue-50 text-blue-500' : 'bg-slate-100 text-slate-400'
+              }`}>
                 <Droplets size={17} />
               </div>
               <span className="text-xs font-bold text-slate-600">Soil Moisture</span>
             </div>
             <div>
-              <div className="text-2xl font-black text-slate-900">{moisture}%</div>
+              <div className={`text-2xl font-black ${displayMoisture !== null ? 'text-slate-900' : 'text-slate-300'}`}>
+                {displayMoisture !== null ? `${displayMoisture}%` : '-- %'}
+              </div>
               <div className="flex items-center justify-between mt-2">
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200">
-                  Optimal
+                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md border ${
+                  isOnline 
+                    ? 'bg-emerald-50 text-emerald-700 border-emerald-200' 
+                    : showHistorical
+                      ? 'bg-amber-50 text-amber-800 border-amber-200'
+                      : 'bg-rose-50 text-rose-700 border-rose-200'
+                }`}>
+                  {isOnline ? 'Optimal' : (showHistorical ? 'Saved Data' : 'Offline')}
                 </span>
                 <span className="text-[10px] text-slate-400">Range: 20 - 60%</span>
               </div>
@@ -526,16 +548,26 @@ export default function Sensors({ isDiagnosticMode = false }) {
           {/* 2. Temperature */}
           <div className="bg-white rounded-2xl p-4 border border-stone-200/70 shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
             <div className="flex items-center gap-2.5 mb-2">
-              <div className="w-8 h-8 rounded-xl bg-rose-50 text-rose-500 flex items-center justify-center">
+              <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${
+                displayTemp !== null ? 'bg-rose-50 text-rose-500' : 'bg-slate-100 text-slate-400'
+              }`}>
                 <Thermometer size={17} />
               </div>
               <span className="text-xs font-bold text-slate-600">Soil Temperature</span>
             </div>
             <div>
-              <div className="text-2xl font-black text-slate-900">{temperature}°C</div>
+              <div className={`text-2xl font-black ${displayTemp !== null ? 'text-slate-900' : 'text-slate-300'}`}>
+                {displayTemp !== null ? `${displayTemp}°C` : '-- °C'}
+              </div>
               <div className="flex items-center justify-between mt-2">
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200">
-                  Normal
+                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md border ${
+                  isOnline 
+                    ? 'bg-emerald-50 text-emerald-700 border-emerald-200' 
+                    : showHistorical
+                      ? 'bg-amber-50 text-amber-800 border-amber-200'
+                      : 'bg-rose-50 text-rose-700 border-rose-200'
+                }`}>
+                  {isOnline ? 'Normal' : (showHistorical ? 'Saved Data' : 'Offline')}
                 </span>
                 <span className="text-[10px] text-slate-400">Range: 10 - 35°C</span>
               </div>
@@ -545,16 +577,26 @@ export default function Sensors({ isDiagnosticMode = false }) {
           {/* 3. pH */}
           <div className="bg-white rounded-2xl p-4 border border-stone-200/70 shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
             <div className="flex items-center gap-2.5 mb-2">
-              <div className="w-8 h-8 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center">
+              <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${
+                displayPh !== null ? 'bg-purple-50 text-purple-600' : 'bg-slate-100 text-slate-400'
+              }`}>
                 <FlaskConical size={17} />
               </div>
               <span className="text-xs font-bold text-slate-600">Soil pH</span>
             </div>
             <div>
-              <div className="text-2xl font-black text-slate-900">{phVal}</div>
+              <div className={`text-2xl font-black ${displayPh !== null ? 'text-slate-900' : 'text-slate-300'}`}>
+                {displayPh !== null ? displayPh : '--'}
+              </div>
               <div className="flex items-center justify-between mt-2">
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200">
-                  Good
+                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md border ${
+                  isOnline 
+                    ? 'bg-emerald-50 text-emerald-700 border-emerald-200' 
+                    : showHistorical
+                      ? 'bg-amber-50 text-amber-800 border-amber-200'
+                      : 'bg-rose-50 text-rose-700 border-rose-200'
+                }`}>
+                  {isOnline ? 'Good' : (showHistorical ? 'Saved Data' : 'Offline')}
                 </span>
                 <span className="text-[10px] text-slate-400">Range: 6.0 - 7.5</span>
               </div>
@@ -564,16 +606,26 @@ export default function Sensors({ isDiagnosticMode = false }) {
           {/* 4. Nitrogen (N) */}
           <div className="bg-white rounded-2xl p-4 border border-stone-200/70 shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
             <div className="flex items-center gap-2.5 mb-2">
-              <div className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+              <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${
+                displayN !== null ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-100 text-slate-400'
+              }`}>
                 <Sprout size={17} />
               </div>
               <span className="text-xs font-bold text-slate-600">Nitrogen (N)</span>
             </div>
             <div>
-              <div className="text-2xl font-black text-slate-900">{nitrogen} <span className="text-xs font-normal text-slate-400">kg/ha</span></div>
+              <div className={`text-2xl font-black ${displayN !== null ? 'text-slate-900' : 'text-slate-300'}`}>
+                {displayN !== null ? `${displayN} kg/ha` : '-- kg/ha'}
+              </div>
               <div className="flex items-center justify-between mt-2">
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200">
-                  Optimal
+                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md border ${
+                  isOnline 
+                    ? 'bg-emerald-50 text-emerald-700 border-emerald-200' 
+                    : showHistorical
+                      ? 'bg-amber-50 text-amber-800 border-amber-200'
+                      : 'bg-rose-50 text-rose-700 border-rose-200'
+                }`}>
+                  {isOnline ? 'Optimal' : (showHistorical ? 'Saved Data' : 'Offline')}
                 </span>
                 <span className="text-[10px] text-slate-400">Range: 20 - 60</span>
               </div>
@@ -583,16 +635,26 @@ export default function Sensors({ isDiagnosticMode = false }) {
           {/* 5. Phosphorus (P) */}
           <div className="bg-white rounded-2xl p-4 border border-stone-200/70 shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
             <div className="flex items-center gap-2.5 mb-2">
-              <div className="w-8 h-8 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
+              <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${
+                displayP !== null ? 'bg-amber-50 text-amber-600' : 'bg-slate-100 text-slate-400'
+              }`}>
                 <Sprout size={17} />
               </div>
               <span className="text-xs font-bold text-slate-600">Phosphorus (P)</span>
             </div>
             <div>
-              <div className="text-2xl font-black text-slate-900">{phosphorus} <span className="text-xs font-normal text-slate-400">kg/ha</span></div>
+              <div className={`text-2xl font-black ${displayP !== null ? 'text-slate-900' : 'text-slate-300'}`}>
+                {displayP !== null ? `${displayP} kg/ha` : '-- kg/ha'}
+              </div>
               <div className="flex items-center justify-between mt-2">
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200">
-                  Optimal
+                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md border ${
+                  isOnline 
+                    ? 'bg-emerald-50 text-emerald-700 border-emerald-200' 
+                    : showHistorical
+                      ? 'bg-amber-50 text-amber-800 border-amber-200'
+                      : 'bg-rose-50 text-rose-700 border-rose-200'
+                }`}>
+                  {isOnline ? 'Optimal' : (showHistorical ? 'Saved Data' : 'Offline')}
                 </span>
                 <span className="text-[10px] text-slate-400">Range: 15 - 40</span>
               </div>
@@ -602,24 +664,34 @@ export default function Sensors({ isDiagnosticMode = false }) {
           {/* 6. Potassium (K) */}
           <div className="bg-white rounded-2xl p-4 border border-stone-200/70 shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
             <div className="flex items-center gap-2.5 mb-2">
-              <div className="w-8 h-8 rounded-xl bg-yellow-50 text-yellow-600 flex items-center justify-center">
+              <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${
+                displayK !== null ? 'bg-yellow-50 text-yellow-600' : 'bg-slate-100 text-slate-400'
+              }`}>
                 <Layers size={17} />
               </div>
               <span className="text-xs font-bold text-slate-600">Potassium (K)</span>
             </div>
             <div>
-              <div className="text-2xl font-black text-slate-900">{potassium} <span className="text-xs font-normal text-slate-400">kg/ha</span></div>
+              <div className={`text-2xl font-black ${displayK !== null ? 'text-slate-900' : 'text-slate-300'}`}>
+                {displayK !== null ? `${displayK} kg/ha` : '-- kg/ha'}
+              </div>
               <div className="flex items-center justify-between mt-2">
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200">
-                  Optimal
+                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md border ${
+                  isOnline 
+                    ? 'bg-emerald-50 text-emerald-700 border-emerald-200' 
+                    : showHistorical
+                      ? 'bg-amber-50 text-amber-800 border-amber-200'
+                      : 'bg-rose-50 text-rose-700 border-rose-200'
+                }`}>
+                  {isOnline ? 'Optimal' : (showHistorical ? 'Saved Data' : 'Offline')}
                 </span>
                 <span className="text-[10px] text-slate-400">Range: 20 - 50</span>
-              </div>
             </div>
           </div>
 
         </div>
       </div>
+    </div>
 
       {/* 4. Middle Section: Sensor Trends (24h) & Field Environment Overview */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">

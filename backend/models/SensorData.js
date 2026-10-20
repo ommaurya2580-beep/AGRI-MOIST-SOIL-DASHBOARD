@@ -41,6 +41,11 @@ const sensorDataSchema = new mongoose.Schema({
     type: String,
     default: 'Field 1'
   },
+  source: {
+    type: String,
+    enum: ['hardware', 'simulation'],
+    default: 'hardware'
+  },
   timestamp: {
     type: Date,
     default: Date.now
