@@ -43,19 +43,35 @@ export default function Sensors({ isDiagnosticMode = false }) {
   const [isAutoMode, setIsAutoMode] = useState(true);
   const [pumpStatus, setPumpStatus] = useState(false);
   const [moisture, setMoisture] = useState(42);
-  const [isOnline, setIsOnline] = useState(true);
-  const [lastSyncTime, setLastSyncTime] = useState('20 Oct 2026, 01:32 PM');
+  const [temperature, setTemperature] = useState(24.0);
+  const [phVal, setPhVal] = useState(6.8);
+  const [nitrogen, setNitrogen] = useState(42);
+  const [phosphorus, setPhosphorus] = useState(28);
+  const [potassium, setPotassium] = useState(35);
+  
+  // Field Environment Overview
+  const [airTemp, setAirTemp] = useState(28.0);
+  const [humidity, setHumidity] = useState(65);
+  const [lightIntensity, setLightIntensity] = useState(850);
+  const [rainfall, setRainfall] = useState(0);
+
+  // Device Connectivity
+  const [isOnline, setIsOnline] = useState(false);
+  const [deviceInfo, setDeviceInfo] = useState({
+    name: 'ESP32-WF-01',
+    mac: '24:6F:28:3A:7F:11',
+    network: 'AgriPulse_Net',
+    ip: '192.168.1.105',
+    uptime: '2d 14h 32m',
+    firmware: 'v1.0.6'
+  });
+  const [lastSyncTime, setLastSyncTime] = useState('Just now');
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isSimulating, setIsSimulating] = useState(false);
 
   // Active Metric for Trends Chart
   const [selectedMetric, setSelectedMetric] = useState('Moisture');
-
-  // Static / Semi-static Agro Metrics matching mockup
-  const [temperature] = useState(24);
-  const [phVal] = useState(6.8);
-  const [nitrogen] = useState(42);
-  const [phosphorus] = useState(28);
-  const [potassium] = useState(35);
+  const [trendSeries, setTrendSeries] = useState(null);
 
   const handleDiagnosticConfirm = () => {
     const currentData = JSON.parse(localStorage.getItem('agripulse_diagnostic') || '{}');
@@ -76,28 +92,75 @@ export default function Sensors({ isDiagnosticMode = false }) {
   const fetchDeviceData = async () => {
     setIsRefreshing(true);
     try {
+      // 1. Fetch live IoT state & readings from backend
       const res = await fetch('/api/state');
-      const data = await res.json();
-      if (data) {
-        if (data.currentMoisture !== undefined) setMoisture(data.currentMoisture || 42);
-        if (data.isOnline !== undefined) setIsOnline(data.isOnline);
-        if (data.state) {
-          setIsAutoMode(data.state.isAutoMode ?? true);
-          setPumpStatus(data.state.pumpIsOn ?? false);
+      if (res.ok) {
+        const data = await res.json();
+        if (data) {
+          setIsOnline(data.isOnline ?? false);
+          if (data.device) setDeviceInfo(prev => ({ ...prev, ...data.device }));
+          
+          if (data.readings) {
+            if (data.readings.moisture !== undefined) setMoisture(data.readings.moisture);
+            if (data.readings.temperature !== undefined) setTemperature(data.readings.temperature);
+            if (data.readings.pH !== undefined) setPhVal(data.readings.pH);
+            if (data.readings.nitrogen !== undefined) setNitrogen(data.readings.nitrogen);
+            if (data.readings.phosphorus !== undefined) setPhosphorus(data.readings.phosphorus);
+            if (data.readings.potassium !== undefined) setPotassium(data.readings.potassium);
+            if (data.readings.airTemperature !== undefined) setAirTemp(data.readings.airTemperature);
+            if (data.readings.humidity !== undefined) setHumidity(data.readings.humidity);
+            if (data.readings.lightIntensity !== undefined) setLightIntensity(data.readings.lightIntensity);
+            if (data.readings.rainfall !== undefined) setRainfall(data.readings.rainfall);
+          } else if (data.currentMoisture !== undefined) {
+            setMoisture(data.currentMoisture);
+          }
+
+          if (data.state) {
+            setIsAutoMode(data.state.isAutoMode ?? true);
+            setPumpStatus(data.state.pumpIsOn ?? false);
+          }
+
+          const now = new Date();
+          setLastSyncTime(`${now.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}, ${now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}`);
         }
-        const now = new Date();
-        setLastSyncTime(`${now.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}, ${now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`);
+      }
+
+      // 2. Fetch 24-hour trends from backend
+      const trendRes = await fetch('/api/trend');
+      if (trendRes.ok) {
+        const trendData = await trendRes.json();
+        if (trendData && typeof trendData === 'object') {
+          setTrendSeries(trendData);
+        }
       }
     } catch (err) {
-      console.warn("Could not fetch state, using sensor cache");
+      console.warn("Could not fetch state from IoT server:", err);
     } finally {
-      setTimeout(() => setIsRefreshing(false), 500);
+      setTimeout(() => setIsRefreshing(false), 400);
+    }
+  };
+
+  // Simulate an incoming IoT sensor packet
+  const handleSimulatePacket = async () => {
+    setIsSimulating(true);
+    try {
+      const randomMoisture = Math.floor(Math.random() * 25 + 35);
+      await fetch('/api/sensor/simulate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ moisture: randomMoisture })
+      });
+      await fetchDeviceData();
+    } catch (err) {
+      console.error("Simulation error:", err);
+    } finally {
+      setTimeout(() => setIsSimulating(false), 500);
     }
   };
 
   useEffect(() => {
     fetchDeviceData();
-    const interval = setInterval(fetchDeviceData, 8000);
+    const interval = setInterval(fetchDeviceData, 5000);
     return () => clearInterval(interval);
   }, []);
 
@@ -114,22 +177,17 @@ export default function Sensors({ isDiagnosticMode = false }) {
     }
   };
 
-  // Trend data series for the 24h chart
-  const trendSeries = {
+  // Fallback trend dataset if server hasn't sent 24h series yet
+  const defaultTrendSeries = {
     'Moisture': [
-      { time: '12 AM', value: 34 },
-      { time: '2 AM', value: 32 },
-      { time: '4 AM', value: 35 },
-      { time: '6 AM', value: 38 },
+      { time: '12 AM', value: 38 },
+      { time: '4 AM', value: 36 },
       { time: '8 AM', value: 44 },
-      { time: '10 AM', value: 50 },
-      { time: '12 PM', value: 56 },
-      { time: '2 PM', value: 52 },
-      { time: '4 PM', value: 48 },
-      { time: '6 PM', value: 45 },
-      { time: '8 PM', value: 42 },
-      { time: '10 PM', value: 40 },
-      { time: '12 AM', value: 38 }
+      { time: '12 PM', value: 46 },
+      { time: '4 PM', value: 43 },
+      { time: '8 PM', value: moisture },
+      { time: '10 PM', value: moisture },
+      { time: '12 AM', value: moisture }
     ],
     'Temperature': [
       { time: '12 AM', value: 19 },
@@ -137,48 +195,50 @@ export default function Sensors({ isDiagnosticMode = false }) {
       { time: '8 AM', value: 21 },
       { time: '12 PM', value: 27 },
       { time: '4 PM', value: 25 },
-      { time: '8 PM', value: 22 },
-      { time: '12 AM', value: 20 }
+      { time: '8 PM', value: temperature },
+      { time: '12 AM', value: temperature }
     ],
     'pH': [
       { time: '12 AM', value: 6.7 },
       { time: '4 AM', value: 6.7 },
       { time: '8 AM', value: 6.8 },
       { time: '12 PM', value: 6.9 },
-      { time: '4 PM', value: 6.8 },
-      { time: '8 PM', value: 6.8 },
-      { time: '12 AM', value: 6.7 }
+      { time: '4 PM', value: phVal },
+      { time: '8 PM', value: phVal },
+      { time: '12 AM', value: phVal }
     ],
     'Nitrogen (N)': [
       { time: '12 AM', value: 40 },
       { time: '4 AM', value: 40 },
       { time: '8 AM', value: 42 },
       { time: '12 PM', value: 43 },
-      { time: '4 PM', value: 42 },
-      { time: '8 PM', value: 41 },
-      { time: '12 AM', value: 41 }
+      { time: '4 PM', value: nitrogen },
+      { time: '8 PM', value: nitrogen },
+      { time: '12 AM', value: nitrogen }
     ],
     'Phosphorus (P)': [
       { time: '12 AM', value: 27 },
       { time: '4 AM', value: 27 },
       { time: '8 AM', value: 28 },
       { time: '12 PM', value: 29 },
-      { time: '4 PM', value: 28 },
-      { time: '8 PM', value: 28 },
-      { time: '12 AM', value: 27 }
+      { time: '4 PM', value: phosphorus },
+      { time: '8 PM', value: phosphorus },
+      { time: '12 AM', value: phosphorus }
     ],
     'Potassium (K)': [
       { time: '12 AM', value: 34 },
       { time: '4 AM', value: 34 },
       { time: '8 AM', value: 35 },
       { time: '12 PM', value: 36 },
-      { time: '4 PM', value: 35 },
-      { time: '8 PM', value: 35 },
-      { time: '12 AM', value: 34 }
+      { time: '4 PM', value: potassium },
+      { time: '8 PM', value: potassium },
+      { time: '12 AM', value: potassium }
     ]
   };
 
-  const currentChartData = trendSeries[selectedMetric] || trendSeries['Moisture'];
+  const activeSeries = (trendSeries && trendSeries[selectedMetric]) 
+    ? trendSeries[selectedMetric] 
+    : (defaultTrendSeries[selectedMetric] || defaultTrendSeries['Moisture']);
 
   return (
     <div className="max-w-[1400px] mx-auto space-y-6 pb-16 animate-in fade-in">
@@ -217,12 +277,16 @@ export default function Sensors({ isDiagnosticMode = false }) {
         
         {/* Status */}
         <div className="flex items-center gap-3 pr-4 border-r border-slate-100">
-          <span className="w-3 h-3 rounded-full bg-emerald-500 animate-pulse"></span>
+          <span className={`w-3 h-3 rounded-full ${
+            isOnline ? 'bg-emerald-500 animate-pulse' : 'bg-emerald-500'
+          }`}></span>
           <div>
             <div className="flex items-center gap-1.5 font-bold text-xs text-emerald-700">
-              <span>Device Online</span>
+              <span>{isOnline ? 'Device Online (Hardware Live)' : 'IoT Server Connected'}</span>
             </div>
-            <p className="text-[11px] text-slate-400">Last Sync: {lastSyncTime}</p>
+            <p className="text-[11px] text-slate-400">
+              {isOnline ? `Last Sync: ${lastSyncTime}` : `Cloud Sync: ${lastSyncTime}`}
+            </p>
           </div>
         </div>
 
@@ -233,8 +297,8 @@ export default function Sensors({ isDiagnosticMode = false }) {
           </div>
           <div>
             <span className="text-[10px] font-bold uppercase text-slate-400">Device Name</span>
-            <h4 className="text-xs font-bold text-slate-800">ESP32-WF-01</h4>
-            <p className="text-[10px] text-slate-400">MAC: 24:6F:28:3A:7F:11</p>
+            <h4 className="text-xs font-bold text-slate-800">{deviceInfo.name || 'ESP32-WF-01'}</h4>
+            <p className="text-[10px] text-slate-400">MAC: {deviceInfo.mac || '24:6F:28:3A:7F:11'}</p>
           </div>
         </div>
 
@@ -245,8 +309,8 @@ export default function Sensors({ isDiagnosticMode = false }) {
           </div>
           <div>
             <span className="text-[10px] font-bold uppercase text-slate-400">Network</span>
-            <h4 className="text-xs font-bold text-slate-800">AgriPulse_Net</h4>
-            <p className="text-[10px] text-slate-400">IP: 192.168.1.105</p>
+            <h4 className="text-xs font-bold text-slate-800">{deviceInfo.network || 'AgriPulse_Net'}</h4>
+            <p className="text-[10px] text-slate-400">IP: {deviceInfo.ip || '192.168.1.105'}</p>
           </div>
         </div>
 
@@ -257,13 +321,23 @@ export default function Sensors({ isDiagnosticMode = false }) {
           </div>
           <div>
             <span className="text-[10px] font-bold uppercase text-slate-400">Uptime</span>
-            <h4 className="text-xs font-bold text-slate-800">2d 14h 32m</h4>
-            <p className="text-[10px] text-slate-400">Firmware: v1.0.6</p>
+            <h4 className="text-xs font-bold text-slate-800">{deviceInfo.uptime || '2d 14h 32m'}</h4>
+            <p className="text-[10px] text-slate-400">Firmware: {deviceInfo.firmware || 'v1.0.6'}</p>
           </div>
         </div>
 
-        {/* Refresh Button */}
-        <div>
+        {/* Action Buttons: Test Packet & Refresh */}
+        <div className="flex items-center gap-2">
+          <button
+            onClick={handleSimulatePacket}
+            disabled={isSimulating}
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200/80 shadow-sm transition-all active:scale-95 disabled:opacity-50"
+            title="Send test telemetry packet to IoT server"
+          >
+            <Zap size={13} className={isSimulating ? "animate-bounce text-amber-600" : "text-amber-500"} />
+            <span>{isSimulating ? "Transmitting..." : "Test Packet"}</span>
+          </button>
+
           <button
             onClick={fetchDeviceData}
             disabled={isRefreshing}
@@ -446,7 +520,7 @@ export default function Sensors({ isDiagnosticMode = false }) {
             {/* Area Chart */}
             <div className="h-64 w-full">
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={currentChartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                <AreaChart data={activeSeries} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                   <defs>
                     <linearGradient id="moistureGrad" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.25}/>
@@ -506,7 +580,7 @@ export default function Sensors({ isDiagnosticMode = false }) {
                 <Thermometer size={18} className="text-rose-500 shrink-0" />
                 <div>
                   <div className="text-[10px] text-slate-400">Air Temperature</div>
-                  <div className="text-sm font-bold text-slate-800">28°C</div>
+                  <div className="text-sm font-bold text-slate-800">{airTemp}°C</div>
                   <span className="text-[9px] text-slate-400">Partly Cloudy</span>
                 </div>
               </div>
@@ -515,7 +589,7 @@ export default function Sensors({ isDiagnosticMode = false }) {
                 <Droplets size={18} className="text-blue-500 shrink-0" />
                 <div>
                   <div className="text-[10px] text-slate-400">Humidity</div>
-                  <div className="text-sm font-bold text-slate-800">65%</div>
+                  <div className="text-sm font-bold text-slate-800">{humidity}%</div>
                   <span className="text-[9px] font-bold text-emerald-600">Normal</span>
                 </div>
               </div>
@@ -524,7 +598,7 @@ export default function Sensors({ isDiagnosticMode = false }) {
                 <Sun size={18} className="text-amber-500 shrink-0" />
                 <div>
                   <div className="text-[10px] text-slate-400">Light Intensity</div>
-                  <div className="text-sm font-bold text-slate-800">850 lux</div>
+                  <div className="text-sm font-bold text-slate-800">{lightIntensity} lux</div>
                   <span className="text-[9px] font-bold text-emerald-600">Good</span>
                 </div>
               </div>
@@ -533,7 +607,7 @@ export default function Sensors({ isDiagnosticMode = false }) {
                 <CloudRain size={18} className="text-blue-400 shrink-0" />
                 <div>
                   <div className="text-[10px] text-slate-400">Rainfall (Today)</div>
-                  <div className="text-sm font-bold text-slate-800">0 mm</div>
+                  <div className="text-sm font-bold text-slate-800">{rainfall} mm</div>
                   <span className="text-[9px] text-slate-400">No Rain</span>
                 </div>
               </div>
