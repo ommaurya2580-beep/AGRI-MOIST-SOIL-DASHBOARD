@@ -12,11 +12,15 @@ import EngineCompute from './pages/EngineCompute';
 import Sensors from './pages/Sensors';
 import ESP32Connect from './pages/ESP32Connect';
 import FertilizerGuide from './pages/FertilizerGuide';
+import UnifiedAnalysisFlow from './pages/CropAnalysis/UnifiedAnalysisFlow';
+import Alerts from './pages/Alerts';
+import History from './pages/History';
+import SettingsPage from './pages/Settings';
 
 import ProblemCategory from './pages/ProblemCategory';
 import ProblemDetail from './pages/ProblemDetail';
 
-// Legacy components mapped to new routes for now
+// Legacy components
 import PestDetection from './components/PestDetection';
 import CropAnalysis from './components/CropAnalysis';
 import TerraLeafPro from './components/TerraLeafPro';
@@ -34,7 +38,7 @@ function App() {
         {/* Main Application Layout */}
         <Route element={<DashboardLayout />}>
           <Route path="dashboard" element={<Dashboard />} />
-          <Route path="fields" element={<div className="p-4">Fields Map (Under Construction)</div>} />
+          <Route path="crop-analysis" element={<UnifiedAnalysisFlow />} />
           
           <Route path="fertilizer-guide">
             <Route index element={<FertilizerGuide />} />
@@ -42,22 +46,20 @@ function App() {
             <Route path="problem/:problemId" element={<ProblemDetail />} />
           </Route>
           
-          <Route path="irrigation" element={<div className="p-4">Irrigation (Under Construction)</div>} />
           <Route path="monitoring" element={<Monitoring />} />
           <Route path="sensors" element={<Sensors />} />
           <Route path="esp32-connect" element={<ESP32Connect />} />
-          <Route path="soil-npk" element={<div className="p-4">Soil & NPK (Under Construction)</div>} />
           <Route path="weather" element={<Weather />} />
           <Route path="weather-sync" element={<WeatherSync />} />
           <Route path="iot-sync" element={<Sensors isDiagnosticMode={true} />} />
           <Route path="image-upload" element={<MultiModelVision />} />
           <Route path="engine-compute" element={<EngineCompute />} />
           <Route path="reports" element={<CropHistoryWizard />} />
-          <Route path="alerts" element={<div className="p-4">Alerts & Notifications (Under Construction)</div>} />
-          <Route path="recommendations" element={<div className="p-4">Recommendations (Under Construction)</div>} />
-          <Route path="settings" element={<div className="p-4">Settings (Under Construction)</div>} />
+          <Route path="alerts" element={<Alerts />} />
+          <Route path="history" element={<History />} />
+          <Route path="settings" element={<SettingsPage />} />
           
-          {/* Analysis Flow routes mapped to existing components for now */}
+          {/* Analysis Flow routes mapped */}
           <Route path="analysis/disease" element={<CropAnalysis />} />
           <Route path="analysis/pest" element={<PestDetection />} />
           <Route path="analysis/pro" element={<TerraLeafPro />} />
