@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Search, ChevronRight, Bug, Activity, Droplets, ThermometerSun, Sprout, Map, ShieldAlert, FlaskConical, Leaf, TrendingUp, Tractor, Pill, ShieldCheck, Info } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { TREATMENT_DB } from '../engine/TreatmentDatabase';
+import AgriculturalWebAdvisories from '../components/analysis/AgriculturalWebAdvisories';
 
 const CATEGORY_CARDS = [
   { id: 'disease', label: 'Diseases', icon: Activity, color: 'text-red-500', bg: 'bg-red-50' },
@@ -99,6 +100,14 @@ export default function FertilizerGuide() {
           </div>
         </div>
       )}
+
+      {/* Agricultural Web Intelligence & Validation (TinyFish Module) */}
+      <AgriculturalWebAdvisories 
+        crop="Wheat" 
+        issue={rootCause || searchQuery || 'Yellow Rust'} 
+        chemical={recommendedTreatment?.chemical || (searchQuery ? searchQuery : 'Tilt 25 EC (Propiconazole)')} 
+        location="Punjab"
+      />
 
       {/* Manual Search */}
       <div className="bg-white rounded-3xl shadow-sm border border-slate-200 p-8">

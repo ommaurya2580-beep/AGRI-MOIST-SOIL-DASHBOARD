@@ -238,6 +238,15 @@ app.post('/api/analysis/pest', upload.single('image'), async (req, res) => {
   }
 });
 
+// --- Optional TinyFish Agricultural Web Intelligence Module ---
+try {
+  const tinyfishRoutes = require('./tinyfish/tinyfishRoutes');
+  app.use('/api/tinyfish', tinyfishRoutes);
+  console.log('TinyFish module registered at /api/tinyfish');
+} catch (err) {
+  console.warn('TinyFish module not mounted:', err.message);
+}
+
 // Serve static frontend files
 app.use(express.static(path.join(__dirname, '../frontend/dist')));
 app.use((req, res) => {

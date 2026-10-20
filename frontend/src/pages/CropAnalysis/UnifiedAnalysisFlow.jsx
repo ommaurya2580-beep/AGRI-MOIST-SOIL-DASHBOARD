@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Upload, Bug, Leaf, AlertCircle, CheckCircle, ChevronRight, Activity, X } from 'lucide-react';
 import PestResultCard from '../../components/analysis/PestResultCard';
+import AgriculturalWebAdvisories from '../../components/analysis/AgriculturalWebAdvisories';
 
 export default function UnifiedAnalysisFlow() {
   const [file, setFile] = useState(null);
@@ -293,6 +294,13 @@ export default function UnifiedAnalysisFlow() {
               </div>
             </div>
           </div>
+
+          {/* Optional Agricultural Web Intelligence & Extension Advisory Layer (TinyFish) */}
+          <AgriculturalWebAdvisories 
+            crop="Wheat"
+            issue={diseaseResult?.prediction || (pestResult?.detections?.[0]?.class_name) || ''}
+            location="Punjab"
+          />
         </div>
       )}
     </div>
