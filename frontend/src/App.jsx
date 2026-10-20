@@ -55,6 +55,7 @@ function App() {
           <Route path="image-upload" element={<MultiModelVision />} />
           <Route path="engine-compute" element={<EngineCompute />} />
           <Route path="reports" element={<CropHistoryWizard />} />
+          <Route path="crop-history" element={<CropHistoryWizard />} />
           <Route path="alerts" element={<Alerts />} />
           <Route path="history" element={<History />} />
           <Route path="settings" element={<SettingsPage />} />

@@ -20,8 +20,8 @@ import AgriPulseBot from '../components/AgriPulseBot';
 
 const navItems = [
   { path: '/dashboard', label: 'Dashboard', icon: Home },
-  { path: '/reports', label: 'Smart Diagnostics', icon: Sparkles },
   { path: '/crop-analysis', label: 'Analyse Crop', icon: ScanLine },
+  { path: '/reports', label: 'Crop History', icon: Sprout },
   { path: '/weather', label: 'Weather', icon: CloudSun },
   { path: '/sensors', label: 'Sensors (IoT)', icon: Radio },
   { path: '/fertilizer-guide', label: 'Web Advisory', icon: Globe, badge: 'Optional' },

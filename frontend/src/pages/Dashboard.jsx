@@ -153,7 +153,8 @@ export default function Dashboard() {
           </div>
 
           <button 
-            className="px-6 py-3 rounded-full bg-[#E8592A] hover:bg-[#D44A1E] text-white font-bold text-xs sm:text-sm shadow-md shadow-orange-500/30 flex items-center gap-2 shrink-0 group-hover:translate-x-1 transition-all"
+            onClick={() => navigate('/reports')}
+            className="px-6 py-3 rounded-full bg-[#E8592A] hover:bg-[#D44A1E] text-white font-bold text-xs sm:text-sm shadow-md shadow-orange-500/30 flex items-center gap-2 shrink-0 group-hover:translate-x-1 transition-all cursor-pointer"
           >
             <span>Start Full Diagnosis</span>
             <ArrowRight size={16} />
