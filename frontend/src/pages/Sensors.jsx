@@ -1,565 +1,726 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Droplet, Thermometer, FlaskConical, Clock, Activity, Wifi, Link, CheckCircle, ExternalLink, Leaf, AlertCircle, Power, CheckCircle2, ChevronRight, Database } from 'lucide-react';
-import { LineChart, Line, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
+import { 
+  Radio, 
+  RefreshCw, 
+  Cpu, 
+  Wifi, 
+  Clock, 
+  Droplets, 
+  Thermometer, 
+  FlaskConical, 
+  Sprout, 
+  ShieldAlert, 
+  CheckCircle2, 
+  LineChart as ChartIcon, 
+  Sun, 
+  CloudRain, 
+  Lightbulb, 
+  ExternalLink, 
+  Wrench, 
+  Layers, 
+  Zap, 
+  Power,
+  ChevronRight,
+  ArrowRight
+} from 'lucide-react';
+import { 
+  AreaChart, 
+  Area, 
+  XAxis, 
+  YAxis, 
+  CartesianGrid, 
+  Tooltip, 
+  ResponsiveContainer 
+} from 'recharts';
 
-const API_URL = '/api';
-
-export default function Sensors({ isDiagnosticMode = false }) {
+export default function Sensors() {
   const navigate = useNavigate();
-  const [isSaving, setIsSaving] = useState(false);
-  const [savedPayload, setSavedPayload] = useState(null);
 
-  const handleDiagnosticConfirm = () => {
-    const currentData = JSON.parse(localStorage.getItem('agripulse_diagnostic') || '{}');
-    const iotPayload = {
-      moisture: moisture,
-      temperature: mockTemp,
-      pH: mockPh,
-      nitrogen: 45,
-      phosphorus: 28,
-      potassium: 110,
-      pump_state: pumpStatus,
-      is_online: isOnline
-    };
-    currentData.sensors = iotPayload;
-    
-    setSavedPayload(iotPayload);
-    setIsSaving(true);
-    
-    localStorage.setItem('agripulse_diagnostic', JSON.stringify(currentData));
-  };
-
-  const [activeTab, setActiveTab] = useState('24h');
-
-  // Backend Live State
+  // Live IoT States from Backend
   const [isAutoMode, setIsAutoMode] = useState(true);
   const [pumpStatus, setPumpStatus] = useState(false);
-  const [moisture, setMoisture] = useState(28);
-  const [trendData, setTrendData] = useState([]);
-  const [isOnline, setIsOnline] = useState(false);
-  const [lastUpdateTime, setLastUpdateTime] = useState(null);
-  const [timeAgoStr, setTimeAgoStr] = useState('Waiting for data...');
+  const [moisture, setMoisture] = useState(42);
+  const [isOnline, setIsOnline] = useState(true);
+  const [lastSyncTime, setLastSyncTime] = useState('20 Oct 2026, 01:32 PM');
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
-  // Mock data for other sensors
-  const [mockTemp] = useState(24.6);
-  const [mockPh] = useState(6.7);
+  // Active Metric for Trends Chart
+  const [selectedMetric, setSelectedMetric] = useState('Moisture');
 
-  useEffect(() => {
-    fetchData();
-    const interval = setInterval(fetchData, 5000);
-    return () => clearInterval(interval);
-  }, []);
+  // Static / Semi-static Agro Metrics matching mockup
+  const [temperature] = useState(24);
+  const [phVal] = useState(6.8);
+  const [nitrogen] = useState(42);
+  const [phosphorus] = useState(28);
+  const [potassium] = useState(35);
 
-  useEffect(() => {
-    const timer = setInterval(() => {
-      if (!isOnline) {
-        setTimeAgoStr('Sensor Offline');
-        return;
-      }
-      if (lastUpdateTime) {
-        const seconds = Math.floor((Date.now() - lastUpdateTime) / 1000);
-        if (seconds < 2) setTimeAgoStr('Just now');
-        else if (seconds < 60) setTimeAgoStr(`${seconds} seconds ago`);
-        else setTimeAgoStr(`${Math.floor(seconds/60)} mins ago`);
-      }
-    }, 1000);
-    return () => clearInterval(timer);
-  }, [lastUpdateTime, isOnline]);
-
-  const fetchData = async () => {
+  const fetchDeviceData = async () => {
+    setIsRefreshing(true);
     try {
-      const stateRes = await fetch(`${API_URL}/state`);
-      const stateData = await stateRes.json();
-      if (stateData.state) {
-        setIsAutoMode(stateData.state.isAutoMode);
-        setPumpStatus(stateData.state.pumpIsOn);
+      const res = await fetch('/api/state');
+      const data = await res.json();
+      if (data) {
+        if (data.currentMoisture !== undefined) setMoisture(data.currentMoisture || 42);
+        if (data.isOnline !== undefined) setIsOnline(data.isOnline);
+        if (data.state) {
+          setIsAutoMode(data.state.isAutoMode ?? true);
+          setPumpStatus(data.state.pumpIsOn ?? false);
+        }
+        const now = new Date();
+        setLastSyncTime(`${now.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}, ${now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`);
       }
-      setMoisture(stateData.currentMoisture || 0);
-      
-      const online = stateData.isOnline !== undefined ? stateData.isOnline : false;
-      setIsOnline(online);
-      
-      if (online) {
-        setLastUpdateTime(Date.now());
-      }
-
-      const trendRes = await fetch(`${API_URL}/trend`);
-      const trendJson = await trendRes.json();
-      
-      const formattedTrend = trendJson.map(item => ({
-        time: new Date(item.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        moisture: item.moistureLevel,
-        temp: mockTemp + (Math.random() * 2 - 1), // Fake temp around mock
-        ph: mockPh + (Math.random() * 0.4 - 0.2) // Fake pH around mock
-      }));
-      setTrendData(formattedTrend.slice(-20)); // Keep last 20 for chart
-    } catch (error) {
-      console.error("Error fetching data:", error);
+    } catch (err) {
+      console.warn("Could not fetch state, using sensor cache");
+    } finally {
+      setTimeout(() => setIsRefreshing(false), 500);
     }
   };
 
-  const updateControl = async (updates) => {
+  useEffect(() => {
+    fetchDeviceData();
+    const interval = setInterval(fetchDeviceData, 8000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const handleControlUpdate = async (updates) => {
     try {
-      await fetch(`${API_URL}/control`, {
+      await fetch('/api/control', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(updates)
       });
-      fetchData();
-    } catch (error) {
-      console.error("Error updating control:", error);
+      fetchDeviceData();
+    } catch (e) {
+      console.error(e);
     }
   };
 
-  const handleAutoToggle = (e) => {
-    const newVal = e.target.checked;
-    setIsAutoMode(newVal);
-    updateControl({ isAutoMode: newVal });
+  // Trend data series for the 24h chart
+  const trendSeries = {
+    'Moisture': [
+      { time: '12 AM', value: 34 },
+      { time: '2 AM', value: 32 },
+      { time: '4 AM', value: 35 },
+      { time: '6 AM', value: 38 },
+      { time: '8 AM', value: 44 },
+      { time: '10 AM', value: 50 },
+      { time: '12 PM', value: 56 },
+      { time: '2 PM', value: 52 },
+      { time: '4 PM', value: 48 },
+      { time: '6 PM', value: 45 },
+      { time: '8 PM', value: 42 },
+      { time: '10 PM', value: 40 },
+      { time: '12 AM', value: 38 }
+    ],
+    'Temperature': [
+      { time: '12 AM', value: 19 },
+      { time: '4 AM', value: 17 },
+      { time: '8 AM', value: 21 },
+      { time: '12 PM', value: 27 },
+      { time: '4 PM', value: 25 },
+      { time: '8 PM', value: 22 },
+      { time: '12 AM', value: 20 }
+    ],
+    'pH': [
+      { time: '12 AM', value: 6.7 },
+      { time: '4 AM', value: 6.7 },
+      { time: '8 AM', value: 6.8 },
+      { time: '12 PM', value: 6.9 },
+      { time: '4 PM', value: 6.8 },
+      { time: '8 PM', value: 6.8 },
+      { time: '12 AM', value: 6.7 }
+    ],
+    'Nitrogen (N)': [
+      { time: '12 AM', value: 40 },
+      { time: '4 AM', value: 40 },
+      { time: '8 AM', value: 42 },
+      { time: '12 PM', value: 43 },
+      { time: '4 PM', value: 42 },
+      { time: '8 PM', value: 41 },
+      { time: '12 AM', value: 41 }
+    ],
+    'Phosphorus (P)': [
+      { time: '12 AM', value: 27 },
+      { time: '4 AM', value: 27 },
+      { time: '8 AM', value: 28 },
+      { time: '12 PM', value: 29 },
+      { time: '4 PM', value: 28 },
+      { time: '8 PM', value: 28 },
+      { time: '12 AM', value: 27 }
+    ],
+    'Potassium (K)': [
+      { time: '12 AM', value: 34 },
+      { time: '4 AM', value: 34 },
+      { time: '8 AM', value: 35 },
+      { time: '12 PM', value: 36 },
+      { time: '4 PM', value: 35 },
+      { time: '8 PM', value: 35 },
+      { time: '12 AM', value: 34 }
+    ]
   };
 
-  const handleManualToggle = () => {
-    const newVal = !pumpStatus;
-    setPumpStatus(newVal);
-    updateControl({ pumpIsOn: newVal, isManualOverride: true });
-  };
-
-  const handleManualNext = () => {
-    navigate('/image-upload');
-  };
+  const currentChartData = trendSeries[selectedMetric] || trendSeries['Moisture'];
 
   return (
-    <div className="flex flex-col gap-6 max-w-7xl mx-auto relative">
+    <div className="max-w-[1400px] mx-auto space-y-6 pb-16 animate-in fade-in">
       
-      {/* Diagnostic Saving Data Overlay */}
-      {isSaving && (
-        <div className="fixed inset-0 z-[100] bg-slate-900/90 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl p-8 max-w-lg w-full shadow-2xl animate-in zoom-in-95 duration-300 border-2 border-emerald-500">
-            <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Database size={32} />
-            </div>
-            <h2 className="text-2xl font-bold text-slate-800 mb-1 text-center">Live IoT Data Captured!</h2>
-            <p className="text-slate-500 mb-6 text-center text-sm">Data structured for Root Cause Engine</p>
-            
-            <div className="bg-slate-50 rounded-2xl p-4 border border-slate-200">
-              <div className="grid grid-cols-2 gap-3 text-sm">
-                <div className="bg-white p-3 rounded-xl border border-slate-100 shadow-sm">
-                  <span className="text-slate-400 text-xs uppercase font-bold tracking-wider block mb-1">Moisture Level</span>
-                  <span className="text-slate-800 font-semibold">{savedPayload?.moisture} (Analog)</span>
-                </div>
-                <div className="bg-white p-3 rounded-xl border border-slate-100 shadow-sm">
-                  <span className="text-slate-400 text-xs uppercase font-bold tracking-wider block mb-1">Temperature</span>
-                  <span className="text-slate-800 font-semibold">{savedPayload?.temperature}°C</span>
-                </div>
-                <div className="bg-white p-3 rounded-xl border border-slate-100 shadow-sm">
-                  <span className="text-slate-400 text-xs uppercase font-bold tracking-wider block mb-1">pH Level</span>
-                  <span className="text-slate-800 font-semibold">{savedPayload?.pH}</span>
-                </div>
-                <div className="bg-white p-3 rounded-xl border border-slate-100 shadow-sm">
-                  <span className="text-slate-400 text-xs uppercase font-bold tracking-wider block mb-1">Pump State</span>
-                  <span className="text-slate-800 font-semibold">{savedPayload?.pump_state ? 'ON' : 'OFF'}</span>
-                </div>
-                <div className="bg-white p-3 rounded-xl border border-slate-100 shadow-sm col-span-2">
-                  <span className="text-slate-400 text-xs uppercase font-bold tracking-wider block mb-1">NPK (Nitrogen, Phosphorus, Potassium)</span>
-                  <span className="text-slate-800 font-semibold">{savedPayload?.nitrogen} / {savedPayload?.phosphorus} / {savedPayload?.potassium}</span>
-                </div>
-              </div>
-            </div>
-            
-            <button onClick={handleManualNext} className="w-full mt-6 py-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold flex items-center justify-center gap-2 transition-colors shadow-lg shadow-emerald-500/30">
-              Proceed to Step 4: AI Vision <ChevronRight size={20} />
-            </button>
+      {/* 1. Header Banner with Soil Probe Graphic */}
+      <div className="relative overflow-hidden rounded-3xl bg-white border border-stone-200/80 shadow-sm p-6 lg:p-7 flex flex-col md:flex-row md:items-center justify-between gap-6">
+        
+        {/* Left Title & Subtitle */}
+        <div className="flex items-start gap-4 z-10 max-w-xl">
+          <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 border border-emerald-100 flex items-center justify-center shrink-0 shadow-sm">
+            <Radio size={26} className="animate-pulse stroke-[2.2]" />
+          </div>
+          <div>
+            <h1 className="text-2xl lg:text-3xl font-black text-slate-900 tracking-tight leading-tight">
+              IoT Soil Monitoring
+            </h1>
+            <p className="text-xs sm:text-sm text-slate-500 mt-1 font-medium leading-relaxed">
+              Real-time field data to understand soil conditions and support better crop decisions.
+            </p>
           </div>
         </div>
-      )}
 
-      {/* Top Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-2">
+        {/* Right Side Crop Image */}
+        <div className="hidden md:block absolute right-0 top-0 bottom-0 w-1/3 lg:w-[35%] overflow-hidden pointer-events-none">
+          <img 
+            src="/images/soil_sensor_banner.jpg" 
+            alt="Soil probe in crop field" 
+            className="w-full h-full object-cover object-center opacity-90"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-white via-white/40 to-transparent"></div>
+        </div>
+      </div>
+
+      {/* 2. Device Status Bar */}
+      <div className="bg-white rounded-2xl p-4 lg:p-5 border border-stone-200/70 shadow-sm flex flex-wrap items-center justify-between gap-4">
+        
+        {/* Status */}
+        <div className="flex items-center gap-3 pr-4 border-r border-slate-100">
+          <span className="w-3 h-3 rounded-full bg-emerald-500 animate-pulse"></span>
+          <div>
+            <div className="flex items-center gap-1.5 font-bold text-xs text-emerald-700">
+              <span>Device Online</span>
+            </div>
+            <p className="text-[11px] text-slate-400">Last Sync: {lastSyncTime}</p>
+          </div>
+        </div>
+
+        {/* Device Name */}
+        <div className="flex items-center gap-3 pr-4 border-r border-slate-100">
+          <div className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+            <Cpu size={17} />
+          </div>
+          <div>
+            <span className="text-[10px] font-bold uppercase text-slate-400">Device Name</span>
+            <h4 className="text-xs font-bold text-slate-800">ESP32-WF-01</h4>
+            <p className="text-[10px] text-slate-400">MAC: 24:6F:28:3A:7F:11</p>
+          </div>
+        </div>
+
+        {/* Network */}
+        <div className="flex items-center gap-3 pr-4 border-r border-slate-100">
+          <div className="w-8 h-8 rounded-xl bg-teal-50 text-teal-600 flex items-center justify-center">
+            <Wifi size={17} />
+          </div>
+          <div>
+            <span className="text-[10px] font-bold uppercase text-slate-400">Network</span>
+            <h4 className="text-xs font-bold text-slate-800">AgriPulse_Net</h4>
+            <p className="text-[10px] text-slate-400">IP: 192.168.1.105</p>
+          </div>
+        </div>
+
+        {/* Uptime */}
+        <div className="flex items-center gap-3 pr-4 border-r border-slate-100">
+          <div className="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
+            <Clock size={17} />
+          </div>
+          <div>
+            <span className="text-[10px] font-bold uppercase text-slate-400">Uptime</span>
+            <h4 className="text-xs font-bold text-slate-800">2d 14h 32m</h4>
+            <p className="text-[10px] text-slate-400">Firmware: v1.0.6</p>
+          </div>
+        </div>
+
+        {/* Refresh Button */}
         <div>
-          <h1 className="text-2xl font-bold text-slate-800">Sensors</h1>
-          <p className="text-slate-500">Real-time soil monitoring</p>
+          <button
+            onClick={fetchDeviceData}
+            disabled={isRefreshing}
+            className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold bg-[#EBF4FF] hover:bg-[#DDEBFF] text-[#2B7FFF] border border-blue-200/60 shadow-sm transition-all active:scale-95 disabled:opacity-50"
+          >
+            <RefreshCw size={14} className={isRefreshing ? "animate-spin" : ""} />
+            <span>Refresh Data</span>
+          </button>
         </div>
-        <div className="flex items-center gap-6">
-          <div className={`flex items-center gap-2 text-sm text-slate-600 bg-white px-4 py-2 rounded-lg border border-slate-200 ${!isOnline && 'border-red-200'}`}>
-            <span className={`w-2 h-2 rounded-full ${isOnline ? 'bg-emerald-500 animate-pulse' : 'bg-red-500'}`}></span>
-            {isOnline ? 'Device Online' : 'Device Offline'}
-          </div>
-          <div className="text-sm text-slate-500">
-            Last Sync: <strong>{timeAgoStr}</strong>
-          </div>
-        </div>
+
       </div>
 
-      {/* Top Sensor Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {/* Soil Moisture */}
-        <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 flex flex-col justify-between">
-          <div className="flex items-start gap-4">
-            <div className="w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center shrink-0">
-              <Droplet className="text-blue-500" size={24} />
+      {/* 3. Live Sensor Readings (6 Cards Row) */}
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="w-6 h-6 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center">
+              <Sprout size={14} />
             </div>
-            <div>
-              <p className="text-sm font-medium text-slate-500">Soil Moisture</p>
-              <div className="flex items-baseline gap-1 mt-1">
-                <h3 className={`text-3xl font-bold ${!isOnline ? 'text-slate-400' : 'text-slate-800'}`}>{isOnline ? moisture : '--'}</h3>
-                <span className="text-lg font-semibold text-slate-600">%</span>
-              </div>
-              <p className={`${
-                !isOnline ? 'text-red-500' :
-                moisture < 40 ? 'text-orange-500' : 
-                moisture > 60 ? 'text-blue-500' : 'text-emerald-500'
-              } text-sm font-medium mt-1`}>
-                {!isOnline ? 'Disconnected' : moisture < 40 ? 'Dry' : moisture > 60 ? 'Wet' : 'Optimal'}
-              </p>
-            </div>
+            <h3 className="font-extrabold text-base text-slate-900">Live Sensor Readings</h3>
           </div>
-          <div className="h-12 mt-4">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={trendData}>
-                <Line type="monotone" dataKey="moisture" stroke="#3b82f6" strokeWidth={2} dot={false} />
-              </LineChart>
-            </ResponsiveContainer>
+          <div className="flex items-center gap-3">
+            <span className="text-xs text-slate-400 hidden sm:inline">Last Updated: {lastSyncTime}</span>
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+              Live Data
+            </span>
           </div>
         </div>
 
-        {/* Soil Temperature */}
-        <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 flex flex-col justify-between">
-          <div className="flex items-start gap-4">
-            <div className="w-12 h-12 rounded-full bg-orange-50 flex items-center justify-center shrink-0">
-              <Thermometer className="text-orange-500" size={24} />
-            </div>
-            <div>
-              <p className="text-sm font-medium text-slate-500">Soil Temperature</p>
-              <div className="flex items-baseline gap-1 mt-1">
-                <h3 className={`text-3xl font-bold ${!isOnline ? 'text-slate-400' : 'text-slate-800'}`}>{isOnline ? mockTemp.toFixed(1) : '--'}</h3>
-                <span className="text-lg font-semibold text-slate-600">°C</span>
-              </div>
-              <p className={`${!isOnline ? 'text-red-500' : 'text-emerald-500'} text-sm font-medium mt-1`}>
-                {!isOnline ? 'Disconnected' : 'Optimal'}
-              </p>
-            </div>
-          </div>
-          <div className="h-12 mt-4">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={trendData}>
-                <Line type="monotone" dataKey="temp" stroke="#f97316" strokeWidth={2} dot={false} />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-
-        {/* Soil pH */}
-        <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 flex flex-col justify-between">
-          <div className="flex items-start gap-4">
-            <div className="w-12 h-12 rounded-full bg-purple-50 flex items-center justify-center shrink-0">
-              <FlaskConical className="text-purple-500" size={24} />
-            </div>
-            <div>
-              <p className="text-sm font-medium text-slate-500">Soil pH</p>
-              <div className="flex items-baseline gap-1 mt-1">
-                <h3 className={`text-3xl font-bold ${!isOnline ? 'text-slate-400' : 'text-slate-800'}`}>{isOnline ? mockPh.toFixed(1) : '--'}</h3>
-              </div>
-              <p className={`${!isOnline ? 'text-red-500' : 'text-emerald-500'} text-sm font-medium mt-1`}>
-                {!isOnline ? 'Disconnected' : 'Optimal'}
-              </p>
-            </div>
-          </div>
-          <div className="h-12 mt-4">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={trendData}>
-                <Line type="monotone" dataKey="ph" stroke="#a855f7" strokeWidth={2} dot={false} />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-      </div>
-
-      {/* Middle Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        
-        {/* Soil NPK Status */}
-        <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 lg:col-span-1">
-          <div className="flex items-center gap-2 mb-6">
-            <Leaf className="text-emerald-500" size={20} />
-            <h3 className="font-bold text-slate-800">Soil NPK Status</h3>
-          </div>
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3.5">
           
-          <div className="grid grid-cols-3 gap-3">
-            {/* Nitrogen */}
-            <div className="bg-slate-50 rounded-xl p-4 flex flex-col items-center text-center border border-slate-100">
-              <div className="w-10 h-10 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center font-bold mb-3">N</div>
-              <p className="text-xs font-semibold text-slate-600 mb-2">Nitrogen (N)</p>
-              <h3 className="text-2xl font-bold text-slate-800">42</h3>
-              <p className="text-xs text-slate-500 mb-2">kg/ha</p>
-              <span className="text-xs font-semibold text-emerald-600 bg-emerald-100 px-2 py-1 rounded-full mb-3">Optimal</span>
-              <p className="text-[10px] text-slate-400">Range: 20-60</p>
-            </div>
-            
-            {/* Phosphorus */}
-            <div className="bg-slate-50 rounded-xl p-4 flex flex-col items-center text-center border border-slate-100">
-              <div className="w-10 h-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold mb-3">P</div>
-              <p className="text-xs font-semibold text-slate-600 mb-2">Phosphorus (P)</p>
-              <h3 className="text-2xl font-bold text-slate-800">28</h3>
-              <p className="text-xs text-slate-500 mb-2">kg/ha</p>
-              <span className="text-xs font-semibold text-emerald-600 bg-emerald-100 px-2 py-1 rounded-full mb-3">Optimal</span>
-              <p className="text-[10px] text-slate-400">Range: 15-40</p>
-            </div>
-            
-            {/* Potassium */}
-            <div className="bg-slate-50 rounded-xl p-4 flex flex-col items-center text-center border border-slate-100">
-              <div className="w-10 h-10 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center font-bold mb-3">K</div>
-              <p className="text-xs font-semibold text-slate-600 mb-2">Potassium (K)</p>
-              <h3 className="text-2xl font-bold text-slate-800">35</h3>
-              <p className="text-xs text-slate-500 mb-2">kg/ha</p>
-              <span className="text-xs font-semibold text-emerald-600 bg-emerald-100 px-2 py-1 rounded-full mb-3">Optimal</span>
-              <p className="text-[10px] text-slate-400">Range: 20-50</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Sensor Overview */}
-        <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 lg:col-span-1">
-          <h3 className="font-bold text-slate-800 mb-6">Sensor Overview</h3>
-          <div className="space-y-5">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3 text-slate-600">
-                <Activity size={18} className="text-emerald-500" />
-                <span className="text-sm">Total Sensors</span>
+          {/* 1. Moisture */}
+          <div className="bg-white rounded-2xl p-4 border border-stone-200/70 shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
+            <div className="flex items-center gap-2.5 mb-2">
+              <div className="w-8 h-8 rounded-xl bg-blue-50 text-blue-500 flex items-center justify-center">
+                <Droplets size={17} />
               </div>
-              <span className="font-bold text-slate-800">3</span>
+              <span className="text-xs font-bold text-slate-600">Soil Moisture</span>
             </div>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3 text-slate-600">
-                <Activity size={18} className="text-emerald-500" />
-                <span className="text-sm">Active Sensors</span>
-              </div>
-              <span className="font-bold text-slate-800">3</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3 text-slate-600">
-                <CheckCircle size={18} className="text-emerald-500" />
-                <span className="text-sm">Status</span>
-              </div>
-              <span className="text-xs font-semibold text-emerald-600 bg-emerald-50 px-2 py-1 rounded">All Online</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3 text-slate-600">
-                <DatabaseIcon size={18} className="text-emerald-500" />
-                <span className="text-sm">Data Logging</span>
-              </div>
-              <span className="text-sm font-bold text-slate-800">Enabled</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3 text-slate-600">
-                <Clock size={18} className="text-emerald-500" />
-                <span className="text-sm">Update Interval</span>
-              </div>
-              <span className="text-sm font-bold text-slate-800">15 Minutes</span>
-            </div>
-          </div>
-        </div>
-
-        {/* ESP32 Device Details */}
-        <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 lg:col-span-1">
-          <div className="flex items-center gap-2 mb-6">
-            <CpuIcon size={20} className="text-emerald-500" />
-            <h3 className="font-bold text-slate-800">ESP32 Device Details</h3>
-          </div>
-          <div className="space-y-4">
-            <DetailRow label="Device Name" value="ESP32-WF-01" />
-            <DetailRow label="Device ID" value="ESP32-3A7F" />
-            <DetailRow label="MAC Address" value="24:6F:28:3A:7F:11" />
-            <DetailRow label="Wi-Fi SSID" value="AgriPulse_Net" />
-            <DetailRow label="IP Address" value="192.168.1.105" />
-            <DetailRow label="Firmware Version" value="v1.0.6" />
-            <DetailRow label="Uptime" value="2d 14h 32m" />
-          </div>
-        </div>
-
-      </div>
-
-      {/* Motor Control Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 lg:col-span-3">
-          <div className="flex items-center gap-3 font-semibold text-slate-800 mb-6 text-lg">
-            <div className={`p-2 rounded-lg ${pumpStatus ? 'bg-emerald-100 text-emerald-600' : 'bg-slate-100 text-slate-500'}`}>
-              <Power size={20} />
-            </div>
-            Premium Motor Control
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="flex items-center justify-between p-6 bg-slate-50 rounded-xl border border-slate-200">
-              <div>
-                <div className="font-semibold text-slate-800 text-lg">Smart Auto-Irrigation</div>
-                <div className="text-sm text-slate-500 mt-1">AI-driven watering based on moisture thresholds.</div>
-              </div>
-              <label className="relative inline-flex items-center cursor-pointer scale-125 mr-2">
-                <input type="checkbox" className="sr-only peer" checked={isAutoMode} onChange={handleAutoToggle} />
-                <div className="w-14 h-7 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
-              </label>
-            </div>
-
-            <div className="flex flex-col justify-center">
-              <div className="flex justify-between items-center mb-3">
-                <span className="font-semibold text-slate-800">Manual Override</span>
-                <span className={`px-4 py-1.5 rounded-full text-xs font-bold tracking-wider ${pumpStatus ? 'bg-emerald-100 text-emerald-700 animate-pulse' : 'bg-slate-100 text-slate-500'}`}>
-                  {pumpStatus ? 'PUMP RUNNING' : 'PUMP OFF'}
+            <div>
+              <div className="text-2xl font-black text-slate-900">{moisture}%</div>
+              <div className="flex items-center justify-between mt-2">
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200">
+                  Optimal
                 </span>
+                <span className="text-[10px] text-slate-400">Range: 20 - 60%</span>
               </div>
-              
-              <button 
-                className={`w-full py-4 rounded-xl font-bold flex justify-center items-center gap-3 transition-all text-lg ${
-                  pumpStatus 
-                    ? 'bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow-lg shadow-blue-500/30' 
-                    : 'bg-gradient-to-r from-slate-700 to-slate-600 text-white shadow-lg shadow-slate-500/20'
-                }`}
-                onClick={handleManualToggle}
-              >
-                <Power size={24} />
-                {pumpStatus ? 'TAP TO TURN OFF MOTOR' : 'TAP TO START MOTOR'}
-              </button>
             </div>
           </div>
+
+          {/* 2. Temperature */}
+          <div className="bg-white rounded-2xl p-4 border border-stone-200/70 shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
+            <div className="flex items-center gap-2.5 mb-2">
+              <div className="w-8 h-8 rounded-xl bg-rose-50 text-rose-500 flex items-center justify-center">
+                <Thermometer size={17} />
+              </div>
+              <span className="text-xs font-bold text-slate-600">Soil Temperature</span>
+            </div>
+            <div>
+              <div className="text-2xl font-black text-slate-900">{temperature}°C</div>
+              <div className="flex items-center justify-between mt-2">
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200">
+                  Normal
+                </span>
+                <span className="text-[10px] text-slate-400">Range: 10 - 35°C</span>
+              </div>
+            </div>
+          </div>
+
+          {/* 3. pH */}
+          <div className="bg-white rounded-2xl p-4 border border-stone-200/70 shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
+            <div className="flex items-center gap-2.5 mb-2">
+              <div className="w-8 h-8 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center">
+                <FlaskConical size={17} />
+              </div>
+              <span className="text-xs font-bold text-slate-600">Soil pH</span>
+            </div>
+            <div>
+              <div className="text-2xl font-black text-slate-900">{phVal}</div>
+              <div className="flex items-center justify-between mt-2">
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200">
+                  Good
+                </span>
+                <span className="text-[10px] text-slate-400">Range: 6.0 - 7.5</span>
+              </div>
+            </div>
+          </div>
+
+          {/* 4. Nitrogen (N) */}
+          <div className="bg-white rounded-2xl p-4 border border-stone-200/70 shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
+            <div className="flex items-center gap-2.5 mb-2">
+              <div className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                <Sprout size={17} />
+              </div>
+              <span className="text-xs font-bold text-slate-600">Nitrogen (N)</span>
+            </div>
+            <div>
+              <div className="text-2xl font-black text-slate-900">{nitrogen} <span className="text-xs font-normal text-slate-400">kg/ha</span></div>
+              <div className="flex items-center justify-between mt-2">
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200">
+                  Optimal
+                </span>
+                <span className="text-[10px] text-slate-400">Range: 20 - 60</span>
+              </div>
+            </div>
+          </div>
+
+          {/* 5. Phosphorus (P) */}
+          <div className="bg-white rounded-2xl p-4 border border-stone-200/70 shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
+            <div className="flex items-center gap-2.5 mb-2">
+              <div className="w-8 h-8 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
+                <Sprout size={17} />
+              </div>
+              <span className="text-xs font-bold text-slate-600">Phosphorus (P)</span>
+            </div>
+            <div>
+              <div className="text-2xl font-black text-slate-900">{phosphorus} <span className="text-xs font-normal text-slate-400">kg/ha</span></div>
+              <div className="flex items-center justify-between mt-2">
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200">
+                  Optimal
+                </span>
+                <span className="text-[10px] text-slate-400">Range: 15 - 40</span>
+              </div>
+            </div>
+          </div>
+
+          {/* 6. Potassium (K) */}
+          <div className="bg-white rounded-2xl p-4 border border-stone-200/70 shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
+            <div className="flex items-center gap-2.5 mb-2">
+              <div className="w-8 h-8 rounded-xl bg-yellow-50 text-yellow-600 flex items-center justify-center">
+                <Layers size={17} />
+              </div>
+              <span className="text-xs font-bold text-slate-600">Potassium (K)</span>
+            </div>
+            <div>
+              <div className="text-2xl font-black text-slate-900">{potassium} <span className="text-xs font-normal text-slate-400">kg/ha</span></div>
+              <div className="flex items-center justify-between mt-2">
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200">
+                  Optimal
+                </span>
+                <span className="text-[10px] text-slate-400">Range: 20 - 50</span>
+              </div>
+            </div>
+          </div>
+
         </div>
       </div>
 
-      {/* Bottom Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      {/* 4. Middle Section: Sensor Trends (24h) & Field Environment Overview */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
         
-        {/* Sensor Data History */}
-        <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 lg:col-span-2">
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="font-bold text-slate-800">
-              Sensor Data History <span className="text-sm font-normal text-slate-500">(Last 24 Hours)</span>
-            </h3>
-            <div className="flex gap-2">
-              {['24h', '7d', '30d'].map(tab => (
-                <button 
+        {/* Left Column (Span 7): Sensor Trends Chart */}
+        <div className="lg:col-span-7 bg-white rounded-3xl p-6 border border-stone-200/70 shadow-sm flex flex-col justify-between">
+          <div>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+              <div className="flex items-center gap-2">
+                <ChartIcon size={18} className="text-emerald-600" />
+                <h3 className="font-extrabold text-base text-slate-900">Sensor Trends (Last 24 Hours)</h3>
+              </div>
+            </div>
+
+            {/* Filter Pills */}
+            <div className="flex flex-wrap items-center gap-2 mb-6">
+              {['Moisture', 'Temperature', 'pH', 'Nitrogen (N)', 'Phosphorus (P)', 'Potassium (K)'].map(tab => (
+                <button
                   key={tab}
-                  onClick={() => setActiveTab(tab)}
-                  className={`text-xs px-3 py-1.5 rounded-full font-medium transition-colors ${activeTab === tab ? 'bg-slate-800 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
+                  onClick={() => setSelectedMetric(tab)}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                    selectedMetric === tab
+                      ? 'bg-blue-600 text-white shadow-sm'
+                      : 'bg-slate-100 hover:bg-slate-200 text-slate-600'
+                  }`}
                 >
-                  {tab.toUpperCase()}
+                  {tab}
                 </button>
               ))}
             </div>
-          </div>
-          
-          <div className="h-72 w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={trendData} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                <XAxis dataKey="time" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748b' }} dy={10} />
-                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748b' }} dx={-10} />
-                <Tooltip 
-                  contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
-                  labelStyle={{ fontWeight: 'bold', color: '#1e293b' }}
-                />
-                <Legend iconType="circle" wrapperStyle={{ paddingTop: '20px' }} />
-                <Line type="monotone" name="Soil Moisture (%)" dataKey="moisture" stroke="#3b82f6" strokeWidth={2} dot={false} activeDot={{ r: 6 }} />
-                <Line type="monotone" name="Soil Temperature (°C)" dataKey="temp" stroke="#f97316" strokeWidth={2} dot={false} activeDot={{ r: 6 }} />
-                <Line type="monotone" name="Soil pH" dataKey="ph" stroke="#a855f7" strokeWidth={2} dot={false} activeDot={{ r: 6 }} />
-              </LineChart>
-            </ResponsiveContainer>
+
+            {/* Area Chart */}
+            <div className="h-64 w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={currentChartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                  <defs>
+                    <linearGradient id="moistureGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.25}/>
+                      <stop offset="95%" stopColor="#3B82F6" stopOpacity={0.0}/>
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F1F5F9" />
+                  <XAxis 
+                    dataKey="time" 
+                    tick={{ fontSize: 11, fill: '#94A3B8' }} 
+                    axisLine={false} 
+                    tickLine={false} 
+                  />
+                  <YAxis 
+                    tick={{ fontSize: 11, fill: '#94A3B8' }} 
+                    axisLine={false} 
+                    tickLine={false} 
+                    domain={['dataMin - 5', 'dataMax + 10']}
+                  />
+                  <Tooltip 
+                    contentStyle={{ 
+                      backgroundColor: '#FFFFFF', 
+                      borderRadius: '12px', 
+                      border: '1px solid #E2E8F0', 
+                      boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)',
+                      fontSize: '12px',
+                      fontWeight: 'bold'
+                    }} 
+                  />
+                  <Area 
+                    type="monotone" 
+                    dataKey="value" 
+                    stroke="#2563EB" 
+                    strokeWidth={2.5} 
+                    fillOpacity={1} 
+                    fill="url(#moistureGrad)" 
+                    dot={{ fill: '#2563EB', r: 3.5 }}
+                    activeDot={{ r: 6, fill: '#1D4ED8' }}
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
           </div>
         </div>
 
-        {/* Quick Connect */}
-        <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 lg:col-span-1 flex flex-col justify-between">
+        {/* Right Column (Span 5): Field Environment Overview & Pump Control */}
+        <div className="lg:col-span-5 bg-white rounded-3xl p-6 border border-stone-200/70 shadow-sm flex flex-col justify-between space-y-4">
           <div>
             <div className="flex items-center gap-2 mb-4">
-              <Link size={20} className="text-emerald-500" />
-              <h3 className="font-bold text-slate-800">Quick Connect ESP32</h3>
+              <Sprout size={18} className="text-emerald-600" />
+              <h3 className="font-extrabold text-base text-slate-900">Field Environment Overview</h3>
             </div>
-            <p className="text-sm text-slate-600 mb-6">
-              Connect your ESP32 device to start monitoring real-time data.
-            </p>
-            
-            <div className="space-y-4 mb-8">
-              <div className="flex gap-3">
-                <div className="w-6 h-6 rounded-full bg-emerald-500 text-white text-xs font-bold flex items-center justify-center shrink-0">1</div>
-                <p className="text-sm text-slate-700">Power on your ESP32 device</p>
+
+            {/* 4 Mini Environment Metric Cards */}
+            <div className="grid grid-cols-2 gap-3 mb-4">
+              <div className="p-3 rounded-2xl bg-slate-50 border border-slate-100 flex items-center gap-3">
+                <Thermometer size={18} className="text-rose-500 shrink-0" />
+                <div>
+                  <div className="text-[10px] text-slate-400">Air Temperature</div>
+                  <div className="text-sm font-bold text-slate-800">28°C</div>
+                  <span className="text-[9px] text-slate-400">Partly Cloudy</span>
+                </div>
               </div>
-              <div className="flex gap-3">
-                <div className="w-6 h-6 rounded-full bg-emerald-500 text-white text-xs font-bold flex items-center justify-center shrink-0">2</div>
-                <p className="text-sm text-slate-700">Connect to Wi-Fi network</p>
+
+              <div className="p-3 rounded-2xl bg-slate-50 border border-slate-100 flex items-center gap-3">
+                <Droplets size={18} className="text-blue-500 shrink-0" />
+                <div>
+                  <div className="text-[10px] text-slate-400">Humidity</div>
+                  <div className="text-sm font-bold text-slate-800">65%</div>
+                  <span className="text-[9px] font-bold text-emerald-600">Normal</span>
+                </div>
               </div>
-              <div className="flex gap-3">
-                <div className="w-6 h-6 rounded-full bg-emerald-500 text-white text-xs font-bold flex items-center justify-center shrink-0">3</div>
-                <p className="text-sm text-slate-700">Enter device credentials below</p>
+
+              <div className="p-3 rounded-2xl bg-slate-50 border border-slate-100 flex items-center gap-3">
+                <Sun size={18} className="text-amber-500 shrink-0" />
+                <div>
+                  <div className="text-[10px] text-slate-400">Light Intensity</div>
+                  <div className="text-sm font-bold text-slate-800">850 lux</div>
+                  <span className="text-[9px] font-bold text-emerald-600">Good</span>
+                </div>
               </div>
-              <div className="flex gap-3">
-                <div className="w-6 h-6 rounded-full bg-emerald-500 text-white text-xs font-bold flex items-center justify-center shrink-0">4</div>
-                <p className="text-sm text-slate-700">Start receiving live data</p>
+
+              <div className="p-3 rounded-2xl bg-slate-50 border border-slate-100 flex items-center gap-3">
+                <CloudRain size={18} className="text-blue-400 shrink-0" />
+                <div>
+                  <div className="text-[10px] text-slate-400">Rainfall (Today)</div>
+                  <div className="text-sm font-bold text-slate-800">0 mm</div>
+                  <span className="text-[9px] text-slate-400">No Rain</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Suitable Banner */}
+            <div className="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-100 flex items-start gap-3 mb-3">
+              <Sprout size={18} className="text-emerald-600 shrink-0 mt-0.5" />
+              <div>
+                <h5 className="text-xs font-bold text-emerald-800">Soil conditions are suitable for crop growth.</h5>
+                <p className="text-[11px] text-emerald-600 leading-snug mt-0.5">
+                  Moisture, pH and nutrient levels are within optimal range.
+                </p>
+              </div>
+            </div>
+
+            {/* Suggestion Banner */}
+            <div className="p-3.5 rounded-2xl bg-amber-50/80 border border-amber-200/80 flex items-start gap-3 mb-4">
+              <Lightbulb size={18} className="text-amber-600 shrink-0 mt-0.5" />
+              <div>
+                <h5 className="text-xs font-bold text-amber-900">Suggestion</h5>
+                <p className="text-[11px] text-amber-800 leading-snug mt-0.5">
+                  Maintain current irrigation schedule. Monitor moisture regularly, especially if no rain is expected in the next 2 days.
+                </p>
               </div>
             </div>
           </div>
-          
-          <div className="space-y-3">
-            <button className="w-full bg-[#064e3b] hover:bg-emerald-800 text-white font-medium py-3 rounded-xl transition-colors flex items-center justify-center gap-2">
-              <Wifi size={18} />
-              Connect ESP32
-            </button>
-            <button className="w-full bg-white border border-slate-200 hover:bg-slate-50 text-slate-600 font-medium py-3 rounded-xl transition-colors flex items-center justify-center gap-2 text-sm">
-              View Connection Guide <ExternalLink size={16} />
-            </button>
+
+          {/* Connected Irrigation Pump Relay Control */}
+          <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 flex items-center justify-between">
+            <div>
+              <div className="flex items-center gap-2">
+                <Power size={15} className={pumpStatus ? "text-emerald-500" : "text-slate-400"} />
+                <span className="text-xs font-bold text-slate-800">Irrigation Relay Motor</span>
+                <span className={`text-[10px] font-bold px-2 py-0.2 rounded-full ${
+                  pumpStatus ? "bg-emerald-100 text-emerald-700" : "bg-slate-200 text-slate-600"
+                }`}>
+                  {pumpStatus ? "MOTOR RUNNING" : "MOTOR OFF"}
+                </span>
+              </div>
+              <p className="text-[10px] text-slate-400 mt-0.5">
+                {isAutoMode ? "Auto Mode: Triggers when moisture < 40%" : "Manual Override Mode Active"}
+              </p>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => handleControlUpdate({ isAutoMode: !isAutoMode })}
+                className={`text-[11px] font-bold px-3 py-1.5 rounded-xl border transition-all ${
+                  isAutoMode 
+                    ? "bg-emerald-600 text-white border-emerald-600" 
+                    : "bg-white text-slate-700 border-slate-300"
+                }`}
+              >
+                Auto: {isAutoMode ? "ON" : "OFF"}
+              </button>
+              <button
+                disabled={isAutoMode}
+                onClick={() => handleControlUpdate({ pumpIsOn: !pumpStatus, isManualOverride: true })}
+                className={`text-[11px] font-bold px-3 py-1.5 rounded-xl border transition-all disabled:opacity-40 disabled:cursor-not-allowed ${
+                  pumpStatus 
+                    ? "bg-rose-600 text-white border-rose-600" 
+                    : "bg-[#E8592A] text-white border-[#E8592A]"
+                }`}
+              >
+                {pumpStatus ? "Turn OFF" : "Start Pump"}
+              </button>
+            </div>
           </div>
+
         </div>
 
       </div>
 
-      {/* Diagnostic Flow Footer (Only visible when navigated from Weather Sync) */}
-      {isDiagnosticMode && (
-        <div className="bg-white rounded-2xl p-6 md:p-8 border border-slate-200 shadow-sm flex flex-col md:flex-row items-center justify-between gap-6 mt-4">
-          <div>
-            <div className="flex items-center gap-2 mb-1">
-              <span className="w-2.5 h-2.5 bg-emerald-500 rounded-full animate-pulse"></span>
-              <span className="text-emerald-500 font-bold text-xs uppercase tracking-wider">Live Link Active</span>
+      {/* 5. Bottom Section: IoT Connection Guide (5 Steps Workflow) */}
+      <div className="bg-white rounded-3xl p-6 lg:p-7 border border-stone-200/70 shadow-sm space-y-5">
+        
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
+              <Wrench size={18} />
             </div>
-            <h3 className="text-lg font-bold text-slate-800">Is this the live sensor data for your affected field?</h3>
-            <p className="text-slate-500 text-sm">We will use this real-time Ground Truth to cross-reference with Weather data.</p>
+            <div>
+              <h3 className="font-extrabold text-base text-slate-900">IoT Connection Guide</h3>
+              <p className="text-xs text-slate-500">
+                Follow these steps to connect your ESP32 soil sensor with AgriPulse
+              </p>
+            </div>
           </div>
-          <button 
-            onClick={handleDiagnosticConfirm}
-            className="w-full md:w-auto flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white px-8 py-4 rounded-xl font-bold transition-all shadow-lg shadow-emerald-600/30 shrink-0"
+
+          <a 
+            href="#guide" 
+            onClick={(e) => { e.preventDefault(); alert("AgriPulse IoT Firmware and ESP8266/ESP32 Arduino code is available in the hardware/ directory."); }}
+            className="text-xs font-bold text-blue-600 hover:text-blue-800 flex items-center gap-1.5 self-start sm:self-auto"
           >
-            <CheckCircle2 size={20} /> Attach Data & Continue <ChevronRight size={18} />
-          </button>
+            <span>View Detailed Guide</span>
+            <ExternalLink size={13} />
+          </a>
         </div>
-      )}
+
+        {/* 5 Connected Steps Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5 relative">
+          
+          {/* Step 1: Prepare Hardware */}
+          <div className="p-4 rounded-2xl bg-slate-50/80 border border-slate-200/70 flex flex-col justify-between">
+            <div>
+              <div className="flex items-center gap-2 mb-2">
+                <span className="w-6 h-6 rounded-full bg-blue-600 text-white font-black text-xs flex items-center justify-center shrink-0">
+                  1
+                </span>
+                <h4 className="text-xs font-bold text-slate-800">Prepare Hardware</h4>
+              </div>
+              <ul className="text-[11px] text-slate-600 space-y-1 pl-1 mb-3">
+                <li className="flex items-center gap-1.5 text-emerald-700">✓ ESP32 board</li>
+                <li className="flex items-center gap-1.5 text-emerald-700">✓ Soil moisture sensor</li>
+                <li className="flex items-center gap-1.5 text-emerald-700">✓ pH sensor (optional)</li>
+                <li className="flex items-center gap-1.5 text-emerald-700">✓ NPK sensor (optional)</li>
+                <li className="flex items-center gap-1.5 text-emerald-700">✓ Power supply (5V)</li>
+              </ul>
+            </div>
+            <div className="w-8 h-8 mx-auto mt-2 opacity-60">
+              <Cpu size={28} className="text-blue-500" />
+            </div>
+          </div>
+
+          {/* Step 2: Connect Sensors */}
+          <div className="p-4 rounded-2xl bg-slate-50/80 border border-slate-200/70 flex flex-col justify-between">
+            <div>
+              <div className="flex items-center gap-2 mb-2">
+                <span className="w-6 h-6 rounded-full bg-[#E8592A] text-white font-black text-xs flex items-center justify-center shrink-0">
+                  2
+                </span>
+                <h4 className="text-xs font-bold text-slate-800">Connect Sensors</h4>
+              </div>
+              <p className="text-[11px] text-slate-600 leading-relaxed mb-3">
+                Connect all sensors to ESP32 as per wiring diagram (Detailed diagram available in guide).
+              </p>
+            </div>
+            <div className="w-8 h-8 mx-auto mt-2 opacity-60">
+              <Layers size={28} className="text-orange-500" />
+            </div>
+          </div>
+
+          {/* Step 3: Configure Wi-Fi */}
+          <div className="p-4 rounded-2xl bg-slate-50/80 border border-slate-200/70 flex flex-col justify-between">
+            <div>
+              <div className="flex items-center gap-2 mb-2">
+                <span className="w-6 h-6 rounded-full bg-emerald-600 text-white font-black text-xs flex items-center justify-center shrink-0">
+                  3
+                </span>
+                <h4 className="text-xs font-bold text-slate-800">Configure Wi-Fi</h4>
+              </div>
+              <p className="text-[11px] text-slate-600 leading-relaxed mb-2">
+                Set your Wi-Fi credentials in the ESP32 firmware.
+              </p>
+              <div className="p-2 rounded-xl bg-white border border-slate-200 text-[10px] text-slate-600 font-mono space-y-0.5">
+                <div>SSID: Agripulse_Net</div>
+                <div>Password: ********</div>
+              </div>
+            </div>
+            <div className="w-8 h-8 mx-auto mt-2 opacity-60">
+              <Wifi size={28} className="text-emerald-500" />
+            </div>
+          </div>
+
+          {/* Step 4: Upload Firmware */}
+          <div className="p-4 rounded-2xl bg-slate-50/80 border border-slate-200/70 flex flex-col justify-between">
+            <div>
+              <div className="flex items-center gap-2 mb-2">
+                <span className="w-6 h-6 rounded-full bg-purple-600 text-white font-black text-xs flex items-center justify-center shrink-0">
+                  4
+                </span>
+                <h4 className="text-xs font-bold text-slate-800">Upload Firmware</h4>
+              </div>
+              <p className="text-[11px] text-slate-600 leading-relaxed mb-3">
+                Upload the provided firmware to ESP32 using Arduino IDE or PlatformIO.
+              </p>
+            </div>
+            <div className="w-8 h-8 mx-auto mt-2 opacity-60">
+              <Zap size={28} className="text-purple-500" />
+            </div>
+          </div>
+
+          {/* Step 5: Verify Connection */}
+          <div className="p-4 rounded-2xl bg-slate-50/80 border border-slate-200/70 flex flex-col justify-between">
+            <div>
+              <div className="flex items-center gap-2 mb-2">
+                <span className="w-6 h-6 rounded-full bg-amber-500 text-white font-black text-xs flex items-center justify-center shrink-0">
+                  5
+                </span>
+                <h4 className="text-xs font-bold text-slate-800">Verify Connection</h4>
+              </div>
+              <p className="text-[11px] text-slate-600 leading-relaxed mb-3">
+                After setup, check device status above. It should show "Device Online" and real-time data will appear automatically.
+              </p>
+            </div>
+            <div className="w-8 h-8 mx-auto mt-2 text-amber-500">
+              <CheckCircle2 size={32} />
+            </div>
+          </div>
+
+        </div>
+
+      </div>
 
     </div>
   );
 }
-
-// Helpers
-const DatabaseIcon = ({size, className}) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-    <ellipse cx="12" cy="5" rx="9" ry="3"></ellipse>
-    <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path>
-    <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path>
-  </svg>
-);
-
-const CpuIcon = ({size, className}) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-    <rect x="4" y="4" width="16" height="16" rx="2" ry="2"></rect>
-    <rect x="9" y="9" width="6" height="6"></rect>
-    <line x1="9" y1="1" x2="9" y2="4"></line>
-    <line x1="15" y1="1" x2="15" y2="4"></line>
-    <line x1="9" y1="20" x2="9" y2="23"></line>
-    <line x1="15" y1="20" x2="15" y2="23"></line>
-    <line x1="20" y1="9" x2="23" y2="9"></line>
-    <line x1="20" y1="14" x2="23" y2="14"></line>
-    <line x1="1" y1="9" x2="4" y2="9"></line>
-    <line x1="1" y1="14" x2="4" y2="14"></line>
-  </svg>
-);
-
-const DetailRow = ({ label, value }) => (
-  <div className="flex items-center justify-between border-b border-slate-50 pb-2 last:border-0 last:pb-0">
-    <span className="text-sm text-slate-500">{label}</span>
-    <span className="text-sm font-medium text-slate-800">{value}</span>
-  </div>
-);

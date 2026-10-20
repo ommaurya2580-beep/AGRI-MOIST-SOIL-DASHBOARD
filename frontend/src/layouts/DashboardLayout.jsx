@@ -21,10 +21,10 @@ const navItems = [
   { path: '/dashboard', label: 'Dashboard', icon: Home },
   { path: '/crop-analysis', label: 'Analyse Crop', icon: ScanLine },
   { path: '/weather', label: 'Weather', icon: CloudSun },
-  { path: '/sensors', label: 'Sensors', icon: Radio },
+  { path: '/sensors', label: 'Sensors (IoT)', icon: Radio },
   { path: '/fertilizer-guide', label: 'Web Advisory', icon: Globe, badge: 'Optional' },
   { path: '/history', label: 'History', icon: Clock },
-  { path: '/alerts', label: 'Alerts', icon: Bell },
+  { path: '/alerts', label: 'Alerts', icon: Bell, alertCount: 3 },
   { path: '/settings', label: 'Settings', icon: Settings },
 ];
 
@@ -105,6 +105,12 @@ export default function DashboardLayout() {
                   {item.badge && (
                     <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200/80">
                       {item.badge}
+                    </span>
+                  )}
+
+                  {item.alertCount && (
+                    <span className="w-4 h-4 rounded-full bg-rose-500 text-white text-[10px] font-bold flex items-center justify-center">
+                      {item.alertCount}
                     </span>
                   )}
                 </NavLink>
