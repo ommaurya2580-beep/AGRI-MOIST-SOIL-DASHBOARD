@@ -49,50 +49,52 @@ app.get('/api/state', async (req, res) => {
     const state = await DeviceState.findOne({ fieldId: 'Field 1' });
     const latestSensorData = await SensorData.findOne({ fieldId: 'Field 1' }).sort({ timestamp: -1 });
     
-    // Check if physical hardware sent a packet in the last 60 seconds
+    // Check if physical hardware sent a packet in the last 90 seconds
     let isHardwareLive = false;
     let currentMoisture = 42;
     
     if (latestSensorData) {
       const timeDiff = Date.now() - new Date(latestSensorData.timestamp).getTime();
-      if (timeDiff < 60000) {
+      if (timeDiff < 90000) {
         isHardwareLive = true;
       }
-      if (latestSensorData.moistureLevel !== undefined && latestSensorData.moistureLevel !== null && latestSensorData.moistureLevel > 0) {
+      if (latestSensorData.moistureLevel !== undefined && latestSensorData.moistureLevel !== null) {
         currentMoisture = latestSensorData.moistureLevel;
       }
     }
     
     const readings = {
       moisture: currentMoisture,
-      temperature: latestSensorData?.temperature || 24.0,
-      pH: latestSensorData?.pH || 6.8,
-      nitrogen: latestSensorData?.nitrogen || 42,
-      phosphorus: latestSensorData?.phosphorus || 28,
-      potassium: latestSensorData?.potassium || 35,
-      airTemperature: latestSensorData?.airTemperature || 28.0,
-      humidity: latestSensorData?.humidity || 65,
-      lightIntensity: latestSensorData?.lightIntensity || 850,
+      temperature: latestSensorData?.temperature ?? 24.0,
+      pH: latestSensorData?.pH ?? 6.8,
+      nitrogen: latestSensorData?.nitrogen ?? 42,
+      phosphorus: latestSensorData?.phosphorus ?? 28,
+      potassium: latestSensorData?.potassium ?? 35,
+      airTemperature: latestSensorData?.airTemperature ?? 28.0,
+      humidity: latestSensorData?.humidity ?? 65,
+      lightIntensity: latestSensorData?.lightIntensity ?? 850,
       rainfall: 0
     };
 
     const device = {
-      name: 'ESP32-WF-01',
-      mac: '24:6F:28:3A:7F:11',
-      network: 'AgriPulse_Net',
-      ip: '192.168.1.105',
-      uptime: '2d 14h 32m',
+      name: isHardwareLive ? 'ESP32 / ESP8266 Live Node' : 'Node Disconnected (Waiting for Device)',
+      mac: isHardwareLive ? '24:6F:28:3A:7F:11' : 'None',
+      network: isHardwareLive ? 'Active Telemetry' : 'Offline / Standby',
+      ip: '13.50.151.133',
+      uptime: isHardwareLive ? 'Live Stream Active' : 'Waiting for Packets',
       firmware: 'v1.0.6',
-      lastSync: latestSensorData ? latestSensorData.timestamp : new Date()
+      lastPacketTime: latestSensorData ? latestSensorData.timestamp : null
     };
     
     res.json({
       isOnline: isHardwareLive,
-      status: isHardwareLive ? 'online' : 'connected_server',
-      statusText: isHardwareLive ? 'Device Online (Live Hardware)' : 'Connected to IoT Cloud (Cloud Telemetry Active)',
+      status: isHardwareLive ? 'online' : 'waiting_hardware',
+      statusText: isHardwareLive ? 'Device Online (Live Hardware)' : 'Waiting for ESP8266 / ESP32 Hardware Data',
       currentMoisture,
       readings,
       device,
+      lastPacketTime: latestSensorData ? latestSensorData.timestamp : null,
+      serverTime: new Date(),
       state
     });
   } catch (error) {
@@ -175,37 +177,58 @@ app.post('/api/control', async (req, res) => {
 
 // --- API Endpoints for ESP8266 / ESP32 Hardware ---
 
+// Check latest sensor telemetry
+app.get('/api/sensor', async (req, res) => {
+  try {
+    const latest = await SensorData.findOne({ fieldId: 'Field 1' }).sort({ timestamp: -1 });
+    if (!latest) {
+      return res.json({ message: "No sensor packets recorded yet." });
+    }
+    const ageSeconds = Math.round((Date.now() - new Date(latest.timestamp).getTime()) / 1000);
+    res.json({
+      latest,
+      ageSeconds,
+      isLive: ageSeconds < 90,
+      targetEndpoint: "POST http://13.50.151.133/api/sensor"
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Hardware posts sensor data here
 app.post('/api/sensor', async (req, res) => {
   try {
-    const { 
-      moistureLevel, 
-      temperature = 24.2, 
-      pH = 6.8, 
-      nitrogen = 42, 
-      phosphorus = 28, 
-      potassium = 35,
-      airTemperature = 28.0,
-      humidity = 65,
-      lightIntensity = 850 
-    } = req.body;
+    const rawMoisture = req.body.moistureLevel ?? req.body.moisture ?? req.body.moisture_level ?? req.body.soilMoisture;
     
-    if (moistureLevel === undefined) {
-      return res.status(400).json({ error: 'moistureLevel is required' });
+    if (rawMoisture === undefined || rawMoisture === null) {
+      return res.status(400).json({ error: 'moistureLevel or moisture is required in JSON body' });
     }
 
+    const moistureLevel = Number(rawMoisture);
+    const temperature = Number(req.body.temperature ?? req.body.temp ?? 24.2);
+    const pH = Number(req.body.pH ?? req.body.ph ?? 6.8);
+    const nitrogen = Number(req.body.nitrogen ?? req.body.n ?? 42);
+    const phosphorus = Number(req.body.phosphorus ?? req.body.p ?? 28);
+    const potassium = Number(req.body.potassium ?? req.body.k ?? 35);
+    const airTemperature = Number(req.body.airTemperature ?? req.body.airTemp ?? 28.0);
+    const humidity = Number(req.body.humidity ?? 65);
+    const lightIntensity = Number(req.body.lightIntensity ?? req.body.light ?? 850);
+
     const newData = new SensorData({ 
-      moistureLevel: Number(moistureLevel),
-      temperature: Number(temperature),
-      pH: Number(pH),
-      nitrogen: Number(nitrogen),
-      phosphorus: Number(phosphorus),
-      potassium: Number(potassium),
-      airTemperature: Number(airTemperature),
-      humidity: Number(humidity),
-      lightIntensity: Number(lightIntensity)
+      moistureLevel,
+      temperature,
+      pH,
+      nitrogen,
+      phosphorus,
+      potassium,
+      airTemperature,
+      humidity,
+      lightIntensity
     });
     await newData.save();
+
+    console.log(`[IoT Telemetry] Saved packet from ${req.ip}: moisture=${moistureLevel}%, temp=${temperature}C, pH=${pH}`);
 
     // Check logic if auto mode is on
     const state = await DeviceState.findOne({ fieldId: 'Field 1' });
@@ -219,8 +242,13 @@ app.post('/api/sensor', async (req, res) => {
     }
 
     // Return current pump status to hardware
-    res.json({ pumpIsOn: state ? state.pumpIsOn : false });
+    res.json({ 
+      success: true,
+      pumpIsOn: state ? state.pumpIsOn : false,
+      recordedMoisture: moistureLevel
+    });
   } catch (error) {
+    console.error('[IoT Error]', error);
     res.status(500).json({ error: error.message });
   }
 });

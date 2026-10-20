@@ -22,7 +22,17 @@ import {
   Zap, 
   Power,
   ChevronRight,
-  ArrowRight
+  ArrowRight,
+  AlertTriangle,
+  Copy,
+  Check,
+  Terminal,
+  Sliders,
+  X,
+  HelpCircle,
+  Send,
+  Play,
+  Activity
 } from 'lucide-react';
 import { 
   AreaChart, 
@@ -55,19 +65,30 @@ export default function Sensors({ isDiagnosticMode = false }) {
   const [lightIntensity, setLightIntensity] = useState(850);
   const [rainfall, setRainfall] = useState(0);
 
-  // Device Connectivity
+  // Device Connectivity & Telemetry Tracking
   const [isOnline, setIsOnline] = useState(false);
+  const [lastPacketTime, setLastPacketTime] = useState(null);
   const [deviceInfo, setDeviceInfo] = useState({
-    name: 'ESP32-WF-01',
+    name: 'ESP32 / ESP8266 Live Node',
     mac: '24:6F:28:3A:7F:11',
-    network: 'AgriPulse_Net',
-    ip: '192.168.1.105',
-    uptime: '2d 14h 32m',
+    network: 'Active Telemetry',
+    ip: '13.50.151.133',
+    uptime: 'Standby',
     firmware: 'v1.0.6'
   });
   const [lastSyncTime, setLastSyncTime] = useState('Just now');
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isSimulating, setIsSimulating] = useState(false);
+
+  // Hardware Setup & Debugger Modal State
+  const [showGuideModal, setShowGuideModal] = useState(false);
+  const [guideTab, setGuideTab] = useState('esp32');
+  const [customMoistureInput, setCustomMoistureInput] = useState(65);
+  const [customTempInput, setCustomTempInput] = useState(24.5);
+  const [customPhInput, setCustomPhInput] = useState(6.8);
+  const [isSubmittingCustom, setIsSubmittingCustom] = useState(false);
+  const [copySuccess, setCopySuccess] = useState(false);
+  const [customSuccessMsg, setCustomSuccessMsg] = useState('');
 
   // Active Metric for Trends Chart
   const [selectedMetric, setSelectedMetric] = useState('Moisture');
@@ -97,9 +118,14 @@ export default function Sensors({ isDiagnosticMode = false }) {
       if (res.ok) {
         const data = await res.json();
         if (data) {
-          setIsOnline(data.isOnline ?? false);
+          setIsOnline(Boolean(data.isOnline));
           if (data.device) setDeviceInfo(prev => ({ ...prev, ...data.device }));
           
+          if (data.lastPacketTime) {
+            const pDate = new Date(data.lastPacketTime);
+            setLastPacketTime(`${pDate.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })}, ${pDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}`);
+          }
+
           if (data.readings) {
             if (data.readings.moisture !== undefined) setMoisture(data.readings.moisture);
             if (data.readings.temperature !== undefined) setTemperature(data.readings.temperature);
@@ -121,7 +147,7 @@ export default function Sensors({ isDiagnosticMode = false }) {
           }
 
           const now = new Date();
-          setLastSyncTime(`${now.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}, ${now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}`);
+          setLastSyncTime(`${now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}`);
         }
       }
 
@@ -136,7 +162,7 @@ export default function Sensors({ isDiagnosticMode = false }) {
     } catch (err) {
       console.warn("Could not fetch state from IoT server:", err);
     } finally {
-      setTimeout(() => setIsRefreshing(false), 400);
+      setTimeout(() => setIsRefreshing(false), 300);
     }
   };
 
@@ -156,6 +182,42 @@ export default function Sensors({ isDiagnosticMode = false }) {
     } finally {
       setTimeout(() => setIsSimulating(false), 500);
     }
+  };
+
+  // Send a custom test packet to /api/sensor
+  const handleSendCustomPacket = async () => {
+    setIsSubmittingCustom(true);
+    setCustomSuccessMsg('');
+    try {
+      const payload = {
+        moistureLevel: Number(customMoistureInput),
+        temperature: Number(customTempInput),
+        pH: Number(customPhInput),
+        nitrogen: 45,
+        phosphorus: 28,
+        potassium: 34
+      };
+      const res = await fetch('/api/sensor', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      if (res.ok) {
+        setCustomSuccessMsg(`Packet accepted! Soil Moisture set to ${customMoistureInput}%. Hardware status is now LIVE!`);
+        await fetchDeviceData();
+        setTimeout(() => setCustomSuccessMsg(''), 6000);
+      }
+    } catch (err) {
+      console.error("Custom packet error:", err);
+    } finally {
+      setIsSubmittingCustom(false);
+    }
+  };
+
+  const handleCopyCode = (codeText) => {
+    navigator.clipboard.writeText(codeText);
+    setCopySuccess(true);
+    setTimeout(() => setCopySuccess(false), 2000);
   };
 
   useEffect(() => {
@@ -272,83 +334,147 @@ export default function Sensors({ isDiagnosticMode = false }) {
         </div>
       </div>
 
-      {/* 2. Device Status Bar */}
+      {/* 2. Device Status Bar with Live vs Offline Hardware State */}
       <div className="bg-white rounded-2xl p-4 lg:p-5 border border-stone-200/70 shadow-sm flex flex-wrap items-center justify-between gap-4">
         
         {/* Status */}
         <div className="flex items-center gap-3 pr-4 border-r border-slate-100">
-          <span className={`w-3 h-3 rounded-full ${
-            isOnline ? 'bg-emerald-500 animate-pulse' : 'bg-emerald-500'
+          <span className={`w-3.5 h-3.5 rounded-full ${
+            isOnline ? 'bg-emerald-500 animate-pulse ring-4 ring-emerald-100' : 'bg-amber-500 ring-4 ring-amber-100'
           }`}></span>
           <div>
-            <div className="flex items-center gap-1.5 font-bold text-xs text-emerald-700">
-              <span>{isOnline ? 'Device Online (Hardware Live)' : 'IoT Server Connected'}</span>
+            <div className={`flex items-center gap-1.5 font-bold text-xs ${
+              isOnline ? 'text-emerald-700' : 'text-amber-800'
+            }`}>
+              <span>{isOnline ? 'ESP Hardware Online (Live Streaming)' : 'Hardware Offline (Waiting for Board)'}</span>
             </div>
-            <p className="text-[11px] text-slate-400">
-              {isOnline ? `Last Sync: ${lastSyncTime}` : `Cloud Sync: ${lastSyncTime}`}
+            <p className="text-[11px] text-slate-500">
+              {isOnline 
+                ? `Live Telemetry (Sync: ${lastSyncTime})` 
+                : (lastPacketTime ? `Last Packet: ${lastPacketTime}` : 'No hardware packet recorded')}
             </p>
           </div>
         </div>
 
-        {/* Device Name */}
+        {/* Device Status */}
         <div className="flex items-center gap-3 pr-4 border-r border-slate-100">
-          <div className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+          <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${
+            isOnline ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600'
+          }`}>
             <Cpu size={17} />
           </div>
           <div>
-            <span className="text-[10px] font-bold uppercase text-slate-400">Device Name</span>
-            <h4 className="text-xs font-bold text-slate-800">{deviceInfo.name || 'ESP32-WF-01'}</h4>
-            <p className="text-[10px] text-slate-400">MAC: {deviceInfo.mac || '24:6F:28:3A:7F:11'}</p>
+            <span className="text-[10px] font-bold uppercase text-slate-400">Node Hardware</span>
+            <h4 className="text-xs font-bold text-slate-800">{isOnline ? 'ESP32 / ESP8266 (Active)' : 'Node Inactive / Standby'}</h4>
+            <p className="text-[10px] text-slate-400">{isOnline ? 'Telemetry frequency: 5s' : 'Waiting for POST /api/sensor'}</p>
           </div>
         </div>
 
-        {/* Network */}
+        {/* Network & Endpoint */}
         <div className="flex items-center gap-3 pr-4 border-r border-slate-100">
-          <div className="w-8 h-8 rounded-xl bg-teal-50 text-teal-600 flex items-center justify-center">
+          <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${
+            isOnline ? 'bg-teal-50 text-teal-600' : 'bg-slate-100 text-slate-500'
+          }`}>
             <Wifi size={17} />
           </div>
           <div>
-            <span className="text-[10px] font-bold uppercase text-slate-400">Network</span>
-            <h4 className="text-xs font-bold text-slate-800">{deviceInfo.network || 'AgriPulse_Net'}</h4>
-            <p className="text-[10px] text-slate-400">IP: {deviceInfo.ip || '192.168.1.105'}</p>
+            <span className="text-[10px] font-bold uppercase text-slate-400">Cloud Server IP</span>
+            <h4 className="text-xs font-bold text-slate-800">13.50.151.133</h4>
+            <p className="text-[10px] text-slate-400">Port 80 (HTTP REST)</p>
           </div>
         </div>
 
-        {/* Uptime */}
+        {/* Uptime / Stream Mode */}
         <div className="flex items-center gap-3 pr-4 border-r border-slate-100">
           <div className="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
             <Clock size={17} />
           </div>
           <div>
-            <span className="text-[10px] font-bold uppercase text-slate-400">Uptime</span>
-            <h4 className="text-xs font-bold text-slate-800">{deviceInfo.uptime || '2d 14h 32m'}</h4>
-            <p className="text-[10px] text-slate-400">Firmware: {deviceInfo.firmware || 'v1.0.6'}</p>
+            <span className="text-[10px] font-bold uppercase text-slate-400">Channel Mode</span>
+            <h4 className="text-xs font-bold text-slate-800">{isOnline ? 'Live Hardware Stream' : 'Cached Ground Truth'}</h4>
+            <p className="text-[10px] text-slate-400">MongoDB Atlas Persistent</p>
           </div>
         </div>
 
-        {/* Action Buttons: Test Packet & Refresh */}
+        {/* Action Buttons: Hardware Guide, Test Packet, Refresh */}
         <div className="flex items-center gap-2">
+          <button
+            onClick={() => setShowGuideModal(true)}
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 shadow-sm transition-all active:scale-95"
+            title="Open ESP32 / ESP8266 Hardware Guide & Wi-Fi Setup"
+          >
+            <Terminal size={13} className="text-emerald-600" />
+            <span>Hardware Code</span>
+          </button>
+
           <button
             onClick={handleSimulatePacket}
             disabled={isSimulating}
             className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200/80 shadow-sm transition-all active:scale-95 disabled:opacity-50"
-            title="Send test telemetry packet to IoT server"
+            title="Inject test telemetry packet directly to MongoDB to verify pipeline"
           >
             <Zap size={13} className={isSimulating ? "animate-bounce text-amber-600" : "text-amber-500"} />
-            <span>{isSimulating ? "Transmitting..." : "Test Packet"}</span>
+            <span>{isSimulating ? "Transmitting..." : "Test Stream"}</span>
           </button>
 
           <button
             onClick={fetchDeviceData}
             disabled={isRefreshing}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold bg-[#EBF4FF] hover:bg-[#DDEBFF] text-[#2B7FFF] border border-blue-200/60 shadow-sm transition-all active:scale-95 disabled:opacity-50"
+            className="flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold bg-[#EBF4FF] hover:bg-[#DDEBFF] text-[#2B7FFF] border border-blue-200/60 shadow-sm transition-all active:scale-95 disabled:opacity-50"
           >
             <RefreshCw size={14} className={isRefreshing ? "animate-spin" : ""} />
-            <span>Refresh Data</span>
+            <span>Refresh</span>
           </button>
         </div>
 
       </div>
+
+      {/* Amber Hardware Offline Alert Banner (Displays when physical device is not sending data) */}
+      {!isOnline && (
+        <div className="bg-gradient-to-r from-amber-50 via-orange-50/50 to-amber-50 border border-amber-200/80 rounded-2xl p-4 sm:p-5 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4 animate-in fade-in">
+          <div className="flex items-start gap-3.5">
+            <div className="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center shrink-0 shadow-xs mt-0.5">
+              <AlertTriangle size={20} className="animate-pulse" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h4 className="text-sm font-bold text-amber-950">
+                  Physical ESP Device Is Offline — Displaying Last Recorded Telemetry
+                </h4>
+                <span className="px-2 py-0.5 text-[10px] font-bold bg-amber-200 text-amber-900 rounded-full">
+                  Waiting for Packets
+                </span>
+              </div>
+              <p className="text-xs text-amber-800/90 mt-1 max-w-3xl leading-relaxed">
+                The cloud backend server is running on AWS (<code className="font-mono bg-amber-100/80 px-1 py-0.5 rounded text-[11px]">http://13.50.151.133/api/sensor</code>), but no HTTP POST requests have arrived from your physical ESP32 / ESP8266 board in the last 90 seconds. To see your sensor readings move live on screen, make sure your phone hotspot is turned ON and flash the Arduino code below.
+              </p>
+              {lastPacketTime && (
+                <p className="text-[11px] text-amber-700 font-medium mt-1">
+                  ⏱ Last packet saved in database: <span className="font-bold">{lastPacketTime}</span> ({moisture}% Moisture)
+                </p>
+              )}
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 shrink-0 w-full md:w-auto">
+            <button
+              onClick={() => setShowGuideModal(true)}
+              className="flex-1 md:flex-initial flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-bold bg-amber-600 hover:bg-amber-700 text-white shadow-sm transition-all active:scale-95"
+            >
+              <Terminal size={14} />
+              <span>View Arduino Code & Setup</span>
+            </button>
+            <button
+              onClick={handleSimulatePacket}
+              disabled={isSimulating}
+              className="flex-1 md:flex-initial flex items-center justify-center gap-1 px-3 py-2.5 rounded-xl text-xs font-bold bg-white hover:bg-amber-50 text-amber-900 border border-amber-300 shadow-sm transition-all"
+            >
+              <Play size={13} className="text-amber-600" />
+              <span>Simulate Reading</span>
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* 3. Live Sensor Readings (6 Cards Row) */}
       <div className="space-y-3">
@@ -357,13 +483,21 @@ export default function Sensors({ isDiagnosticMode = false }) {
             <div className="w-6 h-6 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center">
               <Sprout size={14} />
             </div>
-            <h3 className="font-extrabold text-base text-slate-900">Live Sensor Readings</h3>
+            <h3 className="font-extrabold text-base text-slate-900">Live Soil Sensor Readings</h3>
           </div>
           <div className="flex items-center gap-3">
-            <span className="text-xs text-slate-400 hidden sm:inline">Last Updated: {lastSyncTime}</span>
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-              Live Data
+            <span className="text-xs text-slate-400 hidden sm:inline">
+              {isOnline ? `Auto-refresh: 5s` : `Cached Ground Truth`}
+            </span>
+            <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold ${
+              isOnline 
+                ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' 
+                : 'bg-amber-50 text-amber-800 border border-amber-200'
+            }`}>
+              <span className={`w-1.5 h-1.5 rounded-full ${
+                isOnline ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'
+              }`}></span>
+              {isOnline ? 'Live Hardware Stream' : 'Historical Data (Offline)'}
             </span>
           </div>
         </div>
@@ -814,6 +948,7 @@ export default function Sensors({ isDiagnosticMode = false }) {
       </div>
 
       {/* Diagnostic Flow Confirmation Bar (Visible when in Diagnostic Mode /iot-sync) */}
+      {/* Diagnostic Flow Confirmation Bar (Visible when in Diagnostic Mode /iot-sync) */}
       {isDiag && (
         <div className="bg-white rounded-3xl p-6 lg:p-7 border-2 border-emerald-500 shadow-xl flex flex-col md:flex-row items-center justify-between gap-6 mt-8 animate-in slide-in-from-bottom-4">
           <div className="flex items-start gap-4">
@@ -844,6 +979,507 @@ export default function Sensors({ isDiagnosticMode = false }) {
             <span>Confirm Sensor Data & Proceed to AI Vision</span>
             <ArrowRight size={16} />
           </button>
+        </div>
+      )}
+
+      {/* Hardware Connection & Live Debugger Modal */}
+      {showGuideModal && (
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 sm:p-6 overflow-y-auto animate-in fade-in">
+          <div className="bg-white rounded-3xl shadow-2xl border border-stone-200 max-w-4xl w-full max-h-[90vh] flex flex-col overflow-hidden animate-in zoom-in-95">
+            
+            {/* Modal Header */}
+            <div className="p-5 sm:p-6 border-b border-stone-100 flex items-center justify-between bg-stone-50/70">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center">
+                  <Terminal size={20} />
+                </div>
+                <div>
+                  <h3 className="text-lg font-black text-slate-900">
+                    Hardware Connection Guide & Live Debugger
+                  </h3>
+                  <p className="text-xs text-slate-500 font-medium">
+                    Connect your physical ESP32 or ESP8266 to AWS EC2 Cloud (<code className="font-mono text-emerald-700 bg-emerald-50 px-1 py-0.5 rounded">13.50.151.133</code>)
+                  </p>
+                </div>
+              </div>
+
+              <button
+                onClick={() => setShowGuideModal(false)}
+                className="w-9 h-9 rounded-xl hover:bg-stone-200 text-slate-500 flex items-center justify-center transition-colors"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            {/* Modal Tabs */}
+            <div className="flex items-center border-b border-stone-200 px-6 bg-white overflow-x-auto">
+              <button
+                onClick={() => setGuideTab('esp32')}
+                className={`py-3 px-4 font-bold text-xs border-b-2 transition-all whitespace-nowrap ${
+                  guideTab === 'esp32'
+                    ? 'border-emerald-600 text-emerald-700'
+                    : 'border-transparent text-slate-500 hover:text-slate-800'
+                }`}
+              >
+                ESP32 Arduino Code (WiFi.h)
+              </button>
+              <button
+                onClick={() => setGuideTab('esp8266')}
+                className={`py-3 px-4 font-bold text-xs border-b-2 transition-all whitespace-nowrap ${
+                  guideTab === 'esp8266'
+                    ? 'border-emerald-600 text-emerald-700'
+                    : 'border-transparent text-slate-500 hover:text-slate-800'
+                }`}
+              >
+                ESP8266 Arduino Code (ESP8266WiFi.h)
+              </button>
+              <button
+                onClick={() => setGuideTab('tester')}
+                className={`py-3 px-4 font-bold text-xs border-b-2 transition-all whitespace-nowrap flex items-center gap-1.5 ${
+                  guideTab === 'tester'
+                    ? 'border-emerald-600 text-emerald-700'
+                    : 'border-transparent text-slate-500 hover:text-slate-800'
+                }`}
+              >
+                <Sliders size={13} />
+                <span>Live Packet Simulator</span>
+              </button>
+              <button
+                onClick={() => setGuideTab('serial')}
+                className={`py-3 px-4 font-bold text-xs border-b-2 transition-all whitespace-nowrap ${
+                  guideTab === 'serial'
+                    ? 'border-emerald-600 text-emerald-700'
+                    : 'border-transparent text-slate-500 hover:text-slate-800'
+                }`}
+              >
+                Troubleshooting Checklist
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="p-6 overflow-y-auto space-y-4 flex-1 text-slate-700 text-xs">
+              
+              {/* TAB 1: ESP32 Code */}
+              {guideTab === 'esp32' && (
+                <div className="space-y-4">
+                  <div className="p-3.5 bg-emerald-50/80 border border-emerald-200 rounded-xl text-emerald-900 leading-relaxed">
+                    <p className="font-bold">Instructions for ESP32 (NodeMCU-32S / ESP-WROOM-32):</p>
+                    <ol className="list-decimal list-inside mt-1.5 space-y-1 text-[11px] text-emerald-800">
+                      <li>Copy the code below into <strong>Arduino IDE</strong>.</li>
+                      <li>Replace <code className="bg-white px-1 py-0.5 rounded font-mono">YOUR_WIFI_NAME</code> and <code className="bg-white px-1 py-0.5 rounded font-mono">YOUR_WIFI_PASSWORD</code> with your mobile hotspot credentials.</li>
+                      <li>Ensure your phone hotspot is set to <strong>2.4 GHz</strong> band.</li>
+                      <li>Select your ESP32 board in Arduino IDE and click <strong>Upload</strong>.</li>
+                    </ol>
+                  </div>
+
+                  <div className="relative">
+                    <button
+                      onClick={() => handleCopyCode(`#include <WiFi.h>
+#include <HTTPClient.h>
+#include <ArduinoJson.h>
+
+const char* ssid = "YOUR_WIFI_NAME";        // Phone Hotspot Name
+const char* password = "YOUR_WIFI_PASSWORD"; // Hotspot Password
+const char* serverUrl = "http://13.50.151.133/api/sensor";
+
+const int MOISTURE_PIN = 34; // Connect Analog Moisture pin to GPIO 34
+const int RELAY_PIN = 26;    // Relay pin for Water Pump
+
+unsigned long previousMillis = 0;
+const long interval = 5000;   // Send telemetry every 5 seconds
+
+void setup() {
+  Serial.begin(115200);
+  pinMode(RELAY_PIN, OUTPUT);
+  digitalWrite(RELAY_PIN, LOW);
+
+  WiFi.mode(WIFI_STA);
+  WiFi.begin(ssid, password);
+  Serial.print("Connecting to Wi-Fi");
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
+  Serial.println("\\n[CONNECTED] IP: " + WiFi.localIP().toString());
+}
+
+void loop() {
+  unsigned long currentMillis = millis();
+  if (currentMillis - previousMillis >= interval) {
+    previousMillis = currentMillis;
+
+    if (WiFi.status() == WL_CONNECTED) {
+      int rawAdc = analogRead(MOISTURE_PIN);
+      // Calibration (adjust for your sensor: ~3500 dry air, ~1300 in water)
+      int moisture = map(rawAdc, 3500, 1300, 0, 100);
+      moisture = constrain(moisture, 0, 100);
+
+      HTTPClient http;
+      http.begin(serverUrl);
+      http.addHeader("Content-Type", "application/json");
+
+      String payload = "{\\"moistureLevel\\":" + String(moisture) + 
+                       ",\\"temperature\\":24.5,\\"pH\\":6.8,\\"nitrogen\\":45,\\"phosphorus\\":28,\\"potassium\\":34}";
+
+      int httpResponseCode = http.POST(payload);
+      Serial.print("[HTTP] Response code: ");
+      Serial.println(httpResponseCode);
+
+      if (httpResponseCode > 0) {
+        String response = http.getString();
+        Serial.println("[HTTP] Server Response: " + response);
+      }
+      http.end();
+    }
+  }
+}`)}
+                      className="absolute right-3 top-3 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-white font-bold text-[11px] flex items-center gap-1 shadow-sm transition-all"
+                    >
+                      {copySuccess ? <Check size={13} className="text-emerald-400" /> : <Copy size={13} />}
+                      <span>{copySuccess ? 'Copied!' : 'Copy Code'}</span>
+                    </button>
+
+                    <pre className="p-4 rounded-2xl bg-slate-900 text-slate-100 font-mono text-[11px] overflow-x-auto leading-relaxed">
+{`#include <WiFi.h>
+#include <HTTPClient.h>
+#include <ArduinoJson.h>
+
+const char* ssid = "YOUR_WIFI_NAME";        // Phone Hotspot Name
+const char* password = "YOUR_WIFI_PASSWORD"; // Hotspot Password
+const char* serverUrl = "http://13.50.151.133/api/sensor";
+
+const int MOISTURE_PIN = 34; // Connect Analog Moisture pin to GPIO 34
+const int RELAY_PIN = 26;    // Relay pin for Water Pump
+
+unsigned long previousMillis = 0;
+const long interval = 5000;   // Send telemetry every 5 seconds
+
+void setup() {
+  Serial.begin(115200);
+  pinMode(RELAY_PIN, OUTPUT);
+  digitalWrite(RELAY_PIN, LOW);
+
+  WiFi.mode(WIFI_STA);
+  WiFi.begin(ssid, password);
+  Serial.print("Connecting to Wi-Fi");
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
+  Serial.println("\\n[CONNECTED] IP: " + WiFi.localIP().toString());
+}
+
+void loop() {
+  unsigned long currentMillis = millis();
+  if (currentMillis - previousMillis >= interval) {
+    previousMillis = currentMillis;
+
+    if (WiFi.status() == WL_CONNECTED) {
+      int rawAdc = analogRead(MOISTURE_PIN);
+      // Calibration (adjust for your sensor: ~3500 dry air, ~1300 in water)
+      int moisture = map(rawAdc, 3500, 1300, 0, 100);
+      moisture = constrain(moisture, 0, 100);
+
+      HTTPClient http;
+      http.begin(serverUrl);
+      http.addHeader("Content-Type", "application/json");
+
+      String payload = "{\\"moistureLevel\\":" + String(moisture) + 
+                       ",\\"temperature\\":24.5,\\"pH\\":6.8,\\"nitrogen\\":45,\\"phosphorus\\":28,\\"potassium\\":34}";
+
+      int httpResponseCode = http.POST(payload);
+      Serial.print("[HTTP] Response code: ");
+      Serial.println(httpResponseCode);
+
+      if (httpResponseCode > 0) {
+        String response = http.getString();
+        Serial.println("[HTTP] Server Response: " + response);
+      }
+      http.end();
+    }
+  }
+}`}
+                    </pre>
+                  </div>
+                </div>
+              )}
+
+              {/* TAB 2: ESP8266 Code */}
+              {guideTab === 'esp8266' && (
+                <div className="space-y-4">
+                  <div className="p-3.5 bg-blue-50/80 border border-blue-200 rounded-xl text-blue-900 leading-relaxed">
+                    <p className="font-bold">Instructions for ESP8266 (NodeMCU / Wemos D1 Mini):</p>
+                    <ol className="list-decimal list-inside mt-1.5 space-y-1 text-[11px] text-blue-800">
+                      <li>Copy the sketch below into <strong>Arduino IDE</strong>.</li>
+                      <li>Set your Wi-Fi SSID and Password.</li>
+                      <li>Pin A0 reads the analog moisture value (0-1023).</li>
+                      <li>Target EC2 server: <code className="bg-white px-1 py-0.5 rounded font-mono">http://13.50.151.133/api/sensor</code>.</li>
+                    </ol>
+                  </div>
+
+                  <div className="relative">
+                    <button
+                      onClick={() => handleCopyCode(`#include <ESP8266WiFi.h>
+#include <ESP8266HTTPClient.h>
+#include <WiFiClient.h>
+#include <ArduinoJson.h>
+
+const char* ssid = "YOUR_WIFI_NAME";
+const char* password = "YOUR_WIFI_PASSWORD";
+const char* serverName = "http://13.50.151.133/api/sensor";
+
+const int MOISTURE_PIN = A0;  // Analog pin A0
+const int RELAY_PIN = D1;     // Relay pin D1
+
+unsigned long previousMillis = 0;
+const long interval = 5000;   // 5 seconds
+
+void setup() {
+  Serial.begin(115200);
+  pinMode(RELAY_PIN, OUTPUT);
+  digitalWrite(RELAY_PIN, LOW);
+
+  WiFi.begin(ssid, password);
+  Serial.print("Connecting to Wi-Fi");
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
+  Serial.println("\\nConnected with IP: " + WiFi.localIP().toString());
+}
+
+void loop() {
+  unsigned long currentMillis = millis();
+  if (currentMillis - previousMillis >= interval) {
+    previousMillis = currentMillis;
+
+    if (WiFi.status() == WL_CONNECTED) {
+      int sensorValue = analogRead(MOISTURE_PIN);
+      int moisture = map(sensorValue, 1023, 300, 0, 100);
+      moisture = constrain(moisture, 0, 100);
+
+      WiFiClient client;
+      HTTPClient http;
+      http.begin(client, serverName);
+      http.addHeader("Content-Type", "application/json");
+
+      String payload = "{\\"moistureLevel\\":" + String(moisture) + 
+                       ",\\"temperature\\":24.0,\\"pH\\":6.8,\\"nitrogen\\":42,\\"phosphorus\\":28,\\"potassium\\":35}";
+
+      int httpResponseCode = http.POST(payload);
+      Serial.print("HTTP Response code: ");
+      Serial.println(httpResponseCode);
+
+      if (httpResponseCode > 0) {
+        String response = http.getString();
+        Serial.println("Server Response: " + response);
+      }
+      http.end();
+    }
+  }
+}`)}
+                      className="absolute right-3 top-3 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-white font-bold text-[11px] flex items-center gap-1 shadow-sm transition-all"
+                    >
+                      {copySuccess ? <Check size={13} className="text-emerald-400" /> : <Copy size={13} />}
+                      <span>{copySuccess ? 'Copied!' : 'Copy Code'}</span>
+                    </button>
+
+                    <pre className="p-4 rounded-2xl bg-slate-900 text-slate-100 font-mono text-[11px] overflow-x-auto leading-relaxed">
+{`#include <ESP8266WiFi.h>
+#include <ESP8266HTTPClient.h>
+#include <WiFiClient.h>
+#include <ArduinoJson.h>
+
+const char* ssid = "YOUR_WIFI_NAME";
+const char* password = "YOUR_WIFI_PASSWORD";
+const char* serverName = "http://13.50.151.133/api/sensor";
+
+const int MOISTURE_PIN = A0;  // Analog pin A0
+const int RELAY_PIN = D1;     // Relay pin D1
+
+unsigned long previousMillis = 0;
+const long interval = 5000;   // 5 seconds
+
+void setup() {
+  Serial.begin(115200);
+  pinMode(RELAY_PIN, OUTPUT);
+  digitalWrite(RELAY_PIN, LOW);
+
+  WiFi.begin(ssid, password);
+  Serial.print("Connecting to Wi-Fi");
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
+  Serial.println("\\nConnected with IP: " + WiFi.localIP().toString());
+}
+
+void loop() {
+  unsigned long currentMillis = millis();
+  if (currentMillis - previousMillis >= interval) {
+    previousMillis = currentMillis;
+
+    if (WiFi.status() == WL_CONNECTED) {
+      int sensorValue = analogRead(MOISTURE_PIN);
+      int moisture = map(sensorValue, 1023, 300, 0, 100);
+      moisture = constrain(moisture, 0, 100);
+
+      WiFiClient client;
+      HTTPClient http;
+      http.begin(client, serverName);
+      http.addHeader("Content-Type", "application/json");
+
+      String payload = "{\\"moistureLevel\\":" + String(moisture) + 
+                       ",\\"temperature\\":24.0,\\"pH\\":6.8,\\"nitrogen\\":42,\\"phosphorus\\":28,\\"potassium\\":35}";
+
+      int httpResponseCode = http.POST(payload);
+      Serial.print("HTTP Response code: ");
+      Serial.println(httpResponseCode);
+
+      if (httpResponseCode > 0) {
+        String response = http.getString();
+        Serial.println("Server Response: " + response);
+      }
+      http.end();
+    }
+  }
+}`}
+                    </pre>
+                  </div>
+                </div>
+              )}
+
+              {/* TAB 3: Live Packet Simulator */}
+              {guideTab === 'tester' && (
+                <div className="space-y-5 p-2">
+                  <div className="p-4 bg-amber-50 border border-amber-200 rounded-2xl">
+                    <h4 className="font-bold text-amber-900 text-sm mb-1 flex items-center gap-1.5">
+                      <Zap size={16} className="text-amber-600" />
+                      <span>Live Telemetry Packet Injector</span>
+                    </h4>
+                    <p className="text-xs text-amber-800 leading-relaxed">
+                      You can send an exact simulated packet directly to <code className="font-mono bg-white px-1 py-0.5 rounded">http://13.50.151.133/api/sensor</code> right from here. This will immediately update MongoDB and turn your status indicator to 🟢 <strong>Live Hardware Stream</strong> on the dashboard.
+                    </p>
+                  </div>
+
+                  {customSuccessMsg && (
+                    <div className="p-3.5 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800 font-bold text-xs flex items-center gap-2 animate-in fade-in">
+                      <CheckCircle2 size={16} className="text-emerald-600" />
+                      <span>{customSuccessMsg}</span>
+                    </div>
+                  )}
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    
+                    {/* Moisture Slider */}
+                    <div className="p-4 bg-stone-50 border border-stone-200 rounded-xl space-y-2">
+                      <div className="flex items-center justify-between font-bold text-xs">
+                        <span className="text-slate-700">Soil Moisture Level</span>
+                        <span className="text-base text-blue-600 font-black">{customMoistureInput}%</span>
+                      </div>
+                      <input 
+                        type="range" 
+                        min="0" 
+                        max="100" 
+                        value={customMoistureInput}
+                        onChange={(e) => setCustomMoistureInput(e.target.value)}
+                        className="w-full accent-blue-600 cursor-pointer"
+                      />
+                      <div className="flex justify-between text-[10px] text-slate-400 font-mono">
+                        <span>0% (Bone Dry)</span>
+                        <span>50% (Optimal)</span>
+                        <span>100% (Saturated)</span>
+                      </div>
+                    </div>
+
+                    {/* Quick Preset Buttons */}
+                    <div className="p-4 bg-stone-50 border border-stone-200 rounded-xl space-y-2">
+                      <span className="block font-bold text-xs text-slate-700">Quick Test Presets</span>
+                      <div className="grid grid-cols-3 gap-2">
+                        {[
+                          { label: 'Dry (22%)', val: 22 },
+                          { label: 'Optimal (55%)', val: 55 },
+                          { label: 'Wet (85%)', val: 85 }
+                        ].map((preset, idx) => (
+                          <button
+                            key={idx}
+                            onClick={() => {
+                              setCustomMoistureInput(preset.val);
+                              handleSendCustomPacket();
+                            }}
+                            className="px-2.5 py-2 rounded-lg bg-white hover:bg-stone-100 text-slate-700 font-bold text-[11px] border border-stone-200 shadow-2xs transition-all active:scale-95"
+                          >
+                            {preset.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                  </div>
+
+                  <button
+                    onClick={handleSendCustomPacket}
+                    disabled={isSubmittingCustom}
+                    className="w-full py-3 rounded-xl bg-[#E8592A] hover:bg-[#D44A1E] text-white font-black text-xs shadow-md shadow-orange-500/20 flex items-center justify-center gap-2 transition-all active:scale-98 disabled:opacity-50"
+                  >
+                    <Send size={14} />
+                    <span>{isSubmittingCustom ? "Transmitting to AWS EC2..." : `Transmit Custom Telemetry Packet (${customMoistureInput}% Moisture)`}</span>
+                  </button>
+                </div>
+              )}
+
+              {/* TAB 4: Troubleshooting */}
+              {guideTab === 'serial' && (
+                <div className="space-y-4">
+                  <div className="p-4 bg-stone-50 rounded-2xl border border-stone-200 space-y-3">
+                    <h4 className="font-bold text-slate-900 text-sm">Step-by-Step Serial Monitor Debugging</h4>
+                    
+                    <div className="space-y-2.5 text-xs text-slate-600">
+                      <div className="flex items-start gap-2.5">
+                        <span className="w-5 h-5 rounded-full bg-emerald-100 text-emerald-800 font-bold flex items-center justify-center shrink-0 text-[11px]">1</span>
+                        <p><strong>Hotspot 2.4 GHz Band:</strong> Open phone hotspot settings $\to$ ensure band is <strong>2.4 GHz</strong> (ESP boards cannot connect to 5 GHz Wi-Fi).</p>
+                      </div>
+
+                      <div className="flex items-start gap-2.5">
+                        <span className="w-5 h-5 rounded-full bg-emerald-100 text-emerald-800 font-bold flex items-center justify-center shrink-0 text-[11px]">2</span>
+                        <p><strong>SSID & Password Match:</strong> Check that <code className="bg-white px-1 py-0.5 rounded font-mono">ssid</code> and <code className="bg-white px-1 py-0.5 rounded font-mono">password</code> in your code match your phone hotspot exactly with correct case.</p>
+                      </div>
+
+                      <div className="flex items-start gap-2.5">
+                        <span className="w-5 h-5 rounded-full bg-emerald-100 text-emerald-800 font-bold flex items-center justify-center shrink-0 text-[11px]">3</span>
+                        <p><strong>Baud Rate:</strong> In Arduino IDE, open <strong>Tools &gt; Serial Monitor</strong> and change the dropdown at bottom right to <strong>115200 baud</strong>.</p>
+                      </div>
+
+                      <div className="flex items-start gap-2.5">
+                        <span className="w-5 h-5 rounded-full bg-emerald-100 text-emerald-800 font-bold flex items-center justify-center shrink-0 text-[11px]">4</span>
+                        <p><strong>Expected Output:</strong> The Serial Monitor should print <code className="bg-white px-1 py-0.5 rounded font-mono">Connected with IP: 192.168.x.x</code> followed by <code className="bg-white px-1 py-0.5 rounded font-mono text-emerald-700">HTTP Response code: 200</code>.</p>
+                      </div>
+
+                      <div className="flex items-start gap-2.5">
+                        <span className="w-5 h-5 rounded-full bg-amber-100 text-amber-800 font-bold flex items-center justify-center shrink-0 text-[11px]">5</span>
+                        <p><strong>Common Error Codes:</strong> If Serial Monitor shows <code className="font-mono text-red-600">-1</code>, the ESP is not connected to internet or cannot ping AWS. If it shows <code className="font-mono text-red-600">400</code>, JSON payload key is wrong.</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+            </div>
+
+            {/* Modal Footer */}
+            <div className="p-4 bg-stone-50 border-t border-stone-200 flex items-center justify-between">
+              <span className="text-[11px] text-slate-500 font-medium">
+                AWS EC2 Server Endpoint: <code className="font-mono text-slate-700 bg-white px-1 py-0.5 rounded border border-stone-200">http://13.50.151.133/api/sensor</code>
+              </span>
+              <button
+                onClick={() => setShowGuideModal(false)}
+                className="px-5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs transition-colors"
+              >
+                Close Guide
+              </button>
+            </div>
+
+          </div>
         </div>
       )}
 
