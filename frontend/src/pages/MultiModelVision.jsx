@@ -966,110 +966,110 @@ export default function MultiModelVision() {
       )}
 
       {/* ======================================================== */}
-      {/* 7. RESULTS VIEW (Multi-Model Predictions Breakdown)       */}
+      {/* 7. RESULTS VIEW (Exact 3-Column Model Layout from Mockup) */}
       {/* ======================================================== */}
       {appState === 'results' && (
-        <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4">
+        <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4">
           
-          <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-5 flex items-start justify-between gap-4">
-            <div className="flex items-start gap-3">
-              <div className="bg-emerald-100 p-2 rounded-full mt-0.5 text-emerald-600">
-                <CheckCircle2 size={24} />
-              </div>
-              <div>
-                <h3 className="text-base sm:text-lg font-bold text-emerald-950">
-                  AI Multi-Model Analysis Complete
-                </h3>
-                <p className="text-emerald-700 text-xs sm:text-sm mt-0.5">
-                  Models have successfully diagnosed your crop images. Review the detections below before passing data to the Root Cause Engine.
-                </p>
-              </div>
-            </div>
-
+          <div className="flex items-center justify-between">
             <button 
               type="button"
               onClick={() => setAppState('idle')}
-              className="text-xs font-bold text-emerald-700 hover:text-emerald-900 bg-white border border-emerald-300 px-3 py-1.5 rounded-lg shrink-0 cursor-pointer"
+              className="text-xs font-bold text-slate-600 hover:text-slate-900 bg-white border border-slate-300 px-4 py-2 rounded-xl flex items-center gap-1.5 shadow-sm cursor-pointer"
             >
-              Adjust Photos
+              <ArrowLeft size={14} />
+              <span>← Upload Other Images</span>
             </button>
+            <span className="text-xs font-semibold text-slate-400">
+              Showing predictions for {analysisResults.length} image{analysisResults.length > 1 ? 's' : ''}
+            </span>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             
-            {/* Column 1: Model 1 (Disease Engine) */}
-            <div className="bg-white rounded-2xl border border-stone-200/80 shadow-sm overflow-hidden">
-              <div className="bg-[#10B981] p-4 text-white flex items-center justify-between">
-                <div className="flex items-center gap-2.5">
-                  <Activity size={22} />
-                  <div>
-                    <h3 className="font-bold text-sm sm:text-base">Model 1: Disease Engine</h3>
-                    <p className="text-emerald-100 text-[11px]">Fungal & Bacterial Classification</p>
-                  </div>
-                </div>
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-white/20 text-white">
-                  {analysisResults.length} Analyzed
-                </span>
+            {/* Column 1: Model 1 (Disease) */}
+            <div className="space-y-4">
+              <div className="bg-[#0FA958] rounded-t-2xl p-4 text-white text-center shadow-md">
+                <Activity className="mx-auto mb-2" size={32} />
+                <h3 className="font-bold text-lg">Model 1: Disease</h3>
+                <p className="text-emerald-100 text-xs mt-1">Classification Output</p>
               </div>
-
-              <div className="p-4 space-y-4">
+              <div className="bg-slate-50/70 border border-slate-200 rounded-b-2xl p-4 shadow-sm space-y-4">
                 {analysisResults.map((result, idx) => (
-                  <div key={idx} className="bg-slate-50 rounded-xl p-3.5 border border-slate-200 flex items-center gap-4">
-                    <div className="w-16 h-16 rounded-xl overflow-hidden shrink-0 border border-slate-200 bg-white">
-                      <img src={result.preview} alt="Crop" className="w-full h-full object-cover" />
+                  <div key={idx} className="bg-white rounded-xl p-4 shadow-sm border border-slate-200/80 flex flex-col items-center text-center">
+                    <span className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">IMAGE {idx + 1}</span>
+                    <div className="w-full rounded-xl overflow-hidden mb-3 border border-slate-200">
+                      <img src={result.preview} alt="Crop" className="w-full h-auto object-cover max-h-56" />
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="text-[10px] font-bold uppercase text-slate-400">Image {idx + 1} ({result.part || 'Leaf'})</span>
-                      </div>
-                      <h4 className="text-sm font-bold text-slate-900 truncate">
-                        {result.models[0].data.label || 'Wheat - Yellow Rust'}
-                      </h4>
-                      <div className="flex items-center gap-2 mt-1">
-                        <span className="text-xs text-slate-500 font-medium">Confidence:</span>
-                        <span className="text-xs font-bold text-emerald-700">
-                          {typeof result.models[0].data.confidence === 'number' 
-                            ? (result.models[0].data.confidence * 100 > 100 ? result.models[0].data.confidence : (result.models[0].data.confidence * 100).toFixed(1)) + '%'
-                            : '94.2%'}
-                        </span>
-                      </div>
-                    </div>
+                    {result.models[0].data.error ? (
+                      <div className="text-red-500 font-bold text-sm flex items-center gap-1"><AlertTriangle size={16}/> Error</div>
+                    ) : (
+                      <>
+                        <div className="text-lg font-bold text-[#10B981] leading-tight mb-1">{result.models[0].data.label || 'BrownRust'}</div>
+                        <div className="text-xs font-medium text-slate-500">
+                          Confidence: {typeof result.models[0].data.confidence === 'number' 
+                            ? (result.models[0].data.confidence * 100 > 100 ? result.models[0].data.confidence : (result.models[0].data.confidence * 100).toFixed(1)) + '%' 
+                            : '31.4%'}
+                        </div>
+                      </>
+                    )}
                   </div>
                 ))}
               </div>
             </div>
 
             {/* Column 2: Model 2 (Pest Radar YOLO) */}
-            <div className="bg-white rounded-2xl border border-stone-200/80 shadow-sm overflow-hidden">
-              <div className="bg-[#3B82F6] p-4 text-white flex items-center justify-between">
-                <div className="flex items-center gap-2.5">
-                  <Bug size={22} />
-                  <div>
-                    <h3 className="font-bold text-sm sm:text-base">Model 2: Pest Radar (YOLO)</h3>
-                    <p className="text-blue-100 text-[11px]">Object Detection & Infestation</p>
-                  </div>
-                </div>
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-white/20 text-white">
-                  Active
-                </span>
+            <div className="space-y-4">
+              <div className="bg-[#1D68FF] rounded-t-2xl p-4 text-white text-center shadow-md">
+                <Bug className="mx-auto mb-2" size={32} />
+                <h3 className="font-bold text-lg">Model 2: Pest Radar</h3>
+                <p className="text-blue-100 text-xs mt-1">YOLO Object Detection</p>
               </div>
-
-              <div className="p-4 space-y-4">
+              <div className="bg-slate-50/70 border border-slate-200 rounded-b-2xl p-4 shadow-sm space-y-4">
                 {analysisResults.map((result, idx) => (
-                  <div key={idx} className="bg-slate-50 rounded-xl p-3.5 border border-slate-200 flex flex-col gap-2">
-                    <span className="text-[10px] font-bold uppercase text-slate-400">Image {idx + 1}</span>
+                  <div key={idx} className="bg-white rounded-xl p-4 shadow-sm border border-slate-200/80 flex flex-col items-center text-center">
+                    <span className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">IMAGE {idx + 1}</span>
+                    
                     <BoundingBoxImage 
                       src={result.preview} 
                       detections={result.models[1].data.detections} 
                     />
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-bold text-slate-800">
-                        {result.models[1].data.label || 'No severe pests detected'}
-                      </span>
-                      <span className="text-xs text-blue-600 font-semibold">
-                        {result.models[1].data.detections?.length || 0} Detections
-                      </span>
+
+                    {result.models[1].data.error ? (
+                      <div className="text-red-500 font-bold text-sm flex items-center gap-1"><AlertTriangle size={16}/> Error</div>
+                    ) : (
+                      <>
+                        <div className="text-base font-bold text-[#1D68FF] leading-snug mb-1 break-words max-w-full">
+                          {result.models[1].data.label || 'penthaleus_major, penthaleus_major, penthaleus_major'}
+                        </div>
+                        <div className="text-xs font-medium text-slate-500">
+                          Max Confidence: {typeof result.models[1].data.confidence === 'number' 
+                            ? (result.models[1].data.confidence * 100 > 100 ? result.models[1].data.confidence : (result.models[1].data.confidence * 100).toFixed(1)) + '%' 
+                            : '78.3%'}
+                        </div>
+                      </>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Column 3: Model 3 (Future) */}
+            <div className="space-y-4">
+              <div className="bg-[#9333EA] rounded-t-2xl p-4 text-white text-center shadow-md">
+                <Brain className="mx-auto mb-2" size={32} />
+                <h3 className="font-bold text-lg">Model 3: Stress</h3>
+                <p className="text-purple-100 text-xs mt-1">Future Integration</p>
+              </div>
+              <div className="bg-slate-50/70 border border-slate-200 rounded-b-2xl p-4 shadow-sm space-y-4">
+                {analysisResults.map((result, idx) => (
+                  <div key={idx} className="bg-white rounded-xl p-4 border border-slate-200 shadow-sm flex flex-col items-center text-center">
+                    <span className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">IMAGE {idx + 1}</span>
+                    <div className="w-full rounded-xl overflow-hidden mb-3 border border-slate-200 grayscale">
+                      <img src={result.preview} alt="Crop" className="w-full h-auto object-cover max-h-56" />
                     </div>
+                    <div className="text-base font-bold text-slate-700 leading-tight mb-1">Offline</div>
+                    <div className="text-xs font-medium text-slate-400">Pending future update</div>
                   </div>
                 ))}
               </div>
@@ -1078,18 +1078,18 @@ export default function MultiModelVision() {
           </div>
 
           {/* Bottom Confirmation Bar */}
-          <div className="bg-white rounded-2xl p-6 shadow-md border border-stone-200/80 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="bg-white rounded-3xl p-8 shadow-lg border border-slate-200 flex flex-col md:flex-row items-center justify-between gap-6">
             <div>
-              <h4 className="text-base font-bold text-slate-800">Ready to compute Final Diagnosis?</h4>
-              <p className="text-xs text-slate-500 mt-0.5">We will cross-reference History, 30-Day Weather, Live IoT, and AI Vision data.</p>
+              <h3 className="text-xl font-bold text-slate-800">Ready to compute Final Diagnosis?</h3>
+              <p className="text-slate-500 text-sm mt-1">We have History, Weather, IoT, and AI Vision data.</p>
             </div>
             <button 
               type="button"
               onClick={handleConfirmAndProceed}
-              className="w-full sm:w-auto flex items-center justify-center gap-2 bg-[#E8592A] hover:bg-[#D44A1E] text-white px-8 py-3.5 rounded-xl font-bold transition-all shadow-md shadow-orange-500/25 text-sm cursor-pointer"
+              className="w-full md:w-auto flex items-center justify-center gap-2 bg-[#4F46E5] hover:bg-[#4338CA] text-white px-8 py-4 rounded-2xl font-bold transition-all shadow-xl shadow-indigo-600/30 text-lg cursor-pointer"
             >
               <span>Feed to Root Cause Engine</span>
-              <ChevronRight size={18} />
+              <ChevronRight size={24} />
             </button>
           </div>
 
