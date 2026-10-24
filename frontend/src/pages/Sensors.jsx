@@ -123,7 +123,8 @@ export default function Sensors({ isDiagnosticMode = false }) {
       if (res.ok) {
         const data = await res.json();
         if (data) {
-          setIsOnline(Boolean(data.isOnline));
+          const liveOnline = Boolean(data.isOnline) && (data.secondsSinceLastPacket === undefined || data.secondsSinceLastPacket === null || data.secondsSinceLastPacket < 12);
+          setIsOnline(liveOnline);
           if (data.device) setDeviceInfo(prev => ({ ...prev, ...data.device }));
           
           if (data.lastPacketTime) {
@@ -135,7 +136,7 @@ export default function Sensors({ isDiagnosticMode = false }) {
             setCachedData(data.cachedReadings);
           }
 
-          if (data.readings) {
+          if (data.readings && liveOnline) {
             setMoisture(data.readings.moisture);
             setTemperature(data.readings.temperature);
             setPhVal(data.readings.pH);
@@ -146,6 +147,13 @@ export default function Sensors({ isDiagnosticMode = false }) {
             setHumidity(data.readings.humidity ?? 65);
             setLightIntensity(data.readings.lightIntensity ?? 850);
             setRainfall(data.readings.rainfall ?? 0);
+          } else if (!liveOnline) {
+            setMoisture(null);
+            setTemperature(null);
+            setPhVal(null);
+            setNitrogen(null);
+            setPhosphorus(null);
+            setPotassium(null);
           }
 
           if (data.state) {
@@ -229,7 +237,7 @@ export default function Sensors({ isDiagnosticMode = false }) {
 
   useEffect(() => {
     fetchDeviceData();
-    const interval = setInterval(fetchDeviceData, 5000);
+    const interval = setInterval(fetchDeviceData, 2000);
     return () => clearInterval(interval);
   }, []);
 

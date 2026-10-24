@@ -54,13 +54,15 @@ app.get('/api/state', async (req, res) => {
       source: { $ne: 'simulation' }
     }).sort({ timestamp: -1 });
     
-    // Check if physical hardware sent a packet in the last 60 seconds
+    // Check if physical hardware sent a packet in the last 12 seconds
     let isHardwareLive = false;
     let currentMoisture = null;
+    let secondsSinceLastPacket = null;
     
     if (latestHardwareData) {
       const timeDiff = Date.now() - new Date(latestHardwareData.timestamp).getTime();
-      if (timeDiff < 60000) {
+      secondsSinceLastPacket = Math.max(0, Math.round(timeDiff / 1000));
+      if (timeDiff < 12000) { // 12 seconds timeout (ESP sends every 3 seconds)
         isHardwareLive = true;
         currentMoisture = latestHardwareData.moistureLevel;
       }
@@ -98,7 +100,8 @@ app.get('/api/state', async (req, res) => {
       ip: isHardwareLive ? '13.50.151.133' : 'None',
       uptime: isHardwareLive ? 'Live Stream Active' : 'Offline',
       firmware: 'v1.0.6',
-      lastPacketTime: latestHardwareData ? latestHardwareData.timestamp : null
+      lastPacketTime: latestHardwareData ? latestHardwareData.timestamp : null,
+      secondsSinceLastPacket
     };
     
     res.json({
@@ -110,6 +113,7 @@ app.get('/api/state', async (req, res) => {
       cachedReadings,
       device,
       lastPacketTime: latestHardwareData ? latestHardwareData.timestamp : null,
+      secondsSinceLastPacket,
       serverTime: new Date(),
       state
     });
@@ -204,7 +208,7 @@ app.get('/api/sensor', async (req, res) => {
     res.json({
       latest,
       ageSeconds,
-      isLive: ageSeconds < 90,
+      isLive: ageSeconds < 12,
       targetEndpoint: "POST http://13.50.151.133/api/sensor"
     });
   } catch (error) {

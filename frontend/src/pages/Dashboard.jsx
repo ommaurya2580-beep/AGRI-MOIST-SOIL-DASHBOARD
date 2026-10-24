@@ -30,28 +30,38 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const [sensorState, setSensorState] = useState({
     moisture: 42,
-    isOnline: true,
+    isOnline: false,
     pumpIsOn: false
   });
 
   // Fetch live moisture from AgriPulse Backend Server 1
   useEffect(() => {
     let isMounted = true;
-    fetch('/api/state')
-      .then(res => res.json())
-      .then(data => {
-        if (isMounted && data) {
-          setSensorState({
-            moisture: data.currentMoisture || 42,
-            isOnline: data.isOnline !== undefined ? data.isOnline : true,
-            pumpIsOn: data.state?.pumpIsOn || false
-          });
-        }
-      })
-      .catch(() => {
-        // Safe fallback
-      });
-    return () => { isMounted = false; };
+    const fetchState = () => {
+      fetch('/api/state')
+        .then(res => res.json())
+        .then(data => {
+          if (isMounted && data) {
+            setSensorState({
+              moisture: data.currentMoisture ?? data.cachedReadings?.moisture ?? 42,
+              isOnline: Boolean(data.isOnline),
+              pumpIsOn: data.state?.pumpIsOn || false
+            });
+          }
+        })
+        .catch(() => {
+          if (isMounted) {
+            setSensorState(prev => ({ ...prev, isOnline: false }));
+          }
+        });
+    };
+
+    fetchState();
+    const interval = setInterval(fetchState, 2500);
+    return () => { 
+      isMounted = false; 
+      clearInterval(interval);
+    };
   }, []);
 
   return (
@@ -254,9 +264,17 @@ export default function Dashboard() {
               </div>
               <h4 className="text-xs font-bold text-slate-800">Soil Sensors</h4>
             </div>
-            <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-              {sensorState.isOnline ? 'Online' : 'Standby'}
+            <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold ${
+              sensorState.isOnline 
+                ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' 
+                : 'bg-rose-50 text-rose-700 border border-rose-200'
+            }`}>
+              <span className={`w-1.5 h-1.5 rounded-full ${
+                sensorState.isOnline 
+                  ? 'bg-emerald-500 animate-pulse' 
+                  : 'bg-rose-500'
+              }`}></span>
+              {sensorState.isOnline ? 'Online' : 'Offline'}
             </span>
           </div>
 

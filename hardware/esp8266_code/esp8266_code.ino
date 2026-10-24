@@ -76,7 +76,7 @@ SoftwareSerial modbusSerial(MAX485_RX, MAX485_TX); // RX, TX
 
 // --- Timers ---
 unsigned long previousMillis = 0;
-const long interval = 5000;   // Har 5 second me data AWS cloud bhejna
+const long interval = 3000;   // Har 3 second me data AWS cloud bhejna (Fast & Responsive Sync)
 
 void setup() {
   Serial.begin(115200);
