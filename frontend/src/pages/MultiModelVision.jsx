@@ -31,7 +31,7 @@ import {
   Eye
 } from 'lucide-react';
 
-const CONFIDENCE_THRESHOLD = 0.25;
+const CONFIDENCE_THRESHOLD = 0.15;
 
 function BoundingBoxImage({ src, detections }) {
   const canvasRef = useRef(null);
@@ -326,17 +326,17 @@ export default function MultiModelVision() {
               id: 'model2',
               name: 'Pest Radar (M2)',
               icon: Bug,
-              data: pestRes.status === 'fulfilled' 
+              data: (pestRes.status === 'fulfilled' && pestRes.value && !pestRes.value.error)
                 ? { 
                     label: pestRes.value.detections && pestRes.value.detections.length > 0 
                       ? pestRes.value.detections.map(d => d.class_name).join(", ") 
-                      : "No pests detected", 
+                      : "No target pests detected", 
                     confidence: pestRes.value.detections && pestRes.value.detections.length > 0
                       ? Math.max(...pestRes.value.detections.map(d => d.confidence))
-                      : 0.98,
+                      : null,
                     detections: pestRes.value.detections || []
                   } 
-                : { label: "No severe pest infestation", confidence: 0.95, detections: [] },
+                : { label: "No target pests detected", confidence: null, detections: [] },
               color: 'blue'
             },
             {
@@ -1040,12 +1040,12 @@ export default function MultiModelVision() {
                     ) : (
                       <>
                         <div className="text-base font-bold text-[#1D68FF] leading-snug mb-1 break-words max-w-full">
-                          {result.models[1].data.label || 'penthaleus_major, penthaleus_major, penthaleus_major'}
+                          {result.models[1].data.label || 'No target pests detected'}
                         </div>
                         <div className="text-xs font-medium text-slate-500">
-                          Max Confidence: {typeof result.models[1].data.confidence === 'number' 
-                            ? (result.models[1].data.confidence * 100 > 100 ? result.models[1].data.confidence : (result.models[1].data.confidence * 100).toFixed(1)) + '%' 
-                            : '78.3%'}
+                          {result.models[1].data.detections && result.models[1].data.detections.length > 0
+                            ? `Max Confidence: ${(result.models[1].data.confidence * (result.models[1].data.confidence <= 1 ? 100 : 1)).toFixed(1)}% (${result.models[1].data.detections.length} Detections)`
+                            : '0 Detections (Not in 9 trained wheat classes)'}
                         </div>
                       </>
                     )}
