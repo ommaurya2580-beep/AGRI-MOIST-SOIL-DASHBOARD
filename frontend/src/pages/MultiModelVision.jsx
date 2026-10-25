@@ -119,30 +119,8 @@ export default function MultiModelVision() {
     weather: '28°C · Partly Cloudy'
   });
 
-  // Selected Images List (Default initialized to match the 3 images in mockup)
-  const [images, setImages] = useState([
-    {
-      id: 'mock-1',
-      preview: '/images/samples/sel_leaf.jpg',
-      name: 'wheat_leaf_rust.jpg',
-      part: 'leaf',
-      isSample: true
-    },
-    {
-      id: 'mock-2',
-      preview: '/images/samples/sel_plant.jpg',
-      name: 'wheat_whole_plant.jpg',
-      part: 'whole_plant',
-      isSample: true
-    },
-    {
-      id: 'mock-3',
-      preview: '/images/samples/sel_stem.jpg',
-      name: 'wheat_stem_rust.jpg',
-      part: 'stem',
-      isSample: true
-    }
-  ]);
+  // Selected Images List (Empty by default - user manually uploads images)
+  const [images, setImages] = useState([]);
 
   // Load previous diagnostic context from localStorage
   useEffect(() => {
@@ -647,63 +625,78 @@ export default function MultiModelVision() {
                 </span>
               </div>
 
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5">
-                {images.map((img) => (
-                  <div key={img.id} className="relative group rounded-xl border border-slate-200 overflow-hidden bg-slate-50 flex flex-col shadow-xs">
-                    
-                    {/* Thumbnail Preview */}
-                    <div className="relative aspect-square w-full overflow-hidden bg-slate-100">
-                      <img 
-                        src={img.preview} 
-                        alt="crop preview" 
-                        className="w-full h-full object-cover cursor-pointer group-hover:scale-105 transition-transform duration-300" 
-                        onClick={() => setPreviewModalImage(img.preview)}
-                      />
+              {images.length === 0 ? (
+                <div 
+                  onClick={() => fileInputRef.current?.click()}
+                  className="border-2 border-dashed border-stone-200 hover:border-emerald-400 rounded-2xl p-8 bg-stone-50/50 hover:bg-emerald-50/20 flex flex-col items-center justify-center text-center cursor-pointer transition-all group"
+                >
+                  <div className="w-12 h-12 rounded-2xl bg-white border border-stone-200 group-hover:border-emerald-300 text-stone-400 group-hover:text-emerald-600 flex items-center justify-center mb-2.5 shadow-xs group-hover:scale-105 transition-all">
+                    <Plus size={22} strokeWidth={2.5} />
+                  </div>
+                  <span className="text-xs sm:text-sm font-bold text-slate-800">No images selected yet</span>
+                  <p className="text-[11px] text-slate-400 font-medium mt-0.5">
+                    Click "Upload Images" above or tap here to manually select photos of leaves, plant, or stem one by one (Up to 10)
+                  </p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5">
+                  {images.map((img) => (
+                    <div key={img.id} className="relative group rounded-xl border border-slate-200 overflow-hidden bg-slate-50 flex flex-col shadow-xs">
                       
-                      {/* Delete Button */}
-                      <button 
-                        type="button"
-                        onClick={(e) => { e.stopPropagation(); removeImage(img.id); }}
-                        className="absolute top-1.5 right-1.5 w-6 h-6 rounded-full bg-slate-900/70 hover:bg-rose-600 text-white flex items-center justify-center transition-colors shadow-sm cursor-pointer z-10"
-                        title="Remove image"
-                      >
-                        <X size={13} />
-                      </button>
-                    </div>
+                      {/* Thumbnail Preview */}
+                      <div className="relative aspect-square w-full overflow-hidden bg-slate-100">
+                        <img 
+                          src={img.preview} 
+                          alt="crop preview" 
+                          className="w-full h-full object-cover cursor-pointer group-hover:scale-105 transition-transform duration-300" 
+                          onClick={() => setPreviewModalImage(img.preview)}
+                        />
+                        
+                        {/* Delete Button */}
+                        <button 
+                          type="button"
+                          onClick={(e) => { e.stopPropagation(); removeImage(img.id); }}
+                          className="absolute top-1.5 right-1.5 w-6 h-6 rounded-full bg-slate-900/70 hover:bg-rose-600 text-white flex items-center justify-center transition-colors shadow-sm cursor-pointer z-10"
+                          title="Remove image"
+                        >
+                          <X size={13} />
+                        </button>
+                      </div>
 
-                    {/* Plant Part Dropdown Selector Pill */}
-                    <div className="p-1.5 bg-white border-t border-slate-100 relative">
-                      <select 
-                        value={img.part || 'leaf'} 
-                        onChange={(e) => updateImagePart(img.id, e.target.value)}
-                        className="w-full text-[11px] font-semibold text-slate-700 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-lg py-1 px-1.5 cursor-pointer focus:outline-none appearance-none pr-5"
-                      >
-                        <option value="leaf">🍃 Leaf</option>
-                        <option value="whole_plant">🌱 Whole Plant</option>
-                        <option value="stem">🌾 Stem</option>
-                        <option value="fruit">🍎 Fruit / Ear</option>
-                        <option value="root">🪴 Root</option>
-                      </select>
-                      <ChevronDown size={12} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
-                    </div>
+                      {/* Plant Part Dropdown Selector Pill */}
+                      <div className="p-1.5 bg-white border-t border-slate-100 relative">
+                        <select 
+                          value={img.part || 'leaf'} 
+                          onChange={(e) => updateImagePart(img.id, e.target.value)}
+                          className="w-full text-[11px] font-semibold text-slate-700 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-lg py-1 px-1.5 cursor-pointer focus:outline-none appearance-none pr-5"
+                        >
+                          <option value="leaf">🍃 Leaf</option>
+                          <option value="whole_plant">🌱 Whole Plant</option>
+                          <option value="stem">🌾 Stem</option>
+                          <option value="fruit">🍎 Fruit / Ear</option>
+                          <option value="root">🪴 Root</option>
+                        </select>
+                        <ChevronDown size={12} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                      </div>
 
-                  </div>
-                ))}
-
-                {/* Add More Box (When under 10 images) */}
-                {images.length < 10 && (
-                  <div 
-                    onClick={() => fileInputRef.current?.click()}
-                    className="aspect-square rounded-xl border-2 border-dashed border-emerald-300 bg-emerald-50/40 hover:bg-emerald-50 transition-colors flex flex-col items-center justify-center cursor-pointer p-3 text-center group"
-                  >
-                    <div className="w-8 h-8 rounded-full bg-[#10B981] text-white flex items-center justify-center mb-1.5 shadow-sm group-hover:scale-110 transition-transform">
-                      <Plus size={18} strokeWidth={2.5} />
                     </div>
-                    <span className="text-xs font-bold text-slate-800">Add More</span>
-                    <span className="text-[10px] text-slate-400 font-medium">(Up to 10 images)</span>
-                  </div>
-                )}
-              </div>
+                  ))}
+
+                  {/* Add More Box (When under 10 images) */}
+                  {images.length < 10 && (
+                    <div 
+                      onClick={() => fileInputRef.current?.click()}
+                      className="aspect-square rounded-xl border-2 border-dashed border-emerald-300 bg-emerald-50/40 hover:bg-emerald-50 transition-colors flex flex-col items-center justify-center cursor-pointer p-3 text-center group"
+                    >
+                      <div className="w-8 h-8 rounded-full bg-[#10B981] text-white flex items-center justify-center mb-1.5 shadow-sm group-hover:scale-110 transition-transform">
+                        <Plus size={18} strokeWidth={2.5} />
+                      </div>
+                      <span className="text-xs font-bold text-slate-800">Add More</span>
+                      <span className="text-[10px] text-slate-400 font-medium">(Up to 10 images)</span>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
           </div>
