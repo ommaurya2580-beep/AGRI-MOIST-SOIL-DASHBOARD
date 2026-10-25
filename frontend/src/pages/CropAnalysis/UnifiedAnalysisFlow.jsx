@@ -1,3 +1,4 @@
+// Updated: 2026-10-25
 import React, { useState, useRef, useEffect } from 'react';
 import { Upload, Bug, Leaf, AlertCircle, CheckCircle, ChevronRight, Activity, X } from 'lucide-react';
 import PestResultCard from '../../components/analysis/PestResultCard';

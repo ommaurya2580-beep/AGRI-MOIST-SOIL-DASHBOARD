@@ -1,3 +1,4 @@
+// Updated: 2026-10-25
 import React, { useState } from 'react';
 import { Wifi, Cpu, Settings as SettingsIcon, Activity, CheckCircle, ChevronRight, ChevronLeft, HelpCircle, Loader2, RefreshCcw } from 'lucide-react';
 

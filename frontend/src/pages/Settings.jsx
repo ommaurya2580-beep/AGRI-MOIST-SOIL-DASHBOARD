@@ -1,3 +1,4 @@
+// Updated: 2026-10-25
 import React, { useState } from 'react';
 import { Settings, User, MapPin, Bell, Globe, Sparkles, Check, ShieldCheck } from 'lucide-react';
 

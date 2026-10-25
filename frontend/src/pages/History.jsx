@@ -1,3 +1,4 @@
+// Updated: 2026-10-25
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Clock, ArrowRight, ShieldCheck, Bug, Sprout, Search } from 'lucide-react';

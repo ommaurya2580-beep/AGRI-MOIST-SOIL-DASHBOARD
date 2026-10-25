@@ -1,3 +1,4 @@
+// Updated: 2026-10-25
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Bell, AlertTriangle, CloudRain, CheckCircle, ArrowRight, ShieldAlert, Cpu } from 'lucide-react';

@@ -1,3 +1,4 @@
+<!-- Updated: 2026-10-25 -->
 # React + Vite
 
 This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.

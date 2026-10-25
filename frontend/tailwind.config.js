@@ -1,3 +1,4 @@
+// Updated: 2026-10-25
 /** @type {import('tailwindcss').Config} */
 export default {
   content: [

@@ -1,3 +1,4 @@
+<!-- Updated: 2026-10-25 -->
 # TerraLeaf AI - Model 1 (Inference Service)
 
 FastAPI microservice for Wheat Leaf Disease Classification using TensorFlow/Keras.

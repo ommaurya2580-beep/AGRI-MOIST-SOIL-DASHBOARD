@@ -1,3 +1,4 @@
+// Updated: 2026-10-25
 import React, { useState, useRef, useEffect } from 'react';
 import { Upload, AlertTriangle, Bug, AlertCircle } from 'lucide-react';
 

@@ -1,3 +1,4 @@
+// Updated: 2026-10-25
 import React, { useState, useEffect } from 'react';
 import { Droplet, Activity, Power, Map, Cpu, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';

@@ -1,3 +1,4 @@
+<!-- Updated: 2026-10-25 -->
 # AgriPulse System Architecture
 
 Here is the complete high-level system architecture of the AgriPulse Smart Agriculture Platform, mapping out the connections between the React Frontend, Node.js Backend, AI Models, and IoT Hardware.

@@ -1,3 +1,4 @@
+// Updated: 2026-10-25
 const mongoose = require('mongoose');
 
 const sensorDataSchema = new mongoose.Schema({

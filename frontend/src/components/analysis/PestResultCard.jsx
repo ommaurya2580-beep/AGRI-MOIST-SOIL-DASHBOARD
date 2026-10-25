@@ -1,3 +1,4 @@
+// Updated: 2026-10-25
 import React, { useRef, useEffect } from 'react';
 import { AlertCircle } from 'lucide-react';
 

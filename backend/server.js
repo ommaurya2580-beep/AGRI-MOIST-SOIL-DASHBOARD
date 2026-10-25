@@ -1,3 +1,4 @@
+// Updated: 2026-10-25
 require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');

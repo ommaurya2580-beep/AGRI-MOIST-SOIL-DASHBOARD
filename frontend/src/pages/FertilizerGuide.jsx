@@ -1,3 +1,4 @@
+// Updated: 2026-10-25
 import React, { useState } from 'react';
 import { Search, ChevronRight, Bug, Activity, Droplets, ThermometerSun, Sprout, Map, ShieldAlert, FlaskConical, Leaf, TrendingUp, Tractor, Pill, ShieldCheck, Info } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';

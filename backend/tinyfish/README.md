@@ -1,3 +1,4 @@
+<!-- Updated: 2026-10-25 -->
 # TinyFish Agricultural Web Intelligence Module (AgriPulse)
 
 This module integrates the **TinyFish Search & Fetch API** into AgriPulse as an independent, optional, and fully removable advisory layer.

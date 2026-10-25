@@ -1,4 +1,5 @@
 #!/bin/bash
+# Updated: 2026-10-25
 
 echo "Updating system and installing dependencies..."
 sudo yum update -y

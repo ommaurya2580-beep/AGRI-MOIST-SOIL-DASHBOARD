@@ -1,3 +1,4 @@
+// Updated: 2026-10-25
 const mongoose = require('mongoose');
 
 const analysisRecordSchema = new mongoose.Schema({

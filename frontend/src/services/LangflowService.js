@@ -1,3 +1,4 @@
+// Updated: 2026-10-25
 /**
  * Service to connect with the local Langflow AI Agent
  */

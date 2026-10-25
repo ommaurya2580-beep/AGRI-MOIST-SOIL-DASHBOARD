@@ -1,3 +1,4 @@
+// Updated: 2026-10-25
 import React, { useState } from 'react';
 import { Upload, AlertTriangle, CheckCircle, Leaf } from 'lucide-react';
 import PestDetection from './PestDetection';

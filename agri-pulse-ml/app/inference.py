@@ -1,3 +1,4 @@
+# Updated: 2026-10-25
 import torch
 import torch.nn.functional as F
 from app.config import CLASSES, UNCERTAINTY_THRESHOLD, MODEL_VERSION

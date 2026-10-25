@@ -1,3 +1,4 @@
+// Updated: 2026-10-25
 import React, { useState, useEffect } from 'react';
 import { 
   Globe, ExternalLink, ShieldCheck, AlertTriangle, CheckCircle2, 

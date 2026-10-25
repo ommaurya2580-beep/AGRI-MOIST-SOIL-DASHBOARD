@@ -1,3 +1,4 @@
+// Updated: 2026-10-25
 import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ChevronLeft, Info, FlaskConical, Sprout, ShieldAlert, CheckCircle2, ChevronRight, Activity } from 'lucide-react';

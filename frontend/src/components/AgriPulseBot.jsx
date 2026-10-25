@@ -1,3 +1,4 @@
+// Updated: 2026-10-25
 import React, { useState, useRef, useEffect } from 'react';
 import { Bot, X, Send, User, Sparkles, Loader2, Minimize2, Maximize2 } from 'lucide-react';
 

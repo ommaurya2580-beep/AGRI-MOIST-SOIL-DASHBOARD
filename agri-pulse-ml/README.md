@@ -1,3 +1,4 @@
+<!-- Updated: 2026-10-25 -->
 # Agri Pulse - Crop Intelligence ML Service
 
 This is the FastAPI standalone service for processing plant images and returning disease probabilities using an EfficientNet-B0 PyTorch model.

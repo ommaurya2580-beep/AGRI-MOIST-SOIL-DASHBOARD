@@ -1,3 +1,4 @@
+// Updated: 2026-10-25
 import React, { useState } from 'react';
 import { Upload, AlertTriangle, CheckCircle, Leaf, Activity, Beaker, ShieldAlert, ThermometerSun } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';

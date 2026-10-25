@@ -1,3 +1,4 @@
+// Updated: 2026-10-25
 export const TREATMENT_DB = {
   'Drought / Water Stress': {
     action: 'Immediate Irrigation',
