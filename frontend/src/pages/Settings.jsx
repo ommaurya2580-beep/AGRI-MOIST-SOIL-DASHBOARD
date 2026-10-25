@@ -5,12 +5,16 @@ import { Settings, User, MapPin, Bell, Globe, Sparkles, Check, ShieldCheck } fro
 export default function SettingsPage() {
   const [saved, setSaved] = useState(false);
   const [farmerName, setFarmerName] = useState('John Doe');
-  const [farmLocation, setFarmLocation] = useState('Greater Noida, Uttar Pradesh');
+  const [farmLocation, setFarmLocation] = useState(() => {
+    return localStorage.getItem('agripulse_user_location') || 'Your Farm Location';
+  });
   const [soilType, setSoilType] = useState('Alluvial Clay Loam');
   const [autoPump, setAutoPump] = useState(true);
 
   const handleSave = (e) => {
     e.preventDefault();
+    localStorage.setItem('agripulse_user_location', farmLocation);
+    window.dispatchEvent(new Event('agripulse_location_updated'));
     setSaved(true);
     setTimeout(() => setSaved(false), 3000);
   };

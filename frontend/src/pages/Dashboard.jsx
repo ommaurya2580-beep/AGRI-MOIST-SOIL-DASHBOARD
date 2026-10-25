@@ -35,6 +35,30 @@ export default function Dashboard() {
     pumpIsOn: false
   });
 
+  const [liveWeather, setLiveWeather] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem('agripulse_live_weather') || 'null');
+    } catch {
+      return null;
+    }
+  });
+
+  // Listen for real-time weather updates
+  useEffect(() => {
+    const handleWeatherUpdate = () => {
+      try {
+        const saved = JSON.parse(localStorage.getItem('agripulse_live_weather') || 'null');
+        if (saved) setLiveWeather(saved);
+      } catch {}
+    };
+    window.addEventListener('agripulse_weather_updated', handleWeatherUpdate);
+    window.addEventListener('storage', handleWeatherUpdate);
+    return () => {
+      window.removeEventListener('agripulse_weather_updated', handleWeatherUpdate);
+      window.removeEventListener('storage', handleWeatherUpdate);
+    };
+  }, []);
+
   // Fetch live moisture from AgriPulse Backend Server 1
   useEffect(() => {
     let isMounted = true;
@@ -221,11 +245,22 @@ export default function Dashboard() {
               <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-500 flex items-center justify-center">
                 <CloudSun size={22} />
               </div>
-              <div>
-                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Weather Today</span>
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center justify-between gap-1">
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Weather Today</span>
+                  {liveWeather?.district && (
+                    <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full truncate max-w-[110px]">
+                      📍 {liveWeather.district}
+                    </span>
+                  )}
+                </div>
                 <div className="flex items-baseline gap-2">
-                  <span className="text-2xl font-black text-slate-800">28°C</span>
-                  <span className="text-xs font-semibold text-slate-500">Partly Cloudy</span>
+                  <span className="text-2xl font-black text-slate-800">
+                    {liveWeather?.currentTemp || '28°C'}
+                  </span>
+                  <span className="text-xs font-semibold text-slate-500 truncate max-w-[130px]">
+                    {liveWeather?.weatherDesc || 'Partly Cloudy'}
+                  </span>
                 </div>
               </div>
             </div>
@@ -234,21 +269,21 @@ export default function Dashboard() {
           <div className="grid grid-cols-3 gap-2 pt-3 border-t border-slate-100 text-center">
             <div className="flex flex-col items-center">
               <span className="flex items-center gap-1 text-xs font-bold text-slate-700">
-                <Droplets size={12} className="text-blue-500" /> 65%
+                <Droplets size={12} className="text-blue-500" /> {liveWeather?.currentHumidity || liveWeather?.humidity || '65%'}
               </span>
               <span className="text-[10px] text-slate-400">Humidity</span>
             </div>
             <div className="flex flex-col items-center">
               <span className="flex items-center gap-1 text-xs font-bold text-slate-700">
-                <Wind size={12} className="text-teal-500" /> 12 km/h
+                <Wind size={12} className="text-teal-500" /> {liveWeather?.wind || '12 km/h'}
               </span>
               <span className="text-[10px] text-slate-400">Wind</span>
             </div>
             <div className="flex flex-col items-center">
               <span className="flex items-center gap-1 text-xs font-bold text-slate-700">
-                <CloudRain size={12} className="text-blue-500" /> 0 mm
+                <CloudRain size={12} className="text-blue-500" /> {liveWeather?.rainTotal || '0 mm'}
               </span>
-              <span className="text-[10px] text-slate-400">Rain</span>
+              <span className="text-[10px] text-slate-400">30d Rain</span>
             </div>
           </div>
         </div>

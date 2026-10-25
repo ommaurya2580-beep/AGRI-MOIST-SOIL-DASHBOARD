@@ -36,8 +36,41 @@ export default function DashboardLayout() {
   const navigate = useNavigate();
   const [isBotOpen, setIsBotOpen] = useState(false);
   const [isHindi, setIsHindi] = useState(false);
-  const [selectedLocation, setSelectedLocation] = useState('Greater Noida, UP');
+  const [selectedLocation, setSelectedLocation] = useState(() => {
+    try {
+      const savedWeather = JSON.parse(localStorage.getItem('agripulse_live_weather') || 'null');
+      if (savedWeather?.district) return `${savedWeather.district}, India`;
+      const saved = localStorage.getItem('agripulse_user_location');
+      if (saved) return saved.split(',').slice(0, 2).join(',');
+    } catch {}
+    return 'Detecting Location...';
+  });
   const [showLocationMenu, setShowLocationMenu] = useState(false);
+
+  // Sync with live GPS updates
+  React.useEffect(() => {
+    const handleUpdate = () => {
+      try {
+        const savedWeather = JSON.parse(localStorage.getItem('agripulse_live_weather') || 'null');
+        if (savedWeather?.district) {
+          setSelectedLocation(`${savedWeather.district}, India`);
+          return;
+        }
+        const saved = localStorage.getItem('agripulse_user_location');
+        if (saved) {
+          setSelectedLocation(saved.split(',').slice(0, 2).join(','));
+        }
+      } catch {}
+    };
+
+    handleUpdate();
+    window.addEventListener('agripulse_location_updated', handleUpdate);
+    window.addEventListener('storage', handleUpdate);
+    return () => {
+      window.removeEventListener('agripulse_location_updated', handleUpdate);
+      window.removeEventListener('storage', handleUpdate);
+    };
+  }, []);
 
   const toggleLanguage = () => {
     const select = document.querySelector('.goog-te-combo');
@@ -55,6 +88,8 @@ export default function DashboardLayout() {
     'Ludhiana, Punjab',
     'Karnal, Haryana',
     'Meerut, UP',
+    'Patna, Bihar',
+    'Varanasi, UP',
     'Indore, MP'
   ];
 
@@ -164,18 +199,30 @@ export default function DashboardLayout() {
               </button>
 
               {showLocationMenu && (
-                <div className="absolute right-0 mt-1 w-44 bg-white rounded-xl shadow-lg border border-slate-100 py-1.5 z-50">
-                  {locationsList.map(loc => (
-                    <button
-                      key={loc}
-                      onClick={() => { setSelectedLocation(loc); setShowLocationMenu(false); }}
-                      className={`w-full text-left px-3.5 py-1.5 text-xs font-semibold hover:bg-slate-50 ${
-                        selectedLocation === loc ? 'text-[#E8592A] font-bold' : 'text-slate-600'
-                      }`}
-                    >
-                      {loc}
-                    </button>
-                  ))}
+                <div className="absolute right-0 mt-1 w-52 bg-white rounded-xl shadow-xl border border-stone-100 py-1.5 z-50 animate-in fade-in zoom-in-95 duration-150">
+                  <button
+                    onClick={() => {
+                      setShowLocationMenu(false);
+                      navigate('/weather');
+                    }}
+                    className="w-full text-left px-3.5 py-2 text-xs font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border-b border-stone-100 flex items-center gap-1.5 transition-colors"
+                  >
+                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <span>Live GPS Sync & Weather</span>
+                  </button>
+                  <div className="py-1">
+                    {locationsList.map(loc => (
+                      <button
+                        key={loc}
+                        onClick={() => { setSelectedLocation(loc); setShowLocationMenu(false); }}
+                        className={`w-full text-left px-3.5 py-1.5 text-xs font-semibold hover:bg-slate-50 transition-colors ${
+                          selectedLocation === loc ? 'text-[#E8592A] font-bold' : 'text-slate-600'
+                        }`}
+                      >
+                        {loc}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               )}
             </div>

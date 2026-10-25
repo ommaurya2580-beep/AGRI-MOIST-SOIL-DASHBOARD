@@ -46,8 +46,18 @@ export default function AgriPulseBot({ isOpen, onClose }) {
     if (input.includes('water') || input.includes('irrigate') || input.includes('moisture') || input.includes('pump')) {
       return "Based on your live sensors, the soil moisture in Wheat Field-1 is currently at 28% (Optimal). Since the weather forecast shows a 51% chance of rain later today, I recommend keeping the pump OFF to save water and electricity. My auto-irrigation system will turn it on if moisture drops below 20%.";
     }
-    if (input.includes('weather') || input.includes('rain') || input.includes('forecast')) {
-      return "Today's forecast for Greater Noida indicates partly cloudy conditions with a high of 33°C. There is a 51% chance of moderate showers around 16:00 (4 PM). The UV Index is high (7.0), so avoid spraying activities during the afternoon.";
+    if (input.includes('weather') || input.includes('rain') || input.includes('forecast') || input.includes('temperature')) {
+      try {
+        const live = JSON.parse(localStorage.getItem('agripulse_live_weather') || 'null');
+        const loc = live?.district || live?.name || localStorage.getItem('agripulse_user_location') || 'your area';
+        const temp = live?.currentTemp || '28°C';
+        const desc = live?.weatherDesc || 'Partly Cloudy';
+        const rain = live?.rainTotal || '0 mm';
+        const hum = live?.currentHumidity || live?.humidity || '60%';
+        return `Live weather analysis for ${loc}: Currently ${temp} (${desc}) with relative humidity at ${hum}. Cumulative 30-day precipitation is ${rain}. Telemetry is synced via real-time satellite meteorological feeds.`;
+      } catch {
+        return "Weather telemetry is currently synced with your live GPS location. You can view 30-day precipitation and thermal curves in the Weather tab.";
+      }
     }
     if (input.includes('pest') || input.includes('disease') || input.includes('brown rust') || input.includes('yellow')) {
       return "If you are noticing yellowing or brown spots on your wheat leaves, it could be an early sign of Brown Rust or a Nitrogen deficiency. Please click a clear photo of the leaf and upload it to our 'Pest Detection (Model-2)' module. I will analyze it instantly and recommend the exact fungicide.";
