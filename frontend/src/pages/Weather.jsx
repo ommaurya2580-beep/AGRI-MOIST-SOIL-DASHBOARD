@@ -28,7 +28,9 @@ import {
   RefreshCw,
   Search,
   Navigation,
-  ExternalLink
+  ExternalLink,
+  ChevronRight,
+  ChevronLeft
 } from 'lucide-react';
 import { 
   AreaChart, 
@@ -206,6 +208,7 @@ export default function Weather({ isDiagnosticMode = false }) {
   // 30-day Trend Charts Data
   const [tempTrendData, setTempTrendData] = useState([]);
   const [rainfallData, setRainfallData] = useState([]);
+  const [rainViewDays, setRainViewDays] = useState(7); // Default to 7 days, 30 days on 'See More'
   const [insights, setInsights] = useState([]);
 
   // UI & Loading States
@@ -538,6 +541,11 @@ export default function Weather({ isDiagnosticMode = false }) {
     // Move to next step in diagnostic pipeline (Sensors IoT)
     navigate('/iot-sync');
   };
+
+  // Derived data for 7-day vs 30-day rain view
+  const displayedRainData = rainViewDays === 7 ? rainfallData.slice(-7) : rainfallData;
+  const rainTotalPeriod = (displayedRainData.reduce((acc, curr) => acc + (parseFloat(curr.rain) || 0), 0)).toFixed(1);
+  const rainyDaysPeriod = displayedRainData.filter(d => (parseFloat(d.rain) || 0) >= 0.5).length;
 
   return (
     <div className="max-w-[1400px] mx-auto space-y-6 pb-20 font-sans animate-in fade-in duration-300">
@@ -1121,20 +1129,53 @@ export default function Weather({ isDiagnosticMode = false }) {
 
         </div>
 
-        {/* Chart 2: Rainfall (Last 30 Days) - 4 cols */}
-        <div className="lg:col-span-4 bg-white rounded-3xl border border-stone-200/90 p-5 shadow-sm space-y-4 flex flex-col justify-between">
+        {/* Chart 2: Rainfall (7 Days Default, 30 Days on See More) - 4 cols */}
+        <div className="lg:col-span-4 bg-white rounded-3xl border border-stone-200/90 p-5 shadow-sm space-y-3.5 flex flex-col justify-between">
           
-          <div className="flex items-center gap-2">
-            <CloudRain size={16} className="text-blue-500" />
-            <h3 className="text-xs sm:text-sm font-extrabold text-slate-800">
-              Precipitation (Last 30 Days)
-            </h3>
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-xl bg-blue-50 text-blue-500 flex items-center justify-center shrink-0">
+                <CloudRain size={16} />
+              </div>
+              <div>
+                <h3 className="text-xs sm:text-sm font-extrabold text-slate-800 leading-tight">
+                  Rainfall ({rainViewDays === 7 ? 'Last 7 Days' : 'Last 30 Days'})
+                </h3>
+                <span className="text-[10px] text-stone-400 font-semibold block">
+                  {rainTotalPeriod} mm total • {rainyDaysPeriod} rainy day{rainyDaysPeriod === 1 ? '' : 's'}
+                </span>
+              </div>
+            </div>
+
+            {/* Quick 7d / 30d Toggle Pill */}
+            <div className="flex items-center bg-stone-100 p-0.5 rounded-xl border border-stone-200/60 text-[10px] font-bold shrink-0">
+              <button
+                onClick={() => setRainViewDays(7)}
+                className={`px-2.5 py-1 rounded-lg transition-all cursor-pointer ${
+                  rainViewDays === 7 
+                    ? 'bg-white text-blue-600 shadow-xs font-black' 
+                    : 'text-stone-500 hover:text-stone-800'
+                }`}
+              >
+                7 Days
+              </button>
+              <button
+                onClick={() => setRainViewDays(30)}
+                className={`px-2.5 py-1 rounded-lg transition-all cursor-pointer ${
+                  rainViewDays === 30 
+                    ? 'bg-white text-blue-600 shadow-xs font-black' 
+                    : 'text-stone-500 hover:text-stone-800'
+                }`}
+              >
+                30 Days
+              </button>
+            </div>
           </div>
 
           {/* Recharts Bar Chart */}
-          <div className="h-[210px] w-full pt-2">
+          <div className="h-[200px] w-full pt-1">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={rainfallData} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
+              <BarChart data={displayedRainData} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F1F5F9" />
                 <XAxis 
                   dataKey="date" 
@@ -1155,11 +1196,26 @@ export default function Weather({ isDiagnosticMode = false }) {
                   dataKey="rain" 
                   fill="#0284C7" 
                   radius={[4, 4, 0, 0]} 
-                  barSize={10} 
+                  barSize={rainViewDays === 7 ? 20 : 9} 
                   name="Rainfall (mm)"
                 />
               </BarChart>
             </ResponsiveContainer>
+          </div>
+
+          {/* "See More" Action Footer */}
+          <div className="pt-2 border-t border-stone-100 flex items-center justify-between">
+            <span className="text-[11px] font-semibold text-stone-500">
+              {rainViewDays === 7 ? 'Recent 7 days view' : 'Complete 30 days view'}
+            </span>
+
+            <button
+              onClick={() => setRainViewDays(prev => prev === 7 ? 30 : 7)}
+              className="text-xs font-bold text-blue-600 hover:text-blue-800 flex items-center gap-1 transition-colors px-2 py-1 rounded-lg hover:bg-blue-50 cursor-pointer"
+            >
+              <span>{rainViewDays === 7 ? 'See More (30 Days)' : 'Show 7 Days Only'}</span>
+              {rainViewDays === 7 ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
+            </button>
           </div>
 
         </div>
